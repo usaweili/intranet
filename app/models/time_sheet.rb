@@ -20,7 +20,6 @@ class TimeSheet
   validates :from_time, presence: true, if: :from_time_is_future_time?
   validates :to_time, presence: true, if: :to_time_is_future_time?
   after_validation :check_vadation_while_creating_or_updateing_timesheet
-  before_validation :valid_date_for_create?, on: :create
   validate :time_sheet_overlapping?
 
   MAX_TIMESHEET_COMMAND_LENGTH = 5
@@ -102,20 +101,6 @@ class TimeSheet
 
   def valid_date_for_update?
     date > Date.today - DAYS_FOR_UPDATE
-  end
-
-  def valid_date_for_create?
-    return false if errors.full_messages.present?
-    if date.blank?
-      errors.add(:date, 'Invalid time')
-      return false 
-    end 
-    if date < Date.today - DAYS_FOR_CREATE
-      text = "Not allowed to fill timesheet for this date. If you want to fill the timesheet, meet your manager."
-      errors.add(:date, text)
-      return false
-    end
-    return true
   end
 
   def from_time_is_future_time?

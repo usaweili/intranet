@@ -80,15 +80,23 @@ class TimeSheetsController < ApplicationController
     @from_date = params['user']['from_date']
     @to_date = params['user']['to_date']
     @user = User.find_by(id: params['user']['user_id'])
-    return_values, @time_sheets = TimeSheet.create_time_sheet(@user.id, timesheet_params)
-    unless return_values.include?(false)
-      flash[:notice] = 'Timesheet created succesfully'
-      redirect_to users_time_sheets_path(user_id: @user.id, from_date: @from_date, to_date: @to_date)
-    else
-      if return_values.include?(true)
-        flash[:notice] = "#{return_values.count(true)} #{'timesheet'.pluralize(return_values.count(true))} created succesfully"
+    if(current_user.is_employee_or_intern? && valid_dates_for_create?) ||
+      current_user.is_admin_or_hr?
+      return_values, @time_sheets = TimeSheet.create_time_sheet(@user.id, timesheet_params)
+      unless return_values.include?(false)
+        flash[:notice] = 'Timesheet created succesfully'
+        redirect_to users_time_sheets_path(user_id: @user.id, from_date: @from_date, to_date: @to_date)
+      else
+        if return_values.include?(true)
+          flash[:notice] = "#{return_values.count(true)} #{'timesheet'.pluralize(return_values.count(true))} created succesfully"
+        end
+        render 'new'
       end
-      render 'new'
+    else
+      text = "Not allowed to fill timesheet for this date before #{Date.today - TimeSheet::DAYS_FOR_CREATE}.
+        If you want to fill the timesheet, meet your manager."
+      flash[:error] = text
+      redirect_to new_time_sheet_path(user_id: current_user.id, from_date: @from_date, to_date: @to_date)
     end
   end
 
@@ -161,6 +169,13 @@ class TimeSheetsController < ApplicationController
     unless @user
       render json: { text: 'You are not part of organization contact to admin' }, status: :unauthorized
     end
+  end
+
+  def valid_dates_for_create?
+    timesheet_params["time_sheets_attributes"].values.each do |timesheet|
+      return false if timesheet[:date].to_date < Date.today - TimeSheet::DAYS_FOR_CREATE
+    end
+    true
   end
 
   def load_user

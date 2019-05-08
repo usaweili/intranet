@@ -405,8 +405,9 @@ RSpec.describe TimeSheetsController, type: :controller do
   end
 
   context 'Add timesheet' do
-    let!(:user) { FactoryGirl.create(:user) }
+    let!(:user) { FactoryGirl.create(:user, role: 'Admin') }
     let!(:project) { FactoryGirl.create(:project) }
+    let!(:employee) { FactoryGirl.create(:user) }
 
     before do
       UserProject.create(user_id: user.id, project_id: project.id, start_date: Date.today - 10, end_date: nil)
@@ -435,6 +436,31 @@ RSpec.describe TimeSheetsController, type: :controller do
       post :add_time_sheet, user_id: user.id, user: params
       expect(flash[:error]).to be_present
       should render_template(:new)
+    end
+
+    it 'Should not add Timesheet because timesheet date is less than 7 days in case of Employee' do
+      params = { "time_sheets_attributes" => {"0" => {"project_id" => "#{project.id}",
+                 "date" => "#{Date.today - 8}", "from_time" => "#{Date.today - 8} - 10:00 AM",
+                 "to_time" => "#{Date.today - 8} - 11:00 AM", "description" => "testing API and call with client"}},
+                 "user_id" => employee.id, "from_date" => Date.today - 20, "to_date" => Date.today
+                }
+      sign_in employee
+      post :add_time_sheet, user_id: employee.id, user: params
+      expect(flash[:error]).to eql("Not allowed to fill timesheet for this date before #{Date.today - TimeSheet::DAYS_FOR_CREATE}.
+        If you want to fill the timesheet, meet your manager.")
+      expect(employee.time_sheets.count).to eq(0)
+    end
+
+    it 'Should add Timesheet even if timesheet date is less than 7 days in case of Admin' do
+      params = { "time_sheets_attributes" => {"0" => {"project_id" => "#{project.id}",
+                 "date" => "#{Date.today - 8}", "from_time" => "#{Date.today - 8} - 10:00 AM",
+                 "to_time" => "#{Date.today - 8} - 11:00 AM", "description" => "testing API and call with client"}},
+                 "user_id" => user.id, "from_date" => Date.today - 20, "to_date" => Date.today
+                }
+      sign_in user
+      post :add_time_sheet, user_id: user.id, user: params
+      expect(flash[:error]).to eql(nil)
+      expect(user.time_sheets.count).to eq(1)
     end
   end
 end
