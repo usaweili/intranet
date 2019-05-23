@@ -25,7 +25,9 @@ RSpec.describe Career, type: :model do
     it 'Should fail because contact_number is not present' do
       career.contact_number = ' '
       expect(career).to be_invalid
-      expect(career.errors.full_messages).to eq(["Contact number can't be blank"])
+      expect(career.errors.full_messages).to eq(
+        ["Contact number can't be blank"]
+      )
     end
 
     it 'Should fail because current_ctc is not present' do
@@ -37,25 +39,33 @@ RSpec.describe Career, type: :model do
     it 'Should fail because linkedin profile is not present' do
       career.linkedin_profile = ' '
       expect(career).to be_invalid
-      expect(career.errors.full_messages).to eq(["Linkedin profile can't be blank"])
+      expect(career.errors.full_messages).to eq(
+        ["Linkedin profile can't be blank"]
+      )
     end
 
     it 'Should fail because resume is not uploaded' do
       career.resume = ' '
       expect(career).to be_invalid
-      expect(career.errors.full_messages).to eq(["Resume You are not allowed to upload nil files, allowed types: pdf, jpg, jpeg, gif, png, doc, xls, xlsx"])
+      expect(career.errors.full_messages).to eq(
+        ["Resume You are not allowed to upload nil files, allowed types: pdf, jpg, jpeg, gif, png, doc, xls, xlsx"]
+      )
     end
 
     it 'Should not allowd to upload .txt file' do
       career.resume = fixture_file_upload("/home/josh/a.txt")
       expect(career).to be_invalid
-      expect(career.errors.full_messages).to eq(["Resume You are not allowed to upload \"txt\" files, allowed types: pdf, jpg, jpeg, gif, png, doc, xls, xlsx"])
+      expect(career.errors.full_messages).to eq(
+        ["Resume You are not allowed to upload \"txt\" files, allowed types: pdf, jpg, jpeg, gif, png, doc, xls, xlsx"]
+      )
     end
 
     it 'Should fail because cover is not uploaded' do
       career.cover = ' '
       expect(career).to be_invalid
-      expect(career.errors.full_messages).to eq(["Cover You are not allowed to upload nil files, allowed types: pdf, jpg, jpeg, gif, png, doc, xls, xlsx"])
+      expect(career.errors.full_messages).to eq(
+        ["Cover You are not allowed to upload nil files, allowed types: pdf, jpg, jpeg, gif, png, doc, xls, xlsx"]
+      )
     end
   end
 end
