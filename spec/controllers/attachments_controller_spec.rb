@@ -4,7 +4,7 @@ describe AttachmentsController do
   let(:public_doc) { FactoryGirl.create :attachment, is_visible_to_all: true }
 
   before(:each) do
-    @admin = FactoryGirl.create(:user, email: 'admin@joshsoftware.com', role: 'Admin')
+    @admin = FactoryGirl.create(:admin)
     sign_in @admin
   end
 
@@ -22,12 +22,18 @@ describe AttachmentsController do
     end
 
     it 'will make is_visible false' do
-      post :update, {id: @attachment.id, "attachment" => {is_visible_to_all: false}}
+      post :update, {
+                      id: @attachment.id,
+                      attachment: {is_visible_to_all: false}
+                    }
       expect(@attachment.reload.is_visible_to_all).to eq(false)
     end
 
     it 'will make is_visible true' do
-      post :update, {id: @attachment.id, "attachment" => {is_visible_to_all: true}}
+      post :update, {
+                      id: @attachment.id,
+                      attachment: {is_visible_to_all: true}
+                    }
       expect(@attachment.reload.is_visible_to_all).to eq(true)
     end
   end
