@@ -1,14 +1,12 @@
-# Read about factories at https://github.com/thoughtbot/factory_girl
-
 FactoryGirl.define do
   factory :public_profile do |p|
-    first_name "fname"
-    last_name "lname"
-    gender "Male"
-    mobile_number "1234567890"
-    blood_group "A+"
-    date_of_birth Date.today
-    github_handle "abhishekbose87"
-    blog_url "rishionrails.wordpress.com"
+    first_name { Faker::Name.first_name }
+    last_name { Faker::Name.last_name }
+    gender { Faker::Gender.binary_type }
+    mobile_number { Faker::Number.number(10) }
+    blood_group { "A+" }
+    date_of_birth { Date.today }
+    github_handle { Faker::Internet.username }
+    blog_url { Faker::Internet.url }
   end
 end
