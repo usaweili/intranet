@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ProjectsController do
 
   before(:each) do
-   @admin = FactoryGirl.create(:user, role: 'Admin')
+   @admin = FactoryGirl.create(:admin)
    sign_in @admin
   end
 
@@ -30,15 +30,15 @@ describe ProjectsController do
 
   describe "GET create" do
     it "should create new project" do
-      post :create, {project: {name: "Intranet", code_climate_id: "12345", code_climate_snippet: "Intranet"}}
+      post :create, { project: FactoryGirl.attributes_for(:project) }
       flash[:success].should eql("Project created Succesfully")
       should redirect_to projects_path
     end
 
     it "should not save project without name" do
-      project = FactoryGirl.build(:project, name: "")
-      post :create, {project: {name: "", code_climate_id: "12345", code_climate_snippet: "Intranet"}}
-      project.errors.full_messages.should_not equal([])
+      post :create, {
+        project: FactoryGirl.attributes_for(:project).merge(name: '')
+      }
       should render_template(:new)
     end
   end
@@ -58,8 +58,14 @@ describe ProjectsController do
     it 'Should add team member' do
       user_id = []
       user_id << user.id
-      patch :update, id: project.id, project: { user_ids: user_id, update_project: 'update_project' }
-      user_project = UserProject.where(user_id: user.id, project_id: project.id).first
+      patch :update, id: project.id, project: {
+        user_ids: user_id,
+        update_project: 'update_project'
+      }
+      user_project = UserProject.where(
+                        user_id: user.id,
+                        project_id: project.id
+                      ).first
       expect(user_project.start_date).to eq(Date.today)
     end
 
@@ -67,13 +73,25 @@ describe ProjectsController do
       user_ids = []
       first_team_member = FactoryGirl.create(:user)
       second_team_member = FactoryGirl.create(:user)
-      UserProject.create(user_id: first_team_member.id, project_id: project.id, start_date: DateTime.now - 1, end_date: nil)
-      UserProject.create(user_id: second_team_member.id, project_id: project.id, start_date: DateTime.now - 1, end_date: nil)
-      user_project = UserProject.create(user_id: user.id, project_id: project.id, start_date: DateTime.now - 1, end_date: nil)
+      UserProject.create(user_id: first_team_member.id,
+        project_id: project.id,
+        start_date: DateTime.now - 1
+      )
+      UserProject.create(user_id: second_team_member.id,
+        project_id: project.id,
+        start_date: DateTime.now - 1
+      )
+      user_project = UserProject.create(user_id: user.id,
+                       project_id: project.id,
+                       start_date: DateTime.now - 1
+                     )
       user_ids << first_team_member.id
       user_ids << second_team_member.id
 
-      patch :update, id: project.id, project: {user_ids: user_ids, update_project: 'update_project'}
+      patch :update, id: project.id, project: {
+        user_ids: user_ids,
+        update_project: 'update_project'
+      }
       expect(user_project.reload.end_date).to eq(Date.today)
     end
 
@@ -84,7 +102,10 @@ describe ProjectsController do
       user_ids << first_team_member.id
       user_ids << second_team_member.id
       user_ids << nil
-      patch :update, id: project.id, project: {user_ids: user_ids, update_project: 'update_project'}
+      patch :update, id: project.id, project: {
+        user_ids: user_ids,
+        update_project: 'update_project'
+      }
       expect(flash[:error]).to be_present
     end
   end
@@ -124,7 +145,7 @@ describe ProjectsController do
       projects.init_list!
       last = projects.last
       expect(last.position).to eq(3)
-      xhr :post, :update_sequence_number, id:  projects.last.id, position: 1
+      xhr :post, :update_sequence_number, id: projects.last.id, position: 1
       expect(last.reload.position).to eq(1)
     end
   end
@@ -139,9 +160,15 @@ describe ProjectsController do
       user_ids << first_user.id
       user_ids << second_user.id
 
-      post :add_team_member, :format => :js, id: project.id, project: {user_ids: user_ids}
-      first_user_project = UserProject.where(user_id: first_user.id, project_id: project.id).first
-      second_user_project = UserProject.where(user_id: second_user.id, project_id: project.id).first
+      post :add_team_member, :format => :js,
+                             id: project.id,
+                             project: { user_ids: user_ids }
+      first_user_project = UserProject.where(user_id: first_user.id,
+                             project_id: project.id
+                           ).first
+      second_user_project = UserProject.where(user_id: second_user.id,
+                              project_id: project.id
+                            ).first
       expect(first_user_project.start_date).to eq(Date.today)
       expect(second_user_project.start_date).to eq(Date.today)
     end
@@ -154,41 +181,65 @@ describe ProjectsController do
       project.managers << user
       project.save
       user.save
-      delete :remove_team_member, :format => :js, id: project.id, user_id: user.id, role: ROLE[:manager]
+      delete :remove_team_member, :format => :js,
+                                  id: project.id,
+                                  user_id: user.id,
+                                  role: ROLE[:manager]
       expect(project.reload.manager_ids.include?(user.id)).to eq(false)
       expect(user.reload.managed_project_ids.include?(project.id)).to eq(false)
     end
 
     it 'Should delete employee' do
-      user = FactoryGirl.create(:user, role: 'Employee')
-      user_project = UserProject.create(user_id: user.id, project_id: project.id, start_date: DateTime.now - 1, end_date: nil)
+      user = FactoryGirl.create(:user)
+      user_project = UserProject.create(user_id: user.id,
+                        project_id: project.id,
+                        start_date: DateTime.now - 1
+                      )
       project.save
-      delete :remove_team_member, :format => :js, id: project.id, user_id: user.id, role: ROLE[:team_member]
+      delete :remove_team_member, :format => :js,
+                                  id: project.id,
+                                  user_id: user.id,
+                                  role: ROLE[:team_member]
       expect(user_project.reload.end_date).to eq(Date.today)
     end
 
     it 'Should delete manager who added as team member' do
       user = FactoryGirl.create(:user, role: 'Manager')
-      user_project = UserProject.create(user_id: user.id, project_id: project.id, start_date: DateTime.now - 2, end_date: nil)
+      user_project = UserProject.create(user_id: user.id,
+        project_id: project.id,
+        start_date: DateTime.now - 2
+      )
       project.save
-      delete :remove_team_member, :format => :js, id: project.id, user_id: user.id, role: ROLE[:team_member]
+      delete :remove_team_member, :format => :js,
+                                  id: project.id,
+                                  user_id: user.id,
+                                  role: ROLE[:team_member]
       expect(user_project.reload.end_date).to eq(Date.today)
     end
 
     it 'Should delete Admin who added as manager' do
-      user = FactoryGirl.create(:user, role: 'Admin')
+      user = FactoryGirl.create(:admin)
       project.managers << user
       project.save
-      delete :remove_team_member, :format => :js, id: project.id, user_id: user.id, role: ROLE[:manager]
+      delete :remove_team_member, :format => :js,
+                                  id: project.id,
+                                  user_id: user.id,
+                                  role: ROLE[:manager]
       expect(project.reload.manager_ids.include?(user.id)).to eq(false)
       expect(user.reload.managed_project_ids.include?(project.id)).to eq(false)
     end
 
     it 'Should delete Admin who added as team member' do
-      user = FactoryGirl.create(:user, role: 'Admin')
-      user_project = UserProject.create(user_id: user.id, project_id: project.id, start_date: DateTime.now - 2, end_date: nil)
+      user = FactoryGirl.create(:admin)
+      user_project = UserProject.create(user_id: user.id,
+                       project_id: project.id,
+                       start_date: DateTime.now - 2
+                     )
       project.save
-      delete :remove_team_member, :format => :js, id: project.id, user_id: user.id, role: ROLE[:team_member]
+      delete :remove_team_member, :format => :js,
+                                  id: project.id,
+                                  user_id: user.id,
+                                  role: ROLE[:team_member]
       expect(user_project.reload.end_date).to eq(Date.today)
     end
   end
@@ -199,14 +250,50 @@ describe ProjectsController do
     let!(:project_two) { FactoryGirl.create(:project, name: 'test') }
 
     it 'Should delete timesheet' do
-      UserProject.create(user_id: user.id, project_id: project_one.id, start_date: Date.today - 5, end_date: nil)
-      UserProject.create(user_id: user.id, project_id: project_two.id, start_date: Date.today - 5, end_date: nil)
+      UserProject.create(user_id: user.id,
+        project_id: project_one.id,
+        start_date: Date.today - 5
+      )
+      UserProject.create(user_id: user.id,
+        project_id: project_two.id,
+        start_date: Date.today - 5
+      )
 
-      TimeSheet.create(user_id: user.id, project_id: project_two.id, date: Date.today - 1, from_time: DateTime.now - 1, to_time: DateTime.now - 1 + 1.hours, description: 'Call')
-      TimeSheet.create(user_id: user.id, project_id: project_one.id, date: Date.today - 1, from_time: DateTime.now - 1, to_time: DateTime.now - 1 + 1.hours, description: 'Call')
-      TimeSheet.create(user_id: user.id, project_id: project_one.id, date: Date.today - 2, from_time: DateTime.now - 2, to_time: DateTime.now - 2 + 1.hours, description: 'Call')
-      TimeSheet.create(user_id: user.id, project_id: project_one.id, date: Date.today - 3, from_time: DateTime.now - 3, to_time: DateTime.now - 3 + 1.hours, description: 'Call')
-      TimeSheet.create(user_id: user.id, project_id: project_one.id, date: Date.today - 4, from_time: DateTime.now - 4, to_time: DateTime.now - 4 + 1.hours, description: 'Call')
+      TimeSheet.create(user_id: user.id,
+        project_id: project_two.id,
+        date: Date.today - 1,
+        from_time: DateTime.now - 1,
+        to_time: DateTime.now - 1 + 1.hours,
+        description: 'Call'
+      )
+      TimeSheet.create(user_id: user.id,
+        project_id: project_one.id,
+        date: Date.today - 1,
+        from_time: DateTime.now - 1,
+        to_time: DateTime.now - 1 + 1.hours,
+        description: 'Call'
+      )
+      TimeSheet.create(user_id: user.id,
+        project_id: project_one.id,
+        date: Date.today - 2,
+        from_time: DateTime.now - 2,
+        to_time: DateTime.now - 2 + 1.hours,
+        description: 'Call'
+      )
+      TimeSheet.create(user_id: user.id,
+        project_id: project_one.id,
+        date: Date.today - 3,
+        from_time: DateTime.now - 3,
+        to_time: DateTime.now - 3 + 1.hours,
+        description: 'Call'
+      )
+      TimeSheet.create(user_id: user.id,
+        project_id: project_one.id,
+        date: Date.today - 4,
+        from_time: DateTime.now - 4,
+        to_time: DateTime.now - 4 + 1.hours,
+        description: 'Call'
+      )
 
       project_one_id = project_one.id
       project_name = project_one.name
@@ -214,7 +301,9 @@ describe ProjectsController do
       delete :destroy, id: project_one.id
 
       expect(Project.all.pluck(:name).include?(project_name)).to eq(false)
-      expect(TimeSheet.all.pluck(:project_id).include?(project_one_id)).to eq(false)
+      expect(
+              TimeSheet.all.pluck(:project_id).include?(project_one_id)
+            ).to eq(false)
     end
   end
 end

@@ -1,10 +1,13 @@
-# Read about factories at https://github.com/thoughtbot/factory_girl
-
 FactoryGirl.define do
   factory :project do
-    name "The pediatric network"
-    code_climate_id "12345"
-    code_climate_snippet "Intranet Snipate Text"
-    code "ASDF2D"
+    name { Faker::App.name }
+    code_climate_id { Faker::Bank.swift_bic }
+    code_climate_snippet { Faker::Book.title }
+    code { Faker::Bank.swift_bic }
+    rails_version { Faker::App.semantic_version }
+    ruby_version { Faker::App.semantic_version }
+    database { "MongoDB" }
+    other_details { Faker::App.author }
+    company
   end
 end
