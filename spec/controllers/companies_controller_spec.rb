@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.describe CompaniesController, type: :controller do
   before(:each) do
-    @admin = FactoryGirl.create(:user, role: 'Admin')
+    @admin = FactoryGirl.create(:admin)
     sign_in @admin
   end
 
@@ -34,12 +34,13 @@ RSpec.describe CompaniesController, type: :controller do
 
   describe "#create" do
     it "should create new project" do
-      post :create, { company: { name: "xyz", website: "https://www.google.com", gstno: "12345"}}
+      post :create, { company: FactoryGirl.attributes_for(:company) }
       expect(flash[:success]).to eq "Company created Succesfully"
     end
 
     it "should render new on invalid record" do
-      params = { company: { name: nil, website: "www.google.com", gstno: "12345"}}
+      params = { company: FactoryGirl.attributes_for(:company) }
+      params[:company][:name] = nil
       post :create, params
       expect(response).to render_template(:new)
     end
@@ -77,22 +78,35 @@ RSpec.describe CompaniesController, type: :controller do
   describe '#update' do
     it "should update company record" do
       company = FactoryGirl.create(:company)
-      patch :update, {company: { name: "google"}, id: company.id }
-      expect(company.reload.name).to eq("google")
+      updated_attributes = FactoryGirl.attributes_for(:company)
+      patch :update, { company: updated_attributes, id: company.id }
+      expect(company.reload.name).to eq(updated_attributes[:name])
     end
 
     it "should accept nested attributes for contact" do
       company = FactoryGirl.create(:company)
-      params = { "company"=> { "contact_persons_attributes"=> {"0"=> {"email"=>"ajinath@joshsoftware.com",
-        "name"=>"Ajinath JEdhe", "mobileno"=>"1212121212",}}}, id: company.id}
+      params = {
+        company: {
+          contact_persons_attributes: {
+            '0' => FactoryGirl.attributes_for(:contact_person)
+          }
+        },
+        id: company.id
+      }
       patch :update, params
       expect(company.reload.contact_persons.count).to eq(1)
     end
 
     it "should accept nested attributes for addresses" do
       company = FactoryGirl.create(:company)
-      params = { "company"=> { "addresses_attributes"=> {"0"=> {"type_of_address"=>"temparaty",
-        "address"=>"Pune", "city"=>"Pune",}}}, id: company.id}
+      params = {
+        company: {
+          addresses_attributes: {
+            '0' => FactoryGirl.attributes_for(:address)
+          }
+        },
+        id: company.id
+      }
       patch :update, params
       expect(company.reload.addresses.count).to eq(1)
     end
@@ -100,7 +114,7 @@ RSpec.describe CompaniesController, type: :controller do
 
   describe '#destroy' do
     it 'should delete company record' do
-      company =  FactoryGirl.create(:company)
+      company = FactoryGirl.create(:company)
       delete :destroy, id: company.id
       expect(Company.count).to eq(0)
       expect(response).to redirect_to(companies_path)
