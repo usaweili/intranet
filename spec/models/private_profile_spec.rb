@@ -2,7 +2,16 @@ require 'spec_helper'
 
 describe PrivateProfile do
   
-  it { should have_fields(:pan_number, :personal_email, :passport_number, :qualification, :date_of_joining, :work_experience, :previous_company) }
+  it { should have_fields(
+                          :pan_number,
+                          :personal_email,
+                          :passport_number,
+                          :qualification,
+                          :date_of_joining,
+                          :work_experience,
+                          :previous_company
+                         )
+     }
   it { should have_field(:date_of_joining).of_type(Date) }
   it { should have_many :addresses }
   it { should embed_many :contact_persons }
@@ -15,7 +24,7 @@ describe PrivateProfile do
   it { should validate_presence_of(:personal_email).on(:update) }
 =end
 
-  context 'Validate date of joining' do
+  context 'While updating user, should not update user' do
     let!(:user) { FactoryGirl.create(:user) }
 
     before do
@@ -26,14 +35,16 @@ describe PrivateProfile do
 
     after do
       expect(user.save).to eq(false)
-      expect(user.generate_errors_message).to eq("Private profile is invalid  Date of joining can't be blank")
+      expect(user.generate_errors_message).to eq(
+        "Private profile is invalid  Date of joining can't be blank"
+      )
     end
 
-    it 'should not update user because joining date is not present, role is employee' do
+    it 'because joining date is not present, role is employee' do
       user.role = 'Employee'
     end
 
-    it 'should not update user because joining date is not present, role is HR' do
+    it 'because joining date is not present, role is HR' do
       user.role = 'HR'
     end
   end
@@ -66,7 +77,7 @@ describe PrivateProfile do
     expect(user.valid?).to eq(true)
   end
 
-  context 'Update user' do
+  context 'While updating user, should update user' do
     let!(:user){ FactoryGirl.create(:user) }
 
     after do
@@ -74,14 +85,13 @@ describe PrivateProfile do
       expect(user.generate_errors_message).to eq('  ')
     end
 
-    it 'should update user because joing date is present, role is employee' do
+    it 'because joining date is present, role is employee' do
       user.role = 'Employee'
     end
 
-    it 'should update user because joing date is present, role is HR' do
+    it 'because joining date is present, role is HR' do
       user.role = 'HR'
     end
   end
 
 end
-  

@@ -1,12 +1,10 @@
-# Read about factories at https://github.com/thoughtbot/factory_girl
-
 FactoryGirl.define do
   factory :private_profile do
-  	pan_number 'ABCDE1234F'
-  	personal_email "test@test.com"
-  	passport_number "J8369854"
-  	qualification  "B.E"
-  	date_of_joining Date.new(Date.today.year, 01, 01)
-  	work_experience "2"
+    pan_number { Faker::Code.nric }
+    personal_email { Faker::Internet.email }
+    passport_number { Faker::Code.nric }
+    qualification { Faker::Educator.course }
+    date_of_joining { Date.new(Date.today.year, 01, 01) }
+    work_experience { Faker::Number.between(1, 15) }
   end
 end
