@@ -19,7 +19,7 @@ RSpec.describe SchedulesController, :type => :controller do
     	e1= FactoryGirl.create(:schedule)
       @request.env["devise.mapping"] = :hr
       sign_in FactoryGirl.create(:hr)
-      get :edit, {id: e1.id}
+      get :edit, { id: e1.id }
       expect(response).to render_template("edit")
     end
   end
@@ -42,9 +42,8 @@ RSpec.describe SchedulesController, :type => :controller do
       e1= FactoryGirl.create(:schedule)
       @request.env["devise.mapping"] = :user
       sign_in FactoryGirl.create(:user)
-      get :destroy, {id: e1.id}
+      get :destroy, { id: e1.id }
       expect(response).not_to redirect_to schedules_path
     end
   end
 end
-

@@ -1,31 +1,24 @@
 include ActionDispatch::TestProcess
-require 'faker'
-require 'time'
-require 'date'
 
 FactoryGirl.define do
   factory :schedule do
-    users {[FactoryGirl.create(:user)]}
-    random_object = Random.new
-    interview_time Time.at(random_object.rand(1234675678))   
-    interview_date "23/2/2015"
+    users { [FactoryGirl.create(:user)] }
+    interview_time { Time.at(Random.new.rand(1234675678)) }
+    interview_date { Date.tomorrow }
     candidate_details do
       {
-        email: "abc@gmail.com",
-        telephone: "8989898989",
-        skype: "skype1"
+        email: Faker::Internet.email,
+        telephone: Faker::Number.number,
+        skype: Faker::Lorem.characters(10)
       }
     end
-
     public_profile do
       {
-        git:"http://github.com/candidate1" ,
-        linkedin: "http://in.linkedin.com/pub/avinash-pandey/82/7b3/a17/"
+        git: 'http://github.com/candidate1',
+        linkedin: 'http://in.linkedin.com/pub/test-candidate/82/7b3/a17/'
       }
     end
-    interview_type "Telephonic"
-    file {fixture_file_upload('spec/fixtures/files/sample1.pdf')}
-    
+    interview_type { 'Telephonic' }
+    file { fixture_file_upload('spec/fixtures/files/sample1.pdf') }
   end
 end
-
