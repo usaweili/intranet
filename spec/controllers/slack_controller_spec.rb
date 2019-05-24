@@ -3,12 +3,20 @@ require 'rails_helper'
 RSpec.describe SlackController do
   context 'projects' do
     let!(:user) { FactoryGirl.create(:user) }
-    let!(:project_tpn) { FactoryGirl.create(:project, name: 'tpn') }
-    let!(:project_ds) { FactoryGirl.create(:project, name: 'Dealsignal') }
+    let!(:project1) { FactoryGirl.create(:project) }
+    let!(:project2) { FactoryGirl.create(:project) }
 
     before do
-      UserProject.create(user_id: user.id, project_id: project_tpn.id, start_date: DateTime.now, end_date: nil)
-      UserProject.create(user_id: user.id, project_id: project_ds.id, start_date: DateTime.now, end_date: nil)
+      FactoryGirl.create(:user_project,
+        user: user,
+        project: project1,
+        start_date: DateTime.now
+      )
+      FactoryGirl.create(:user_project,
+        user: user,
+        project: project2,
+        start_date: DateTime.now
+      )
       user.public_profile.slack_handle = USER_ID
       user.save
     end
@@ -18,24 +26,24 @@ RSpec.describe SlackController do
       slack_params = {
         'token' => SLACK_API_TOKEN,
         'channel' => CHANNEL_ID,
-        'text' => "1. tpn\n2. Dealsignal"
+        'text' => "1. #{project1.name}\n2. #{project2.name}"
       }
       post :projects, params
 
       resp = JSON.parse(response.body)
       expect(response).to have_http_status(200)
-      expect(resp['text']).to eq("1. tpn\n2. Dealsignal")
+      expect(resp['text']).to eq("1. #{project1.name}\n2. #{project2.name}")
     end
 
     it 'Should give the managed projects name' do
       user = FactoryGirl.create(:user, role: 'Manager')
       params = { user_id: USER_ID, channel_id: CHANNEL_ID }
-      project_tpn.managers << user
-      project_ds.managers << user
+      project1.managers << user
+      project2.managers << user
       post :projects, params
       resp = JSON.parse(response.body)
       expect(response).to have_http_status(200)
-      expect(resp['text']).to eq("1. tpn\n2. Dealsignal")
+      expect(resp['text']).to eq("1. #{project1.name}\n2. #{project2.name}")
     end
 
     it 'Should give message : You are not working on any project' do
@@ -49,11 +57,11 @@ RSpec.describe SlackController do
   end
 
   context 'Check user is exists' do
-    let!(:user) { FactoryGirl.create(:user, email: 'ajay@joshsoftware.com') }
+    let!(:user) { FactoryGirl.create(:user) }
 
     before do
-      project = FactoryGirl.create(:project, name: 'England Hockey', display_name: 'England_Hockey')
-      UserProject.create(user_id: user.id, project_id: project.id, start_date: DateTime.now, end_date: nil)
+      project = FactoryGirl.create(:project)
+      UserProject.create(user: user, project: project, start_date: DateTime.now)
       user.save
       stub_request(:post, "https://slack.com/api/chat.postMessage")
     end
@@ -63,7 +71,7 @@ RSpec.describe SlackController do
         'token' => SLACK_API_TOKEN,
         'channel' => CHANNEL_ID,
         'user_id' => USER_ID,
-        'text' => "England_Hockey #{Date.yesterday}  6 7 abcd efghigk lmnop"
+        'text' => "#{project.name} #{Date.yesterday}  6 7 abcd efghigk lmnop"
       }
 
       post :projects, params

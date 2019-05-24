@@ -14,7 +14,10 @@ RSpec.describe SlackBot, type: :model do
         'user' => USER_ID
       }
       VCR.use_cassette 'success_user_info' do
-        response = Net::HTTP.post_form(URI("https://slack.com/api/users.info"), slack_params)
+        response = Net::HTTP.post_form(
+                     URI("https://slack.com/api/users.info"),
+                     slack_params
+                   )
         resp = JSON.parse(response.body)
         expect(resp['ok']).to eq(true)
       end
@@ -26,7 +29,10 @@ RSpec.describe SlackBot, type: :model do
         'user' => 'ABCD8F'
       }
       VCR.use_cassette 'failure_user_info' do
-        response = Net::HTTP.post_form(URI("https://slack.com/api/users.info"), slack_params)
+        response = Net::HTTP.post_form(
+                     URI("https://slack.com/api/users.info"),
+                     slack_params
+                   )
         resp = JSON.parse(response.body)
         expect(resp['ok']).to eq(false)
         expect(resp['error']).to eq('user_not_found')
