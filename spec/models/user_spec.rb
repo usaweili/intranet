@@ -1,47 +1,52 @@
 require 'spec_helper'
 
-describe User do  
+describe User do
 
-
-  it { should have_fields(:email, :encrypted_password, :role, :uid, :provider, :status) }
-  it { should have_field(:status).of_type(String).with_default_value_of(STATUS[0]) }
+  it { should have_fields(
+                          :email,
+                          :encrypted_password,
+                          :role,
+                          :uid,
+                          :provider,
+                          :status
+                         )
+     }
+  it { should have_field(:status).of_type(String).with_default_value_of(
+        STATUS[0]
+        )
+     }
   it { should embed_one :public_profile }
   it { should embed_one :private_profile }
   it { should accept_nested_attributes_for(:public_profile) }
   it { should accept_nested_attributes_for(:private_profile) }
   it { should validate_presence_of(:role) }
   it { should validate_presence_of(:email) }
-
   
   it "should have employer as default role when created" do
     user = FactoryGirl.build(:user)
     expect(user.role).to eq("Employee")
     expect(user.role?("Employee")).to eq(true)
-  end 
+  end
   
   it "intern should not eligible for leave" do
-    user = FactoryGirl.build(:user, role: 'Intern', email: 'intern@company.com')
-    user.save
-    expect(user.eligible_for_leave?).to eq(false) 
+    user = FactoryGirl.create(:user, role: 'Intern')
+    expect(user.eligible_for_leave?).to eq(false)
   end
 
   it "nil date of joining employee should not eligible for leave" do
-    user = FactoryGirl.build(:user, email: 'employee@company.com')
-    user.save
+    user = FactoryGirl.build(:user)
     expect(user.eligible_for_leave?).to eq(false) 
-  end 
+  end
   
   it "valid employee should be eligible for leave" do
-    user = FactoryGirl.build(:user, private_profile: FactoryGirl.build(:private_profile, date_of_joining: Date.new(Date.today.year, Date.today.month, 01).prev_month))
-    user.save!
-     
+    user = FactoryGirl.create(:user)
     expect(user.eligible_for_leave?).to eq(true) 
   end 
 
   it 'should assign website sequence number auto incremented for new user' do
-    user1 = FactoryGirl.create(:user, email: "test2@joshsoftware.com")
+    user1 = FactoryGirl.create(:user)
     expect(user1.website_sequence_number).to eq(1)
-    user = FactoryGirl.create(:user, email: 'test123@joshsoftware.com')
+    user = FactoryGirl.create(:user)
     expect(user.reload.website_sequence_number).to eq(2)
   end
 
@@ -96,14 +101,28 @@ describe User do
     let!(:project) { FactoryGirl.create(:project) }
 
     it 'Should give the project report' do
-      UserProject.create(user_id: user.id, project_id: project.id, start_date: Date.today - 2)
+      FactoryGirl.create(:user_project,
+        user: user,
+        project: project,
+        start_date: Date.today - 2
+      )
       projects = user.projects
       expect(projects.present?).to eq(true)
     end
 
     it 'Should give worked on project form from date and to date' do
-      UserProject.create(user_id: user.id, project_id: project.id, start_date: Date.today - 3, end_date: nil)
-      TimeSheet.create(user_id: user.id, project_id: project.id, date: Date.today - 1, from_time: '9:00', to_time: '10:00', description: 'Woked on test cases')
+      FactoryGirl.create(:user_project,
+        user: user,
+        project: project,
+        start_date: Date.today - 3
+      )
+      FactoryGirl.create(:time_sheet,
+        user: user,
+        project: project,
+        date: Date.today - 1,
+        from_time: '9:00',
+        to_time: '10:00'
+      )
       projects = user.worked_on_projects(Date.today - 2, Date.today)
       expect(projects.present?).to eq(true)
     end
@@ -126,11 +145,21 @@ describe User do
     describe 'Remove project' do
       it 'Project count grater than tow' do
         project_ids = []
-        first_project = FactoryGirl.create(:project, name: 'test1')
-        second_project = FactoryGirl.create(:project, name: 'test2')
-        UserProject.create(user_id: user.id, project_id: first_project.id, start_date: DateTime.now - 1, end_date: nil)
-        UserProject.create(user_id: user.id, project_id: second_project.id, start_date: DateTime.now - 1, end_date: nil)
-        user_project = UserProject.create(user_id: user.id, project_id: project.id, start_date: DateTime.now - 1, end_date: nil)
+        first_project = FactoryGirl.create(:project)
+        second_project = FactoryGirl.create(:project)
+        FactoryGirl.create(:user_project,
+          user: user,
+          project: first_project,
+          start_date: DateTime.now - 1)
+        FactoryGirl.create(:user_project,
+          user: user,
+          project: second_project,
+          start_date: DateTime.now - 1)
+        user_project = FactoryGirl.create(:user_project,
+                         user: user,
+                         project: project,
+                         start_date: DateTime.now - 1
+                       )
         project_ids << ""
         project_ids << first_project.id
         project_ids << second_project.id
@@ -141,7 +170,11 @@ describe User do
 
       it 'Project count is one' do
         project_ids = []
-        user_project = UserProject.create(user_id: user.id, project_id: project.id, start_date: DateTime.now - 1, end_date: nil)
+        user_project = FactoryGirl.create(:user_project,
+                         user: user,
+                         project: project,
+                         start_date: DateTime.now - 1
+                       )
         project_ids << ""
         params = { user: { project_ids: project_ids } }
         user.add_or_remove_projects(params)
@@ -171,7 +204,11 @@ describe User do
       project = FactoryGirl.create(:project)
       manager_one = FactoryGirl.create(:user, role: 'Manager')
       manager_two = FactoryGirl.create(:user, role: 'Manager')
-      UserProject.create(user_id: user.id, project_id: project.id, start_date: Date.today - 2, end_date: nil)
+      user_project = FactoryGirl.create(:user_project,
+                         user: user,
+                         project: project,
+                         start_date: Date.today - 2
+                       )
       project.managers << manager_one
       project.managers << manager_two
       managers_emails = user.get_managers_emails
@@ -182,9 +219,17 @@ describe User do
 
     it 'Should skip the email if already added' do
       project_one = FactoryGirl.create(:project)
-      project_two = FactoryGirl.create(:project, name: 'test')
-      UserProject.create(user_id: user.id, project_id: project_one.id, start_date: Date.today - 2, end_date: nil)
-      UserProject.create(user_id: user.id, project_id: project_two.id, start_date: Date.today - 2, end_date: nil)
+      project_two = FactoryGirl.create(:project)
+      FactoryGirl.create(:user_project,
+        user: user,
+        project: project_one,
+        start_date: Date.today - 2
+      )
+      FactoryGirl.create(:user_project,
+        user: user,
+        project: project_two,
+        start_date: Date.today - 2
+      )
       manager = FactoryGirl.create(:user, role: 'Manager')
       project_one.managers << manager
       project_two.managers << manager
@@ -193,83 +238,145 @@ describe User do
       expect(managers_emails[0]).to eq(managers_emails[0])
     end
 
-    it 'Should not give the managers emails if manager is not assigned to project' do
+    it 'Should not give the emails if manager is not assigned to project' do
       project = FactoryGirl.create(:project)
-      UserProject.create(user_id: user.id, project_id: project.id, start_date: Date.today - 2, end_date: nil)
+      FactoryGirl.create(:user_project,
+        user: user,
+        project: project,
+        start_date: Date.today - 2
+      )
       managers_emails = user.get_managers_emails
       expect(managers_emails.count).to eq(0)
     end
 
     context 'Get user project from user' do
-      let!(:user) { FactoryGirl.create(:user, email: 'user1@joshsoftware.com') }
+      let!(:user) { FactoryGirl.create(:user) }
       let!(:project) { FactoryGirl.create(:project) }
 
       it "Should give the record if user's project start date is less than from date and end date is nil" do
-        UserProject.create(user_id: user.id, project_id: project.id, start_date: '01/08/2018'.to_date, end_date: nil)
+        FactoryGirl.create(:user_project,
+          user: user,
+          project: project,
+          start_date: '01/08/2018'.to_date
+        )
         from_date = '01/09/2018'.to_date
         to_date = '20/09/2018'.to_date
-        user_projects = user.get_user_projects_from_user(project.id, from_date, to_date)
+        user_projects = user.get_user_projects_from_user(project.id,
+                          from_date,
+                          to_date
+                        )
         expect(user_projects.count).to eq(1)
         expect(user_projects[0].start_date.to_s).to eq('01/08/2018')
         expect(user_projects[0].end_date).to eq(nil)
       end
 
       it "Should give the record if user's project start date is greater than from date and end date is nil" do
-        UserProject.create(user_id: user.id, project_id: project.id, start_date: '06/09/2018'.to_date, end_date: nil)
+        FactoryGirl.create(:user_project,
+          user: user,
+          project: project,
+          start_date: '06/09/2018'.to_date
+        )
         from_date = '01/09/2018'.to_date
         to_date = '20/09/2018'.to_date
-        user_projects = user.get_user_projects_from_user(project.id, from_date, to_date)
+        user_projects = user.get_user_projects_from_user(project.id,
+                          from_date,
+                          to_date
+                        )
         expect(user_projects.count).to eq(1)
         expect(user_projects[0].start_date.to_s).to eq('06/09/2018')
         expect(user_projects[0].end_date).to eq(nil)
       end
 
       it "Should give the record if user's project start date is greater than from date and end date is less than to date" do
-        UserProject.create(user_id: user.id, project_id: project.id, start_date: '05/09/2018'.to_date, end_date: '15/09/2018'.to_date)
+        FactoryGirl.create(:user_project,
+          user: user,
+          project: project,
+          start_date: '05/09/2018'.to_date,
+          end_date: '15/09/2018'.to_date
+        )
         from_date = '01/09/2018'.to_date
         to_date = '20/09/2018'.to_date
-        user_projects = user.get_user_projects_from_user(project.id, from_date, to_date)
+        user_projects = user.get_user_projects_from_user(project.id,
+                          from_date,
+                          to_date
+                        )
         expect(user_projects.count).to eq(1)
         expect(user_projects[0].start_date.to_s).to eq('05/09/2018')
         expect(user_projects[0].end_date.to_s).to eq('15/09/2018')
       end
 
       it "Should give the record if user's project start date is greater than from date and end date is greater than to date" do
-        UserProject.create(user_id: user.id, project_id: project.id, start_date: '08/09/2018'.to_date, end_date: '23/09/2018'.to_date)
+        FactoryGirl.create(:user_project,
+          user: user,
+          project: project,
+          start_date: '08/09/2018'.to_date,
+          end_date: '23/09/2018'.to_date
+        )
         from_date = '01/09/2018'.to_date
         to_date = '20/09/2018'.to_date
-        user_projects = user.get_user_projects_from_user(project.id, from_date, to_date)
+        user_projects = user.get_user_projects_from_user(project.id,
+                          from_date,
+                          to_date
+                        )
         expect(user_projects.count).to eq(1)
         expect(user_projects[0].start_date.to_s).to eq('08/09/2018')
         expect(user_projects[0].end_date.to_s).to eq('23/09/2018')
       end
 
       it "Should give the record if user's project start date less than from date and end date less than to date" do
-        UserProject.create(user_id: user.id, project_id: project.id, start_date: '05/08/2018'.to_date, end_date: '10/09/2018'.to_date)
+        FactoryGirl.create(:user_project,
+          user: user,
+          project: project,
+          start_date: '05/08/2018'.to_date,
+          end_date: '10/09/2018'.to_date
+        )
         from_date = '01/09/2018'.to_date
         to_date = '20/09/2018'.to_date
-        user_projects = user.get_user_projects_from_user(project.id, from_date, to_date)
+        user_projects = user.get_user_projects_from_user(project.id,
+                          from_date,
+                          to_date
+                        )
         expect(user_projects.count).to eq(1)
         expect(user_projects[0].start_date.to_s).to eq('05/08/2018')
         expect(user_projects[0].end_date.to_s).to eq('10/09/2018')
       end
 
       it "Should give the record if user's project start date is less than from date and end date is greater than to date" do
-        UserProject.create(user_id: user.id, project_id: project.id, start_date: '01/08/2018'.to_date, end_date: '10/10/2018'.to_date)
+        FactoryGirl.create(:user_project,
+          user: user,
+          project: project,
+          start_date: '01/08/2018'.to_date,
+          end_date: '10/10/2018'.to_date
+        )
         from_date = '01/09/2018'.to_date
         to_date = '20/09/2018'.to_date
-        user_projects = user.get_user_projects_from_user(project.id, from_date, to_date)
+        user_projects = user.get_user_projects_from_user(project.id,
+                          from_date,
+                          to_date
+                        )
         expect(user_projects.count).to eq(1)
         expect(user_projects[0].start_date.to_s).to eq('01/08/2018')
         expect(user_projects[0].end_date.to_s).to eq('10/10/2018')
       end
   
       it "Should give the record if user remove from project and added to same project in searching period" do
-        UserProject.create(user_id: user.id, project_id: project.id, start_date: '01/08/2018'.to_date, end_date: '10/10/2018'.to_date)
-        UserProject.create(user_id: user.id, project_id: project.id, start_date: '11/09/2018'.to_date, end_date: nil)
+        FactoryGirl.create(:user_project,
+          user: user,
+          project: project,
+          start_date: '01/08/2018'.to_date,
+          end_date: '10/10/2018'.to_date
+        )
+        FactoryGirl.create(:user_project,
+          user: user,
+          project: project,
+          start_date: '11/09/2018'.to_date,
+        )
         from_date = '01/09/2018'.to_date
         to_date = '20/09/2018'.to_date
-        user_projects = user.get_user_projects_from_user(project.id, from_date, to_date)
+        user_projects = user.get_user_projects_from_user(project.id,
+                          from_date,
+                          to_date
+                        )
         expect(user_projects.count).to eq(2)
         expect(user_projects[0].start_date.to_s).to eq('01/08/2018')
         expect(user_projects[0].end_date.to_s).to eq('10/10/2018')
@@ -277,39 +384,62 @@ describe User do
       end
   
       it "Should not give the record because user's project start date and end date is not between from date and to date" do
-        UserProject.create(user_id: user.id, project_id: project.id, start_date: '01/08/2018'.to_date, end_date: '25/08/2018'.to_date)
+        FactoryGirl.create(:user_project,
+          user: user,
+          project: project,
+          start_date: '01/08/2018'.to_date,
+          end_date: '25/08/2018'.to_date
+        )
         from_date = '01/09/2018'.to_date
         to_date = '20/09/2018'.to_date
-        user_projects = user.get_user_projects_from_user(project.id, from_date, to_date)
+        user_projects = user.get_user_projects_from_user(project.id,
+                          from_date,
+                          to_date
+                        )
         expect(user_projects.count).to eq(0)
         expect(user_projects.present?).to eq(false)
       end
 
       it "Should not give the record because user's project start date and end date is not between from date and to date" do
-        UserProject.create(user_id: user.id, project_id: project.id, start_date: '25/09/2018'.to_date, end_date: '30/09/2018')
+        FactoryGirl.create(:user_project,
+          user: user,
+          project: project,
+          start_date: '25/09/2018'.to_date,
+          end_date: '30/09/2018'.to_date
+        )
         from_date = '01/09/2018'.to_date
         to_date = '20/09/2018'.to_date
-        user_projects = user.get_user_projects_from_user(project.id, from_date, to_date)
+        user_projects = user.get_user_projects_from_user(project.id,
+                          from_date,
+                          to_date
+                        )
         expect(user_projects.count).to eq(0)
         expect(user_projects.present?).to eq(false)
       end
     end
   end
+
   context 'Employee Auto Id generation' do
-    let!(:user) { FactoryGirl.create(:user,public_profile: FactoryGirl.build(:public_profile)) }
-    let(:internuser) { FactoryGirl.create(:user, role: 'Intern', email: 'intern@joshsoftware.com',employee_detail: FactoryGirl.build(:employee_detail))}
+    let!(:user) { FactoryGirl.create(:user) }
+    let(:internuser) { FactoryGirl.create(:user,
+                         role: 'Intern',
+                         employee_detail: FactoryGirl.build(:employee_detail)
+                       )
+                     }
     it "should generate new Employee ID if employee is new" do      
-      user = FactoryGirl.create(:user, public_profile: FactoryGirl.build(:public_profile))
+      user = FactoryGirl.create(:user)
       expect(user.employee_detail.employee_id.to_i).to eq(2)
     end
 
     it "should not generate ID if employee is exist" do
-      user = FactoryGirl.create(:user, public_profile: FactoryGirl.build(:public_profile))
-      expect(user.employee_detail.employee_id).to eq(user.employee_detail.employee_id)
+      user = FactoryGirl.create(:user)
+      expect(user.employee_detail.employee_id).to eq(
+        user.employee_detail.employee_id
+      )
     end
 
     it "should not generate ID if user role is Intern" do
-      user = FactoryGirl.create(:user, role: 'Intern', email: 'intern@joshsoftware.com')
+      user = FactoryGirl.create(:user, role: 'Intern')
       expect(user.employee_detail).to eq(nil)
     end
 
@@ -327,8 +457,12 @@ describe User do
       expect(internuser.email).to eq(internuser.email)
       expect(internuser.status).to eq(internuser.status)
       expect(internuser.employee_detail.employee_id.to_i).to eq(2)
-      expect(internuser.employee_detail.date_of_relieving).to eq(internuser.employee_detail.date_of_relieving)
-      expect(internuser.employee_detail.available_leaves).to eq(internuser.employee_detail.available_leaves)
+      expect(internuser.employee_detail.date_of_relieving).to eq(
+        internuser.employee_detail.date_of_relieving
+      )
+      expect(internuser.employee_detail.available_leaves).to eq(
+        internuser.employee_detail.available_leaves
+      )
     end
   end
 end
