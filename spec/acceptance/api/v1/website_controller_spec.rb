@@ -2,8 +2,17 @@ require 'spec_helper'
 require 'rspec_api_documentation/dsl'
 
 resource "Website Apis" do
-  let!(:users) {FactoryGirl.create_list(:user, 3, status: 'approved', visible_on_website:  true)}
-  let!(:projects) { FactoryGirl.create_list(:project, 3, visible_on_website: true)}
+  let!(:users) { FactoryGirl.create_list(:user,
+                    3,
+                    status: 'approved',
+                    visible_on_website:  true
+                  )
+               }
+  let!(:projects) { FactoryGirl.create_list(:project,
+                      3,
+                      visible_on_website: true
+                    )
+                  }
 
   get "/api/v1/team" do
     example "Get all the team members" do
@@ -32,7 +41,9 @@ resource "Website Apis" do
       do_request
       res = JSON.parse(response_body)
       expect(status).to eq 200
-      expect(res.last.keys).to eq ["description", "name", "url", "case_study_url", "tags", "image_url"]
+      expect(res.last.keys).to eq [
+        "description", "name", "url", "case_study_url", "tags", "image_url"
+      ]
       expect(res.count).to eq 3
 
     end

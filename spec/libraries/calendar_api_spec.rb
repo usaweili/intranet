@@ -4,8 +4,10 @@ describe CalendarApi do
   before(:each) do
     @event = {
       'summary'=> "Silly Event",
-      'start'=> {'dateTime' => DateTime.tomorrow.strftime("%Y-%m-%dT%H:%M:%S+05:30") },
-      'end'=>   {'dateTime' => DateTime.tomorrow.strftime("%Y-%m-%dT%H:%M:%S+05:30") },
+      'start'=>
+        {'dateTime' => DateTime.tomorrow.strftime("%Y-%m-%dT%H:%M:%S+05:30") },
+      'end'=>
+        {'dateTime' => DateTime.tomorrow.strftime("%Y-%m-%dT%H:%M:%S+05:30") },
     }
   end
 
@@ -38,7 +40,8 @@ describe CalendarApi do
 
     context "return nil if event is outdated" do
       before do
-        @event['start']['dateTime'] = DateTime.yesterday.strftime("%Y-%m-%dT%H:%M:%S+05:30")
+        @event['start']['dateTime'] =
+          DateTime.yesterday.strftime("%Y-%m-%dT%H:%M:%S+05:30")
         @result = CalendarApi.create_event(@event)
       end
 
