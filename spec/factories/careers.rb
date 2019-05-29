@@ -8,8 +8,8 @@ FactoryGirl.define do
     current_ctc         { '8 Lakhs' }
     linkedin_profile    { Faker::Internet.url }
     github_profile      { Faker::Internet.url }
-    resume              { fixture_file_upload "/home/josh/redis.pdf" }
+    resume              { fixture_file_upload 'spec/fixtures/files/sample1.pdf' }
     portfolio_link      { Faker::Internet.url }
-    cover               { fixture_file_upload "/home/josh/redis.pdf" }
+    cover               { fixture_file_upload 'spec/fixtures/files/sample1.pdf' }
   end
 end
