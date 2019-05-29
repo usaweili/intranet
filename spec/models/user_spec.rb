@@ -12,7 +12,7 @@ describe User do
                          )
      }
   it { should have_field(:status).of_type(String).with_default_value_of(
-        STATUS[0]
+          STATUS[0]
         )
      }
   it { should embed_one :public_profile }
@@ -51,7 +51,7 @@ describe User do
   end
 
   it "should reset yearly leave" do
-    user = FactoryGirl.build(:user, private_profile: FactoryGirl.build(:private_profile, date_of_joining: Date.new(Date.today.year - 1, Date.today.month, 19).prev_month))
+    user = FactoryGirl.build(:user)
     user.save
     user.reload
     user.set_leave_details_per_year
@@ -63,33 +63,41 @@ describe User do
 
     ##### check date of joining in case of specs fail
     before (:each) do
-      @user = FactoryGirl.create(:user, private_profile: FactoryGirl.build(:private_profile, date_of_joining: Date.new(Date.today.year, Date.today.month, 19)))
+      @user = FactoryGirl.create(:user)
       @user.save
     end
 
     it "should send email if HR and admin roles are present" do
-      hr_user = FactoryGirl.create(:user, role: "HR", email: "hr@joshsoftware.com", password: "josh123", private_profile: FactoryGirl.build(:private_profile, date_of_joining: Date.new(Date.today.year, Date.today.month, 19) - 10.month))
-      admin_user = FactoryGirl.create(:user, role: "Admin", email: "admin@joshsoftware.com", password: "josh123", private_profile: FactoryGirl.build(:private_profile, date_of_joining: Date.new(Date.today.year, Date.today.month, 19) - 10.month))
-      leave_application = FactoryGirl.create(:leave_application, user_id: @user.id)
+      hr_user = FactoryGirl.create(:hr)
+      admin_user = FactoryGirl.create(:admin)
+      leave_application = FactoryGirl.create(:leave_application,
+        user_id: @user.id
+      )
       expect{@user.sent_mail_for_approval(leave_application)}.not_to raise_error
     end
 
     it "should send email if HR role is absent" do
-      admin_user = FactoryGirl.create(:user, role: "Admin", email: "admin@joshsoftware.com", password: "josh123", private_profile: FactoryGirl.build(:private_profile, date_of_joining: Date.new(Date.today.year, Date.today.month, 19) - 10.month))
-      leave_application = FactoryGirl.create(:leave_application, user_id: @user.id)
+      admin_user = FactoryGirl.create(:admin)
+      leave_application = FactoryGirl.create(:leave_application,
+        user_id: @user.id
+      )
       expect(User.where(role: 'HR')).to eq([])
       expect{@user.sent_mail_for_approval(leave_application)}.not_to raise_error
     end
     
     it "should send email if admin role is absent" do
-      hr_user = FactoryGirl.create(:user, role: "HR", email: "hr@joshsoftware.com", password: "josh123", private_profile: FactoryGirl.build(:private_profile, date_of_joining: Date.new(Date.today.year, Date.today.month, 19) - 10.month))
-      leave_application = FactoryGirl.create(:leave_application, user_id: @user.id)
+      hr_user = FactoryGirl.create(:hr)
+      leave_application = FactoryGirl.create(:leave_application,
+        user_id: @user.id
+      )
       expect(User.where(role: 'Admin')).to eq([])
       expect{@user.sent_mail_for_approval(leave_application)}.not_to raise_error
     end
 
     it "should send email if hr and admin roles are absent" do
-      leave_application = FactoryGirl.create(:leave_application, user_id: @user.id)
+      leave_application = FactoryGirl.create(:leave_application,
+        user_id: @user.id
+      )
       expect(User.where(role: 'Admin')).to eq([])
       expect(User.where(role: 'HR')).to eq([])
       expect{@user.sent_mail_for_approval(leave_application)}.not_to raise_error
@@ -130,7 +138,7 @@ describe User do
 
   context 'Add or remove project' do
     let!(:user) { FactoryGirl.create(:user) }
-    let!(:project) { FactoryGirl.build(:project) }
+    let!(:project) { FactoryGirl.create(:project) }
 
     it 'Should add project' do
       project_ids = []
@@ -139,7 +147,7 @@ describe User do
       params = { user: { project_ids: project_ids } }
       user.add_or_remove_projects(params)
       user_project = UserProject.find_by(user_id: user.id, project_id: project.id)
-      expect(user_project.start_date).to eq(Date.today)
+      expect(user_project.start_date).to eq(Date.today - 7.days)
     end
 
     describe 'Remove project' do
@@ -156,10 +164,10 @@ describe User do
           project: second_project,
           start_date: DateTime.now - 1)
         user_project = FactoryGirl.create(:user_project,
-                         user: user,
-                         project: project,
-                         start_date: DateTime.now - 1
-                       )
+          user: user,
+          project: project,
+          start_date: DateTime.now - 1
+        )
         project_ids << ""
         project_ids << first_project.id
         project_ids << second_project.id
@@ -171,10 +179,10 @@ describe User do
       it 'Project count is one' do
         project_ids = []
         user_project = FactoryGirl.create(:user_project,
-                         user: user,
-                         project: project,
-                         start_date: DateTime.now - 1
-                       )
+          user: user,
+          project: project,
+          start_date: DateTime.now - 1
+        )
         project_ids << ""
         params = { user: { project_ids: project_ids } }
         user.add_or_remove_projects(params)
@@ -205,10 +213,10 @@ describe User do
       manager_one = FactoryGirl.create(:user, role: 'Manager')
       manager_two = FactoryGirl.create(:user, role: 'Manager')
       user_project = FactoryGirl.create(:user_project,
-                         user: user,
-                         project: project,
-                         start_date: Date.today - 2
-                       )
+        user: user,
+        project: project,
+        start_date: Date.today - 2
+      )
       project.managers << manager_one
       project.managers << manager_two
       managers_emails = user.get_managers_emails
@@ -262,9 +270,9 @@ describe User do
         from_date = '01/09/2018'.to_date
         to_date = '20/09/2018'.to_date
         user_projects = user.get_user_projects_from_user(project.id,
-                          from_date,
-                          to_date
-                        )
+          from_date,
+          to_date
+        )
         expect(user_projects.count).to eq(1)
         expect(user_projects[0].start_date.to_s).to eq('01/08/2018')
         expect(user_projects[0].end_date).to eq(nil)
@@ -279,9 +287,9 @@ describe User do
         from_date = '01/09/2018'.to_date
         to_date = '20/09/2018'.to_date
         user_projects = user.get_user_projects_from_user(project.id,
-                          from_date,
-                          to_date
-                        )
+          from_date,
+          to_date
+        )
         expect(user_projects.count).to eq(1)
         expect(user_projects[0].start_date.to_s).to eq('06/09/2018')
         expect(user_projects[0].end_date).to eq(nil)
@@ -297,9 +305,9 @@ describe User do
         from_date = '01/09/2018'.to_date
         to_date = '20/09/2018'.to_date
         user_projects = user.get_user_projects_from_user(project.id,
-                          from_date,
-                          to_date
-                        )
+          from_date,
+          to_date
+        )
         expect(user_projects.count).to eq(1)
         expect(user_projects[0].start_date.to_s).to eq('05/09/2018')
         expect(user_projects[0].end_date.to_s).to eq('15/09/2018')
@@ -315,9 +323,9 @@ describe User do
         from_date = '01/09/2018'.to_date
         to_date = '20/09/2018'.to_date
         user_projects = user.get_user_projects_from_user(project.id,
-                          from_date,
-                          to_date
-                        )
+          from_date,
+          to_date
+        )
         expect(user_projects.count).to eq(1)
         expect(user_projects[0].start_date.to_s).to eq('08/09/2018')
         expect(user_projects[0].end_date.to_s).to eq('23/09/2018')
@@ -333,9 +341,9 @@ describe User do
         from_date = '01/09/2018'.to_date
         to_date = '20/09/2018'.to_date
         user_projects = user.get_user_projects_from_user(project.id,
-                          from_date,
-                          to_date
-                        )
+          from_date,
+          to_date
+        )
         expect(user_projects.count).to eq(1)
         expect(user_projects[0].start_date.to_s).to eq('05/08/2018')
         expect(user_projects[0].end_date.to_s).to eq('10/09/2018')
@@ -351,9 +359,9 @@ describe User do
         from_date = '01/09/2018'.to_date
         to_date = '20/09/2018'.to_date
         user_projects = user.get_user_projects_from_user(project.id,
-                          from_date,
-                          to_date
-                        )
+          from_date,
+          to_date
+        )
         expect(user_projects.count).to eq(1)
         expect(user_projects[0].start_date.to_s).to eq('01/08/2018')
         expect(user_projects[0].end_date.to_s).to eq('10/10/2018')
@@ -374,9 +382,9 @@ describe User do
         from_date = '01/09/2018'.to_date
         to_date = '20/09/2018'.to_date
         user_projects = user.get_user_projects_from_user(project.id,
-                          from_date,
-                          to_date
-                        )
+          from_date,
+          to_date
+        )
         expect(user_projects.count).to eq(2)
         expect(user_projects[0].start_date.to_s).to eq('01/08/2018')
         expect(user_projects[0].end_date.to_s).to eq('10/10/2018')
@@ -393,9 +401,9 @@ describe User do
         from_date = '01/09/2018'.to_date
         to_date = '20/09/2018'.to_date
         user_projects = user.get_user_projects_from_user(project.id,
-                          from_date,
-                          to_date
-                        )
+          from_date,
+          to_date
+        )
         expect(user_projects.count).to eq(0)
         expect(user_projects.present?).to eq(false)
       end
@@ -410,9 +418,9 @@ describe User do
         from_date = '01/09/2018'.to_date
         to_date = '20/09/2018'.to_date
         user_projects = user.get_user_projects_from_user(project.id,
-                          from_date,
-                          to_date
-                        )
+          from_date,
+          to_date
+        )
         expect(user_projects.count).to eq(0)
         expect(user_projects.present?).to eq(false)
       end
@@ -422,10 +430,10 @@ describe User do
   context 'Employee Auto Id generation' do
     let!(:user) { FactoryGirl.create(:user) }
     let(:internuser) { FactoryGirl.create(:user,
-                         role: 'Intern',
-                         employee_detail: FactoryGirl.build(:employee_detail)
-                       )
-                     }
+        role: 'Intern',
+        employee_detail: FactoryGirl.build(:employee_detail)
+      )
+    }
     it "should generate new Employee ID if employee is new" do      
       user = FactoryGirl.create(:user)
       expect(user.employee_detail.employee_id.to_i).to eq(2)
