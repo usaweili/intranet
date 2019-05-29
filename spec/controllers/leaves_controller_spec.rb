@@ -105,9 +105,9 @@ describe LeaveApplicationsController do
         sign_out @user
         sign_in @admin
         @leave_application = @leave_application.update(
-                                start_at: Date.today + 5.days,
-                                end_at: Date.today + 10.days
-                              )
+          start_at: Date.today + 5.days,
+          end_at: Date.today + 10.days
+        )
         get :view_leave_status, {
                                   name: '',
                                   from: Date.today + 5.days,
@@ -171,9 +171,7 @@ describe LeaveApplicationsController do
   context "AS HR" do
     before(:each) do
       admin = FactoryGirl.create(:admin)
-      @user = FactoryGirl.create(:hr,
-        private_profile: FactoryGirl.build(:private_profile)
-      )
+      @user = FactoryGirl.create(:hr)
       sign_in @user
       @leave_application = FactoryGirl.create(:leave_application, user: @user)
     end
@@ -196,9 +194,7 @@ describe LeaveApplicationsController do
     before(:each) do
       @admin = FactoryGirl.create(:admin)
       @hr = FactoryGirl.create(:hr)
-      @user = FactoryGirl.create(:user,
-        private_profile: FactoryGirl.build(:private_profile)
-      )
+      @user = FactoryGirl.create(:user)
       sign_in @admin
     end
 
@@ -286,9 +282,7 @@ describe LeaveApplicationsController do
   context 'If user is not Admin should not able to ' do
 
     before do
-      @user = FactoryGirl.create(:user,
-        private_profile: FactoryGirl.build(:private_profile)
-      )
+      @user = FactoryGirl.create(:user)
       sign_in @user
     end
 
@@ -319,9 +313,7 @@ describe LeaveApplicationsController do
     before(:each) do
       @admin = FactoryGirl.create(:admin)
       @hr = FactoryGirl.create(:hr)
-      @user = FactoryGirl.create(:user,
-        private_profile: FactoryGirl.build(:private_profile)
-      )
+      @user = FactoryGirl.create(:user)
       sign_in @admin
     end
 
@@ -375,8 +367,9 @@ describe LeaveApplicationsController do
       number_of_days = 2
       leave_application = FactoryGirl.create(:leave_application, user: @user)
       @user.reload
-      expect(@user.employee_detail.available_leaves).to
-                                        eq(available_leaves-number_of_days)
+      expect(@user.employee_detail.available_leaves).to eq(
+        available_leaves-number_of_days
+      )
       xhr :get, :process_leave, {
                                   id: leave_application.id,
                                   leave_action: :reject

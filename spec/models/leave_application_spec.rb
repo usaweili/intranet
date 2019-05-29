@@ -15,9 +15,7 @@ describe LeaveApplication do
   context 'Validate date - Cross date validation - ' do
 
     before do
-      @user = FactoryGirl.create(:user,
-        private_profile: FactoryGirl.attributes_for(:private_profile)
-      )
+      @user = FactoryGirl.create(:user)
     end
 
     it 'should not be able to apply leave for same date' do
@@ -40,9 +38,7 @@ describe LeaveApplication do
 
     before do
       @user = FactoryGirl.create(:user)
-      @user = FactoryGirl.create(:user,
-        private_profile: FactoryGirl.attributes_for(:private_profile)
-      )
+      @user = FactoryGirl.create(:user)
     end
 
     it 'end date can be equal to start date' do
@@ -79,9 +75,7 @@ describe LeaveApplication do
     
       before do
         @user = FactoryGirl.create(:user)
-        @user = FactoryGirl.create(:user,
-          private_profile: FactoryGirl.attributes_for(:private_profile)
-        )
+        @user = FactoryGirl.create(:user)
         @available_leaves = @user.employee_detail.available_leaves
         @number_of_days = 2
       end
@@ -93,11 +87,11 @@ describe LeaveApplication do
           @available_leaves-@number_of_days
         )
         @message = LeaveApplication.process_leave(
-                                              leave_application.id,
-                                              APPROVED,
-                                              :process_accept_application,
-                                              ''
-                                              )
+          leave_application.id,
+          APPROVED,
+          :process_accept_application,
+          ''
+        )
         @user.reload
         expect(@user.employee_detail.available_leaves).to eq(
           @available_leaves - @number_of_days
@@ -106,11 +100,11 @@ describe LeaveApplication do
         expect(@message).to eq({type: :notice, text: "Approved Successfully"})
 
         @message = LeaveApplication.process_leave(
-                                              leave_application.id,
-                                              REJECTED,
-                                              :process_reject_application,
-                                              ''
-                                              )
+          leave_application.id,
+          REJECTED,
+          :process_reject_application,
+          ''
+        )
         expect(@message).to eq({type: :notice, text: "Rejected Successfully"})
         @user.reload
         expect(@user.employee_detail.available_leaves).to eq(@available_leaves)
@@ -137,11 +131,11 @@ describe LeaveApplication do
           )
 
           @message = LeaveApplication.process_leave(
-                                                leave_application.id,
-                                                REJECTED,
-                                                :process_reject_application,
-                                                ''
-                                                )
+            leave_application.id,
+            REJECTED,
+            :process_reject_application,
+            ''
+          )
           expect(@message).to eq(
             {type: :notice, text: "Rejected Successfully"}
           )
@@ -151,11 +145,11 @@ describe LeaveApplication do
           )
 
           @message = LeaveApplication.process_leave(
-                                                leave_application.id,
-                                                APPROVED,
-                                                :process_accept_application,
-                                                ''
-                                                )
+            leave_application.id,
+            APPROVED,
+            :process_accept_application,
+            ''
+          )
           @user.reload
           expect(@user.employee_detail.available_leaves).to eq(
             @available_leaves - @number_of_days
@@ -177,11 +171,11 @@ describe LeaveApplication do
           available_leaves = @user.employee_detail.available_leaves
 
           @message = LeaveApplication.process_leave(
-                                                leave_application.id,
-                                                APPROVED,
-                                                :process_accept_application,
-                                                ''
-                                                )
+            leave_application.id,
+            APPROVED,
+            :process_accept_application,
+            ''
+          )
           @user.reload
           expect(@user.employee_detail.available_leaves).to eq(available_leaves)
 
@@ -193,20 +187,20 @@ describe LeaveApplication do
             user: @user
           )
           LeaveApplication.process_leave(
-                                      leave_application.id,
-                                      APPROVED,
-                                      :process_accept_application,
-                                      ''
-                                      )
+            leave_application.id,
+            APPROVED,
+            :process_accept_application,
+            ''
+          )
           @user.reload
           available_leaves = @user.employee_detail.available_leaves
 
           @message = LeaveApplication.process_leave(
-                                                leave_application.id,
-                                                APPROVED,
-                                                :process_accept_application,
-                                                ''
-                                                )
+            leave_application.id,
+            APPROVED,
+            :process_accept_application,
+            ''
+          )
           @user.reload
           expect(@user.employee_detail.available_leaves).to eq(available_leaves)
 
