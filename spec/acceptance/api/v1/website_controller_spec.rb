@@ -3,16 +3,16 @@ require 'rspec_api_documentation/dsl'
 
 resource "Website Apis" do
   let!(:users) { FactoryGirl.create_list(:user,
-                    3,
-                    status: 'approved',
-                    visible_on_website:  true
-                  )
-               }
+      3,
+      status: 'approved',
+      visible_on_website:  true
+    )
+  }
   let!(:projects) { FactoryGirl.create_list(:project,
-                      3,
-                      visible_on_website: true
-                    )
-                  }
+      3,
+      visible_on_website: true
+    )
+  }
 
   get "/api/v1/team" do
     example "Get all the team members" do
@@ -83,9 +83,9 @@ resource "Website Apis" do
       params['current_ctc'] = '8 lakhs'
       params['linkedin_profile'] = Faker::Internet.url
       params['github_profile'] = Faker::Internet.url
-      params['resume'] = fixture_file_upload("/home/josh/redis.pdf")
+      params['resume'] = fixture_file_upload('spec/fixtures/files/sample1.pdf')
       params['portfolio_link'] = Faker::Internet.url
-      params['cover'] = fixture_file_upload("/home/josh/redis.pdf")
+      params['cover'] = fixture_file_upload('spec/fixtures/files/sample1.pdf')
 
       do_request(:career => params)
       expect(status).to eq(201)
