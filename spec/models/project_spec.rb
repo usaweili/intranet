@@ -70,13 +70,13 @@ describe Project do
       project.managers << user
       project.managers << manager
       manager_names = Project.manager_names(project)
-      expect(manager_names).to eq("fname lname | fname lname")
+      expect(manager_names).to eq("#{user.name} | #{manager.name}")
     end
 
     it 'Should match employee name' do
       FactoryGirl.create(:user_project, user: user, project: project)
       employee_names = Project.employee_names(project)
-      expect(employee_names).to eq("fname lname")
+      expect(employee_names).to eq("#{user.name}")
     end
   end
 
