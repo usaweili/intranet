@@ -53,7 +53,7 @@ RSpec.describe Career, type: :model do
     end
 
     it 'Should not allowd to upload .txt file' do
-      career.resume = fixture_file_upload("/home/josh/a.txt")
+      career.resume = fixture_file_upload('spec/fixtures/files/sample1.txt')
       expect(career).to be_invalid
       expect(career.errors.full_messages).to eq(
         ["Resume You are not allowed to upload \"txt\" files, allowed types: pdf, jpg, jpeg, gif, png, doc, xls, xlsx"]
