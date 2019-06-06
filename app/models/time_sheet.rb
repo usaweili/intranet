@@ -19,9 +19,9 @@ class TimeSheet
   validates :date, presence: true, if: :is_future_date?
   validates :from_time, presence: true, if: :from_time_is_future_time?
   validates :to_time, presence: true, if: :to_time_is_future_time?
-  after_validation :check_vadation_while_creating_or_updateing_timesheet
   before_validation :valid_date_for_create?, on: :create
   validate :time_sheet_overlapping?
+  validate :check_validation_while_creating_or_updating_timesheet
 
   MAX_TIMESHEET_COMMAND_LENGTH = 5
   DATE_FORMAT_LENGTH = 3
@@ -82,7 +82,7 @@ class TimeSheet
     return true
   end
   
-  def check_vadation_while_creating_or_updateing_timesheet
+  def check_validation_while_creating_or_updating_timesheet
     if timesheet_date_greater_than_assign_project_date
       text = "Not allowed to fill timesheet for this date. As you were not assigned on project for this date"
       errors.add(:date, text)
@@ -190,6 +190,7 @@ class TimeSheet
   def time_sheet_overlapping?
     return_value = true
     TimeSheet.where(date: date, user_id: user_id).order("from_time ASC").each do |time_sheet|
+      next if time_sheet == self
       if time_sheet.from_time < from_time && time_sheet.to_time > to_time ||
        time_sheet.from_time > from_time && time_sheet.to_time < to_time ||
        time_sheet.from_time > from_time && time_sheet.to_time > to_time && time_sheet.from_time < to_time ||
