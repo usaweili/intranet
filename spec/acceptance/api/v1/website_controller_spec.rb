@@ -16,19 +16,19 @@ resource "Website Apis" do
 
   get "/api/v1/team" do
     example "Get all the team members" do
-      header 'Referer', 'http://joshsoftware.com'
+      header 'Referer', "http://#{ORGANIZATION_DOMAIN}"
       user = FactoryGirl.create(:user, visible_on_website: false)
+
       do_request
       res = JSON.parse(response_body)
-
       expect(status).to eq 200
       expect(res.count).to eq 3
       expect(res.last.keys).to eq ["email", "public_profile", "employee_detail"]
       expect(res.flatten).not_to include user.name
-
     end
 
-    example "Must be Unauthorized for referer other than joshsoftware" do
+    example "Must be Unauthorized for referer other than #{ORGANIZATION_DOMAIN}" do
+
       do_request
       expect(status).to eq 401
     end
@@ -36,8 +36,9 @@ resource "Website Apis" do
 
   get "/api/v1/portfolio" do
     example "Get all projects" do
-      header 'Referer', 'http://joshsoftware.com'
+      header 'Referer', "http://#{ORGANIZATION_DOMAIN}"
       project = FactoryGirl.create(:project, visible_on_website: false)
+
       do_request
       res = JSON.parse(response_body)
       expect(status).to eq 200
@@ -45,10 +46,10 @@ resource "Website Apis" do
         "description", "name", "url", "case_study_url", "tags", "image_url"
       ]
       expect(res.count).to eq 3
-
     end
 
-    example "Must be Unauthorized for referer other than joshsoftware" do
+    example "Must be Unauthorized for referer other than #{ORGANIZATION_DOMAIN}" do
+
       do_request
       expect(status).to eq 401
     end
@@ -56,24 +57,29 @@ resource "Website Apis" do
 
   post "/api/v1/contact_us" do
     example "Should have status created" do
+      header 'Referer', "http://#{ORGANIZATION_DOMAIN}"
       params = {}
       params['name'] = Faker::Name.name
       params['email'] = Faker::Internet.email
+      ENV['RACK_ENV'] = 'test'
+
       do_request(:contact_us => params)
       expect(status).to eq(201)
     end
 
     example "Should have status unprocessable entity" do
+      header 'Referer', "http://#{ORGANIZATION_DOMAIN}"
       params = {}
       params['email'] = Faker::Internet.email
+
       do_request(:contact_us => params)
       expect(status).to eq(422)
     end
-
   end
 
   post "/api/v1/career" do
     example 'Should have status created' do
+      header 'Referer', "http://#{ORGANIZATION_DOMAIN}"
       params = {}
       params['first_name'] = Faker::Name.first_name
       params['last_name'] = Faker::Name.last_name
@@ -92,6 +98,7 @@ resource "Website Apis" do
     end
 
     example 'Should have status unprocessable entity' do
+      header 'Referer', "http://#{ORGANIZATION_DOMAIN}"
       params = {}
       params['first_name'] = Faker::Name.first_name
       params['last_name'] = Faker::Name.last_name
