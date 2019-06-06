@@ -1,245 +1,248 @@
 require 'rails_helper'
 
 RSpec.describe TimeSheetsController, type: :controller do
-  context 'create' do
-    let!(:user) { FactoryGirl.create(:user) }
-    let!(:project) { FactoryGirl.create(:project) }
-    before do
-      user.public_profile.slack_handle = USER_ID
-      FactoryGirl.create(:user_project,
-        user: user,
-        project: project,
-        start_date: DateTime.now - 2
-      )
-      user.save
-      stub_request(:post, "https://slack.com/api/chat.postMessage")
-    end
 
-    it 'Should success' do
-      params = {
-        'user_id' => USER_ID, 
-        'channel_id' => CHANNEL_ID, 
-        'text' => "England_Hockey #{Date.yesterday}  6 7 abcd efghigk lmnop"
-      }
+  #Slack related specs
+  # context 'create' do
+  #   let!(:user) { FactoryGirl.create(:user) }
+  #   let!(:project) { FactoryGirl.create(:project) }
+  #   before do
+  #     user.public_profile.slack_handle = USER_ID
+  #     FactoryGirl.create(:user_project,
+  #       user: user,
+  #       project: project,
+  #       start_date: DateTime.now - 2
+  #     )
+  #     user.save
+  #     stub_request(:post, "https://slack.com/api/chat.postMessage")
+  #   end
 
-      post :create, params
-      resp = JSON.parse(response.body)
-      expect(response).to have_http_status(:created)
-      expect(resp['text']).to eq("*Timesheet saved successfully!*")
-    end
+  #   it 'Should success' do
+  #     params = {
+  #       'user_id' => USER_ID, 
+  #       'channel_id' => CHANNEL_ID, 
+  #       'text' => "England_Hockey #{Date.yesterday}  6 7 abcd efghigk lmnop"
+  #     }
 
-    it 'should fail because validation trigger on timesheet data' do
-      params = {
-        'user_id' => USER_ID, 
-        'channel_id' => CHANNEL_ID, 
-        'text' => 'England 14-07-2018  6 7 abcd efghigk lmnop' 
-      }
+  #     post :create, params
+  #     resp = JSON.parse(response.body)
+  #     expect(response).to have_http_status(:created)
+  #     expect(resp['text']).to eq("*Timesheet saved successfully!*")
+  #   end
 
-      post :create, params
-      expect(response).to have_http_status(:bad_request)
-    end
-  end
+  #   it 'should fail because validation trigger on timesheet data' do
+  #     params = {
+  #       'user_id' => USER_ID, 
+  #       'channel_id' => CHANNEL_ID, 
+  #       'text' => 'England 14-07-2018  6 7 abcd efghigk lmnop' 
+  #     }
 
-  context 'Check user is exists' do
-    let(:user) { FactoryGirl.create(:user) }
-    let!(:project) { FactoryGirl.create(:project) }
-    before do
-      FactoryGirl.create(:user_project,
-        user: user,
-        project: project,
-        start_date: DateTime.now - 2
-      )
-      user.save
-      stub_request(:post, "https://slack.com/api/chat.postMessage")
-    end
+  #     post :create, params
+  #     expect(response).to have_http_status(:bad_request)
+  #   end
+  # end
 
-    it 'Associate slack id to user' do
-      params = {
-        'token' => SLACK_API_TOKEN,
-        'channel' => CHANNEL_ID,
-        'user_id' => USER_ID,
-        'text' => "England_Hockey #{Date.yesterday}  6 7 abcd efghigk lmnop"
-      }
-      post :create, params
-      expect(response).to have_http_status(:created)
-    end
-  end
 
-  context 'Timesheet: Daily status' do
-    let(:user) { FactoryGirl.create(:user) }
-    let!(:tpn) { FactoryGirl.build(:project) }
+  # context 'Check user is exists' do
+  #   let(:user) { FactoryGirl.create(:user) }
+  #   let!(:project) { FactoryGirl.create(:project) }
+  #   before do
+  #     FactoryGirl.create(:user_project,
+  #       user: user,
+  #       project: project,
+  #       start_date: DateTime.now - 2
+  #     )
+  #     user.save
+  #     stub_request(:post, "https://slack.com/api/chat.postMessage")
+  #   end
 
-    context 'command with date option' do
-      before do
-        tpn.name = 'The pediatric network'
-        tpn.display_name = 'The_pediatric_network'
-        tpn.save
-        stub_request(:post, "https://slack.com/api/chat.postMessage")
-        FactoryGirl.create(:user_project,
-          user: user,
-          project: tpn,
-          start_date: DateTime.now - 2
-        )
-        FactoryGirl.create(:time_sheet,
-          user: user,
-          project: tpn,
-          date: DateTime.yesterday,
-          from_time: Time.parse("#{Date.yesterday} 9:00"),
-          to_time: Time.parse("#{Date.yesterday} 10:00"),
-          description: 'Today I finish the work'
-        )
-      end
+  #   it 'Associate slack id to user' do
+  #     params = {
+  #       'token' => SLACK_API_TOKEN,
+  #       'channel' => CHANNEL_ID,
+  #       'user_id' => USER_ID,
+  #       'text' => "England_Hockey #{Date.yesterday}  6 7 abcd efghigk lmnop"
+  #     }
+  #     post :create, params
+  #     expect(response).to have_http_status(:created)
+  #   end
+  # end
 
-      it 'Should success : user worked on single project' do
-        params = {
-          'user_id' => USER_ID,
-          'channel_id' => CHANNEL_ID,
-          'text' => Date.yesterday.to_s,
-          'command' => '/daily_status'
-        }
+  # context 'Timesheet: Daily status' do
+  #   let(:user) { FactoryGirl.create(:user) }
+  #   let!(:tpn) { FactoryGirl.build(:project) }
 
-        post :daily_status, params
-        resp = JSON.parse(response.body)
-        expect(resp['text']).to eq("You worked on *The pediatric network: 1H 00M*. Details are as follow\n\n1. The pediatric network 09:00AM 10:00AM Today I finish the work \n")
-        expect(response).to have_http_status(:ok)
-      end
+  #   context 'command with date option' do
+  #     before do
+  #       tpn.name = 'The pediatric network'
+  #       tpn.display_name = 'The_pediatric_network'
+  #       tpn.save
+  #       stub_request(:post, "https://slack.com/api/chat.postMessage")
+  #       FactoryGirl.create(:user_project,
+  #         user: user,
+  #         project: tpn,
+  #         start_date: DateTime.now - 2
+  #       )
+  #       FactoryGirl.create(:time_sheet,
+  #         user: user,
+  #         project: tpn,
+  #         date: DateTime.yesterday,
+  #         from_time: Time.parse("#{Date.yesterday} 9:00"),
+  #         to_time: Time.parse("#{Date.yesterday} 10:00"),
+  #         description: 'Today I finish the work'
+  #       )
+  #     end
 
-      it 'Should success : user worked on multiple projects' do
-        deal_signal = FactoryGirl.build(:project)
-        deal_signal.name = 'Deal signal'
-        deal_signal.display_name = 'deal_signal'
-        deal_signal.save
-        FactoryGirl.create(:user_project,
-          user: user,
-          project: deal_signal,
-          start_date: DateTime.now - 4
-        )
-        FactoryGirl.create(:time_sheet,
-          user: user,
-          project: deal_signal,
-          date: DateTime.yesterday,
-          from_time: Time.parse("#{Date.yesterday} 11:00"),
-          to_time: Time.parse("#{Date.yesterday} 12:00"),
-          description: 'Today I finish the work'
-        )
-        params = {
-          'user_id' => USER_ID,
-          'channel_id' => CHANNEL_ID,
-          'text' => Date.yesterday.to_s,
-          'command' => '/daily_status'
-        }
-        post :daily_status, params
-        resp = JSON.parse(response.body)
-        expect(response).to have_http_status(:ok)
-        expect(resp['text']).to eq(
-          "You worked on *The pediatric network: 1H 00M* *Deal signal: 1H 00M*. Details are as follow\n\n1. The pediatric network 09:00AM 10:00AM Today I finish the work \n2. Deal signal 11:00AM 12:00PM Today I finish the work \n"
-        )
-      end
+  #     it 'Should success : user worked on single project' do
+  #       params = {
+  #         'user_id' => USER_ID,
+  #         'channel_id' => CHANNEL_ID,
+  #         'text' => Date.yesterday.to_s,
+  #         'command' => '/daily_status'
+  #       }
 
-      it 'Should fail because invalid date' do
-        params = {
-          'user_id' => USER_ID,
-          'channel_id' => CHANNEL_ID,
-          'text' => '06/13/2018'
-        }
+  #       post :daily_status, params
+  #       resp = JSON.parse(response.body)
+  #       expect(resp['text']).to eq("You worked on *The pediatric network: 1H 00M*. Details are as follow\n\n1. The pediatric network 09:00AM 10:00AM Today I finish the work \n")
+  #       expect(response).to have_http_status(:ok)
+  #     end
 
-        post :daily_status, params
-        expect(response).to have_http_status(:unprocessable_entity)
-      end
-    end
+  #     it 'Should success : user worked on multiple projects' do
+  #       deal_signal = FactoryGirl.build(:project)
+  #       deal_signal.name = 'Deal signal'
+  #       deal_signal.display_name = 'deal_signal'
+  #       deal_signal.save
+  #       FactoryGirl.create(:user_project,
+  #         user: user,
+  #         project: deal_signal,
+  #         start_date: DateTime.now - 4
+  #       )
+  #       FactoryGirl.create(:time_sheet,
+  #         user: user,
+  #         project: deal_signal,
+  #         date: DateTime.yesterday,
+  #         from_time: Time.parse("#{Date.yesterday} 11:00"),
+  #         to_time: Time.parse("#{Date.yesterday} 12:00"),
+  #         description: 'Today I finish the work'
+  #       )
+  #       params = {
+  #         'user_id' => USER_ID,
+  #         'channel_id' => CHANNEL_ID,
+  #         'text' => Date.yesterday.to_s,
+  #         'command' => '/daily_status'
+  #       }
+  #       post :daily_status, params
+  #       resp = JSON.parse(response.body)
+  #       expect(response).to have_http_status(:ok)
+  #       expect(resp['text']).to eq(
+  #         "You worked on *The pediatric network: 1H 00M* *Deal signal: 1H 00M*. Details are as follow\n\n1. The pediatric network 09:00AM 10:00AM Today I finish the work \n2. Deal signal 11:00AM 12:00PM Today I finish the work \n"
+  #       )
+  #     end
 
-    context 'command without date option' do
-      before do
-        tpn.name = 'The pediatric network'
-        tpn.display_name = 'The_pediatric_network'
-        tpn.save
-        FactoryGirl.create(:user_project,
-          user: user,
-          project: tpn,
-          start_date: DateTime.now - 3
-          )
-        stub_request(:post, "https://slack.com/api/chat.postMessage")
-      end
+  #     it 'Should fail because invalid date' do
+  #       params = {
+  #         'user_id' => USER_ID,
+  #         'channel_id' => CHANNEL_ID,
+  #         'text' => '06/13/2018'
+  #       }
 
-      it 'Should success : user worked single project' do
-        FactoryGirl.create(:time_sheet,
-          user: user,
-          project: tpn,
-          date: Date.today,
-          from_time: '9:00',
-          to_time: '10:00',
-          description: 'Today I finish the work'
-        )
-        params = {
-          'user_id' => USER_ID,
-          'channel_id' => CHANNEL_ID,
-          'text' => ""
-        }
+  #       post :daily_status, params
+  #       expect(response).to have_http_status(:unprocessable_entity)
+  #     end
+  #   end
 
-        post :daily_status, params
-        resp = JSON.parse(response.body)
-        expect(resp['text']).to eq("You worked on *The pediatric network: 1H 00M*. Details are as follow\n\n1. The pediatric network 09:00AM 10:00AM Today I finish the work \n")
-        expect(response).to have_http_status(:ok)
-      end
+  #   context 'command without date option' do
+  #     before do
+  #       tpn.name = 'The pediatric network'
+  #       tpn.display_name = 'The_pediatric_network'
+  #       tpn.save
+  #       FactoryGirl.create(:user_project,
+  #         user: user,
+  #         project: tpn,
+  #         start_date: DateTime.now - 3
+  #         )
+  #       stub_request(:post, "https://slack.com/api/chat.postMessage")
+  #     end
 
-      it 'Should success : user worked on multiple project' do
-        deal_signal = FactoryGirl.build(:project)
-        deal_signal.name = 'Deal signal'
-        deal_signal.display_name = 'deal_signal'
-        deal_signal.save
-        FactoryGirl.create(:user_project,
-          user: user,
-          project: deal_signal,
-          start_date: DateTime.now - 3
-        )
-        FactoryGirl.create(:time_sheet,
-          user: user,
-          project: tpn,
-          date: Date.today,
-          from_time: "#{Date.today} 7:00",
-          to_time: "#{Date.today} 8:00",
-          description: 'Today I finish the work'
-        )
+  #     it 'Should success : user worked single project' do
+  #       FactoryGirl.create(:time_sheet,
+  #         user: user,
+  #         project: tpn,
+  #         date: Date.today,
+  #         from_time: '9:00',
+  #         to_time: '10:00',
+  #         description: 'Today I finish the work'
+  #       )
+  #       params = {
+  #         'user_id' => USER_ID,
+  #         'channel_id' => CHANNEL_ID,
+  #         'text' => ""
+  #       }
 
-        FactoryGirl.create(:time_sheet,
-          user: user,
-          project: deal_signal,
-          date: Date.today,
-          from_time: "#{Date.today} 8:00",
-          to_time: "#{Date.today} 9:00",
-          description: 'Today I finish the work'
-        )
-        params = {
-          'user_id' => USER_ID,
-          'channel_id' => CHANNEL_ID,
-          'text' => ""
-        }
-        post :daily_status, params
-        resp = JSON.parse(response.body)
-        expect(response).to have_http_status(:ok)
-        expect(resp['text']).to eq("You worked on *The pediatric network: 1H 00M* *Deal signal: 1H 00M*. Details are as follow\n\n1. The pediatric network 07:00AM 08:00AM Today I finish the work \n2. Deal signal 08:00AM 09:00AM Today I finish the work \n")
-      end
+  #       post :daily_status, params
+  #       resp = JSON.parse(response.body)
+  #       expect(resp['text']).to eq("You worked on *The pediatric network: 1H 00M*. Details are as follow\n\n1. The pediatric network 09:00AM 10:00AM Today I finish the work \n")
+  #       expect(response).to have_http_status(:ok)
+  #     end
 
-      it 'Should fail because timesheet not present' do
-        FactoryGirl.create(:time_sheet,
-          user: user,
-          project: tpn,
-          date: Date.today - 1,
-          from_time: '9:00',
-          to_time: '10:00',
-          description: 'Today I finish the work'
-        )
-        params = {
-          'user_id' => USER_ID,
-          'channel_id' => CHANNEL_ID,
-          'text' => ""
-        }
+  #     it 'Should success : user worked on multiple project' do
+  #       deal_signal = FactoryGirl.build(:project)
+  #       deal_signal.name = 'Deal signal'
+  #       deal_signal.display_name = 'deal_signal'
+  #       deal_signal.save
+  #       FactoryGirl.create(:user_project,
+  #         user: user,
+  #         project: deal_signal,
+  #         start_date: DateTime.now - 3
+  #       )
+  #       FactoryGirl.create(:time_sheet,
+  #         user: user,
+  #         project: tpn,
+  #         date: Date.today,
+  #         from_time: "#{Date.today} 7:00",
+  #         to_time: "#{Date.today} 8:00",
+  #         description: 'Today I finish the work'
+  #       )
 
-        post :daily_status, params
-        expect(response).to have_http_status(:unprocessable_entity)
-      end
-    end
-  end
+  #       FactoryGirl.create(:time_sheet,
+  #         user: user,
+  #         project: deal_signal,
+  #         date: Date.today,
+  #         from_time: "#{Date.today} 8:00",
+  #         to_time: "#{Date.today} 9:00",
+  #         description: 'Today I finish the work'
+  #       )
+  #       params = {
+  #         'user_id' => USER_ID,
+  #         'channel_id' => CHANNEL_ID,
+  #         'text' => ""
+  #       }
+  #       post :daily_status, params
+  #       resp = JSON.parse(response.body)
+  #       expect(response).to have_http_status(:ok)
+  #       expect(resp['text']).to eq("You worked on *The pediatric network: 1H 00M* *Deal signal: 1H 00M*. Details are as follow\n\n1. The pediatric network 07:00AM 08:00AM Today I finish the work \n2. Deal signal 08:00AM 09:00AM Today I finish the work \n")
+  #     end
+
+  #     it 'Should fail because timesheet not present' do
+  #       FactoryGirl.create(:time_sheet,
+  #         user: user,
+  #         project: tpn,
+  #         date: Date.today - 1,
+  #         from_time: '9:00',
+  #         to_time: '10:00',
+  #         description: 'Today I finish the work'
+  #       )
+  #       params = {
+  #         'user_id' => USER_ID,
+  #         'channel_id' => CHANNEL_ID,
+  #         'text' => ""
+  #       }
+
+  #       post :daily_status, params
+  #       expect(response).to have_http_status(:unprocessable_entity)
+  #     end
+  #   end
+  # end
 
   context 'index' do
     let!(:user) { FactoryGirl.create(:admin) }
@@ -453,298 +456,316 @@ RSpec.describe TimeSheetsController, type: :controller do
     end
   end
 
-  context 'Update timesheet' do
+  context 'Update' do
     let!(:user) { FactoryGirl.create(:admin) }
     let!(:project) { FactoryGirl.create(:project) }
     let!(:employee) { FactoryGirl.create(:user) }
 
-    it 'Should update timesheet' do
-      sign_in user
-      FactoryGirl.create(:user_project,
-        user: user,
-        project: project,
-        start_date: Date.today - 10
-      )
-      time_sheet = FactoryGirl.create(:time_sheet,
-                      user: user,
-                      project: project,
-                      date: Date.today - 1,
-                      from_time: Time.parse("#{Date.today - 1} 10:00"),
-                      to_time: Time.parse("#{Date.today - 1} 11:30"),
-                      description: 'Woked on test cases'
-                    )
-      params = {
-                  time_sheets_attributes: {
-                    "0" => {
-                              project_id: "#{project.id}",
-                              date: "#{Date.today - 1}",
-                              from_time: "#{Date.today - 1} - 09:00",
-                              to_time: "#{Date.today - 1} - 11:15",
-                              description: "testing API and call with client",
-                              id: "#{time_sheet.id}"
-                           }
-                    },
-                  id:user.id
-               }
-      put :update_timesheet, user_id: user.id,
-                              user: params,
-                              time_sheet_date: Date.today - 1
-      expect(time_sheet.reload.from_time.to_s).to eq(
-        "#{Date.today - 1} - 09:00 AM"
-      )
-      expect(time_sheet.reload.to_time.to_s).to eq(
-        "#{Date.today - 1} - 11:15 AM"
-      )
-      expect(time_sheet.reload.description).to eq(
-        "testing API and call with client"
-      )
+    context 'should successfully update timesheet' do
+      it 'if all attributes are valid' do
+        sign_in user
+        FactoryGirl.create(:user_project,
+          user: user,
+          project: project,
+          start_date: Date.today - 10
+        )
+        time_sheet = FactoryGirl.create(:time_sheet,
+          user: user,
+          project: project,
+          date: Date.today - 1,
+          from_time: Time.parse("#{Date.today - 1} 10:00"),
+          to_time: Time.parse("#{Date.today - 1} 11:30"),
+          description: 'Woked on test cases'
+        )
+        params = {
+                    time_sheets_attributes: {
+                      "0" => {
+                                project_id: project.id,
+                                date: Date.today - 1,
+                                from_time: "#{Date.today - 1} - 09:00",
+                                to_time: "#{Date.today - 1} - 11:15",
+                                description: 'testing API and call with client',
+                                id: time_sheet.id
+                             }
+                      },
+                    id:user.id
+                 }
+        put :update_timesheet, user_id: user.id,
+                                user: params,
+                                time_sheet_date: Date.today - 1
+        expect(time_sheet.reload.from_time.to_s).to eq(
+          "#{Date.today - 1} - 09:00 AM"
+        )
+        expect(time_sheet.reload.to_time.to_s).to eq(
+          "#{Date.today - 1} - 11:15 AM"
+        )
+        expect(time_sheet.reload.description).to eq(
+          'testing API and call with client'
+        )
+      end
+
+      it 'if timesheet date is not less than 2 days in case of Employee' do
+        sign_in employee
+        FactoryGirl.create(:user_project,
+          user: employee,
+          project: project,
+          start_date: Date.today - 10
+        )
+        time_sheet = FactoryGirl.create(:time_sheet,
+          user: employee,
+          project: project,
+          date: Date.today - 1,
+          from_time: Time.parse("#{Date.today - 1} 10"),
+          to_time: Time.parse("#{Date.today - 1} 11:30"),
+          description: 'Woked on test cases'
+        )
+        params = {
+                    time_sheets_attributes: {
+                      "0" => {
+                                project_id: project.id,
+                                date: Date.today - 1,
+                                from_time: "#{Date.today - 1} - 11:00 AM",
+                                to_time: "#{Date.today - 1} - 10:00 AM",
+                                description: 'testing API and call with client',
+                                id: time_sheet.id
+                             }
+                      },
+                    id:user.id
+                 }
+        post :update_timesheet, user_id: employee.id,
+                                user: params,
+                                time_sheet_date: Date.today - 1
+        expect(flash[:error]).not_to be_present
+        should render_template(:edit_timesheet)
+      end
+
+      it 'if timesheet date is less than 2 days in case of Admin' do
+        sign_in user
+        FactoryGirl.create(:user_project,
+          user: user,
+          project: project,
+          start_date: Date.today - 10
+        )
+        time_sheet = FactoryGirl.create(:time_sheet,
+          user: user,
+          project: project,
+          date: Date.today - 3,
+          from_time: Time.parse("#{Date.today - 1} 10"),
+          to_time: Time.parse("#{Date.today - 1} 11:30"),
+          description: 'Woked on test cases'
+        )
+        params = {
+                    time_sheets_attributes: {
+                      "0" => {
+                                project_id: project.id,
+                                date: Date.today - 1,
+                                from_time: "#{Date.today - 1} - 11:00 AM",
+                                to_time: "#{Date.today - 1} - 10:00 AM",
+                                description: 'testing API and call with client',
+                                id: time_sheet.id
+                             }
+                      },
+                    id:user.id
+                 }
+        post :update_timesheet, user_id: user.id,
+                                user: params,
+                                time_sheet_date: Date.today - 3
+        expect(flash[:error]).not_to be_present
+        should render_template(:edit_timesheet)
+      end
     end
 
-    it 'Should not update timesheet because description is not present' do
-      sign_in user
-      FactoryGirl.create(:user_project,
-        user: user,
-        project: project,
-        start_date: Date.today - 10
-      )
-      time_sheet = FactoryGirl.create(:time_sheet,
-                      user: user,
-                      project: project,
-                      date: Date.today - 1,
-                      from_time: Time.parse("#{Date.today - 1} 10"),
-                      to_time: Time.parse("#{Date.today - 1} 11:30"),
-                      description: 'Woked on test cases'
-                    )
-      params = {
-                  time_sheets_attributes: {
-                    "0" => {
-                              project_id: "#{project.id}",
-                              date: "#{Date.today - 1}",
-                              from_time: "#{Date.today - 1} - 09:00 AM",
-                              to_time: "#{Date.today - 1} - 11:15 AM",
-                              description: "",
-                              id: "#{time_sheet.id}"
-                           }
-                    },
-                  id:user.id
-               }
-      post :update_timesheet, user_id: user.id,
-                              user: params,
-                              time_sheet_date: Date.today - 1
-      expect(flash[:error]).to be_present
-      should render_template(:edit_timesheet)
-    end
+    context 'should not update timesheet' do
+      it "if 'description' is not present" do
+        sign_in user
+        FactoryGirl.create(:user_project,
+          user: user,
+          project: project,
+          start_date: Date.today - 10
+        )
+        time_sheet = FactoryGirl.create(:time_sheet,
+          user: user,
+          project: project,
+          date: Date.today - 1,
+          from_time: Time.parse("#{Date.today - 1} 10"),
+          to_time: Time.parse("#{Date.today - 1} 11:30"),
+          description: 'Worked on test cases'
+        )
+        params = {
+                    time_sheets_attributes: {
+                      "0" => {
+                                project_id: project.id,
+                                date: Date.today - 1,
+                                from_time: "#{Date.today - 1} - 09:00 AM",
+                                to_time: "#{Date.today - 1} - 11:15 AM",
+                                description: '',
+                                id: time_sheet.id
+                             }
+                      },
+                    id:user.id
+                 }
+        post :update_timesheet, user_id: user.id,
+                                user: params,
+                                time_sheet_date: Date.today - 1
+        expect(time_sheet.reload.description).to eq(
+          'Worked on test cases'
+        )
+        should render_template(:edit_timesheet)
+      end
 
-    it 'Should not update timesheet because from time is not present' do
-      sign_in user
-      FactoryGirl.create(:user_project,
-        user: user,
-        project: project,
-        start_date: Date.today - 10
-      )
-      time_sheet = FactoryGirl.create(:time_sheet,
-                      user: user,
-                      project: project,
-                      date: Date.today - 1,
-                      from_time: Time.parse("#{Date.today - 1} 10"),
-                      to_time: Time.parse("#{Date.today - 1} 11:30"),
-                      description: 'Woked on test cases'
-                    )
-      params = {
-                  time_sheets_attributes: {
-                    "0" => {
-                              project_id: "#{project.id}",
-                              date: "#{Date.today - 1}",
-                              from_time: "",
-                              to_time: "#{Date.today - 1} - 11:15 AM",
-                              description: "testing API and call with client",
-                              id: "#{time_sheet.id}"
-                           }
-                    },
-                  id:user.id
-               }
-      post :update_timesheet, user_id: user.id,
-                              user: params,
-                              time_sheet_date: Date.today - 1
-      expect(flash[:error]).to be_present
-      should render_template(:edit_timesheet)
-    end
+      it "if 'from time' is not present" do
+        sign_in user
+        FactoryGirl.create(:user_project,
+          user: user,
+          project: project,
+          start_date: Date.today - 10
+        )
+        time_sheet = FactoryGirl.create(:time_sheet,
+          user: user,
+          project: project,
+          date: Date.today - 1,
+          from_time: Time.parse("#{Date.today - 1} 10"),
+          to_time: Time.parse("#{Date.today - 1} 11:30"),
+          description: 'Woked on test cases'
+        )
+        params = {
+                    time_sheets_attributes: {
+                      "0" => {
+                                project_id: project.id,
+                                date: Date.today - 1,
+                                from_time: '',
+                                to_time: "#{Date.today - 1} - 11:15 AM",
+                                description: "testing API and call with client",
+                                id: time_sheet.id
+                             }
+                      },
+                    id:user.id
+                 }
+        post :update_timesheet, user_id: user.id,
+                                user: params,
+                                time_sheet_date: Date.today - 1
+        expect(time_sheet.reload.from_time).to eq(
+          Time.parse("#{Date.today - 1} 10")
+        )
+        should render_template(:edit_timesheet)
+      end
 
-    it 'Should not update timesheet because to time is not present' do
-      sign_in user
-      FactoryGirl.create(:user_project,
-        user: user,
-        project: project,
-        start_date: Date.today - 10
-      )
-      time_sheet = FactoryGirl.create(:time_sheet,
-                      user: user,
-                      project: project,
-                      date: Date.today - 1,
-                      from_time: Time.parse("#{Date.today - 1} 10"),
-                      to_time: Time.parse("#{Date.today - 1} 11:30"),
-                      description: 'Woked on test cases'
-                    )
-      params = {
-                  time_sheets_attributes: {
-                    "0" => {
-                              project_id: "#{project.id}",
-                              date: "#{Date.today - 1}",
-                              from_time: "#{Date.today - 1} - 09:00 AM",
-                              to_time: "",
-                              description: "testing API and call with client",
-                              id: "#{time_sheet.id}"
-                           }
-                    },
-                  id:user.id
-               }
-      post :update_timesheet, user_id: user.id,
-                              user: params,
-                              time_sheet_date: Date.today - 1
-      expect(flash[:error]).to be_present
-      should render_template(:edit_timesheet)
-    end
+      it "if 'to time' is not present" do
+        sign_in user
+        FactoryGirl.create(:user_project,
+          user: user,
+          project: project,
+          start_date: Date.today - 10
+        )
+        time_sheet = FactoryGirl.create(:time_sheet,
+          user: user,
+          project: project,
+          date: Date.today - 1,
+          from_time: Time.parse("#{Date.today - 1} 10"),
+          to_time: Time.parse("#{Date.today - 1} 11:30"),
+          description: 'Woked on test cases'
+        )
+        params = {
+                    time_sheets_attributes: {
+                      "0" => {
+                                project_id: project.id,
+                                date: Date.today - 1,
+                                from_time: "#{Date.today - 1} - 09:00 AM",
+                                to_time: '',
+                                description: 'testing API and call with client',
+                                id: time_sheet.id
+                             }
+                      },
+                    id:user.id
+                 }
+        post :update_timesheet, user_id: user.id,
+                                user: params,
+                                time_sheet_date: Date.today - 1
+        expect(time_sheet.reload.to_time).to eq(
+          Time.parse("#{Date.today - 1} 11:30")
+        )                        
+        should render_template(:edit_timesheet)
+      end
 
-    it 'Should not update Timesheet because timesheet date is less than 7 days' do
-      sign_in user
-      FactoryGirl.create(:user_project,
-        user: user,
-        project: project,
-        start_date: Date.today - 10
-      )
-      time_sheet = FactoryGirl.create(:time_sheet,
-                      user: user,
-                      project: project,
-                      date: Date.today - 1,
-                      from_time: Time.parse("#{Date.today - 1} 10"),
-                      to_time: Time.parse("#{Date.today - 1} 11:30"),
-                      description: 'Woked on test cases'
-                    )
-      params = {
-                  time_sheets_attributes: {
-                    "0" => {
-                              project_id: "#{project.id}",
-                              date: "#{Date.today - 1}",
-                              from_time: "#{Date.today - 1} - 11:00 AM",
-                              to_time: "#{Date.today - 1} - 10:00 AM",
-                              description: "testing API and call with client",
-                              id: "#{time_sheet.id}"
-                           }
-                    },
-                  id:user.id
-               }
-      post :update_timesheet, user_id: user.id,
-                              user: params,
-                              time_sheet_date: Date.today - 1
-      expect(flash[:error]).to be_present
-      should render_template(:edit_timesheet)
-    end
+      it 'if timesheet date is less than 7 days' do
+        sign_in user
+        FactoryGirl.create(:user_project,
+          user: user,
+          project: project,
+          start_date: Date.today - 10
+        )
+        time_sheet = FactoryGirl.create(:time_sheet,
+          user: user,
+          project: project,
+          date: Date.today - 1,
+          from_time: Time.parse("#{Date.today - 1} 10"),
+          to_time: Time.parse("#{Date.today - 1} 11:30"),
+          description: 'Worked on test cases'
+        )
+        params = {
+                    time_sheets_attributes: {
+                      "0" => {
+                                project_id: project.id,
+                                date: Date.today - 1,
+                                from_time: "#{Date.today - 1} - 11:00 AM",
+                                to_time: "#{Date.today - 1} - 10:00 AM",
+                                description: 'testing API and call with client',
+                                id: time_sheet.id
+                             }
+                      },
+                    id:user.id
+                 }
+        post :update_timesheet, user_id: user.id,
+                                user: params,
+                                time_sheet_date: Date.today - 1
+        expect(time_sheet.reload.from_time).to eq(
+          Time.parse("#{Date.today - 1} 10")
+        )
+        expect(time_sheet.reload.to_time).to eq(
+          Time.parse("#{Date.today - 1} 11:30")
+        )
+        expect(time_sheet.reload.description).to eq(
+          'Worked on test cases'
+        )
+        should render_template(:edit_timesheet)
+      end
 
-    it 'Should update Timesheet because timesheet date is not less than 2 days in case of Employee' do
-      sign_in employee
-      FactoryGirl.create(:user_project,
-        user: employee,
-        project: project,
-        start_date: Date.today - 10
-      )
-      time_sheet = FactoryGirl.create(:time_sheet,
-                      user: employee,
-                      project: project,
-                      date: Date.today - 1,
-                      from_time: Time.parse("#{Date.today - 1} 10"),
-                      to_time: Time.parse("#{Date.today - 1} 11:30"),
-                      description: 'Woked on test cases'
-                    )
-      params = {
-                  time_sheets_attributes: {
-                    "0" => {
-                              project_id: "#{project.id}",
-                              date: "#{Date.today - 1}",
-                              from_time: "#{Date.today - 1} - 11:00 AM",
-                              to_time: "#{Date.today - 1} - 10:00 AM",
-                              description: "testing API and call with client",
-                              id: "#{time_sheet.id}"
-                           }
-                    },
-                  id:user.id
-               }
-      post :update_timesheet, user_id: employee.id,
-                              user: params,
-                              time_sheet_date: Date.today - 1
-      expect(flash[:error]).not_to be_present
-      should render_template(:edit_timesheet)
-    end
-
-    it 'Should not update Timesheet because timesheet date is less than 2 days in case of Employee' do
-      sign_in employee
-      FactoryGirl.create(:user_project,
-        user: employee,
-        project: project,
-        start_date: Date.today - 10
-      )
-      time_sheet = FactoryGirl.create(:time_sheet,
-                      user: employee,
-                      project: project,
-                      date: Date.today - 3,
-                      from_time: Time.parse("#{Date.today - 1} 10"),
-                      to_time: Time.parse("#{Date.today - 1} 11:30"),
-                      description: 'Woked on test cases'
-                    )
-      params = {
-                  time_sheets_attributes: {
-                    "0" => {
-                              project_id: "#{project.id}",
-                              date: "#{Date.today - 1}",
-                              from_time: "#{Date.today - 1} - 11:00 AM",
-                              to_time: "#{Date.today - 1} - 10:00 AM",
-                              description: "testing API and call with client",
-                              id: "#{time_sheet.id}"
-                           }
-                    },
-                  id:user.id
-               }
-      post :update_timesheet, user_id: employee.id,
-                              user: params,
-                              time_sheet_date: Date.today - 3
-      expect(flash[:error]).to eql(
-        "Not allowed to edit timesheet for this date. You can edit timesheet for past #{TimeSheet::DAYS_FOR_UPDATE} days."
-      )
-      should render_template(:edit_timesheet)
-    end
-
-    it 'Should update Timesheet even if timesheet date is less than 2 days in case of Admin' do
-      sign_in user
-      FactoryGirl.create(:user_project,
-        user: user,
-        project: project,
-        start_date: Date.today - 10
-      )
-      time_sheet = FactoryGirl.create(:time_sheet,
-                      user: user,
-                      project: project,
-                      date: Date.today - 3,
-                      from_time: Time.parse("#{Date.today - 1} 10"),
-                      to_time: Time.parse("#{Date.today - 1} 11:30"),
-                      description: 'Woked on test cases'
-                    )
-      params = {
-                  time_sheets_attributes: {
-                    "0" => {
-                              project_id: "#{project.id}",
-                              date: "#{Date.today - 1}",
-                              from_time: "#{Date.today - 1} - 11:00 AM",
-                              to_time: "#{Date.today - 1} - 10:00 AM",
-                              description: "testing API and call with client",
-                              id: "#{time_sheet.id}"
-                           }
-                    },
-                  id:user.id
-               }
-      post :update_timesheet, user_id: user.id,
-                              user: params,
-                              time_sheet_date: Date.today - 3
-      expect(flash[:error]).not_to be_present
-      should render_template(:edit_timesheet)
+      it 'if timesheet date is less than 2 days in case of Employee' do
+        sign_in employee
+        FactoryGirl.create(:user_project,
+          user: employee,
+          project: project,
+          start_date: Date.today - 10
+        )
+        time_sheet = FactoryGirl.create(:time_sheet,
+          user: employee,
+          project: project,
+          date: Date.today - 3,
+          from_time: Time.parse("#{Date.today - 1} 10"),
+          to_time: Time.parse("#{Date.today - 1} 11:30"),
+          description: 'Woked on test cases'
+        )
+        params = {
+                    time_sheets_attributes: {
+                      "0" => {
+                                project_id: project.id,
+                                date: Date.today - 1,
+                                from_time: "#{Date.today - 1} - 11:00 AM",
+                                to_time: "#{Date.today - 1} - 10:00 AM",
+                                description: 'testing API and call with client',
+                                id: time_sheet.id
+                             }
+                      },
+                    id:user.id
+                 }
+        post :update_timesheet, user_id: employee.id,
+                                user: params,
+                                time_sheet_date: Date.today - 3
+        expect(flash[:error]).to eq(
+          "Not allowed to edit timesheet for this date. You can edit timesheet for past #{TimeSheet::DAYS_FOR_UPDATE} days."
+        )
+        should render_template(:edit_timesheet)
+      end
     end
   end
 
@@ -755,6 +776,8 @@ RSpec.describe TimeSheetsController, type: :controller do
     let!(:project) {FactoryGirl.create(:project)}
 
     it 'Should give the project report' do
+      user_one.public_profile.first_name = 'Aaaaa'
+      user_one.save
       FactoryGirl.create(:user_project,
         user: user_one,
         project: project,
@@ -767,7 +790,7 @@ RSpec.describe TimeSheetsController, type: :controller do
       )
       FactoryGirl.create(:time_sheet,
         user: user_one,
-        project_id: project.id,
+        project: project,
         date: Date.today - 2,
         from_time: "#{Date.today - 2} 10",
         to_time: "#{Date.today - 2} 11",
@@ -775,7 +798,7 @@ RSpec.describe TimeSheetsController, type: :controller do
       )
       FactoryGirl.create(:time_sheet,
         user: user_one,
-        project_id: project.id,
+        project: project,
         date: Date.today - 2,
         from_time: "#{Date.today - 2} 12",
         to_time: "#{Date.today - 2} 13",
@@ -783,7 +806,7 @@ RSpec.describe TimeSheetsController, type: :controller do
       )
       FactoryGirl.create(:time_sheet,
         user: user_two,
-        project_id: project.id,
+        project: project,
         date: Date.today - 2,
         from_time: "#{Date.today - 2} 10",
         to_time: "#{Date.today - 2} 11",
@@ -796,23 +819,20 @@ RSpec.describe TimeSheetsController, type: :controller do
                                   from_date: from_date,
                                   to_date: to_date,
                                   project_id: project.id
-      expect(response.body).to eq(
-        "Employee name,Date(dd/mm/yyyy),No of hours,Details\nfname lname,28-10-2018,2,\"Test api\ncall with client\"\nfname lname,28-10-2018,1,test data\n"
-      )
+
+      expect(response.body).to eq("Employee name,Date(dd/mm/yyyy),No of hours,Details\n#{user_one.name},#{(Date.today - 2).strftime('%d-%m-%Y')},2,\"Test api\ncall with client\"\n#{user_two.name},#{(Date.today - 2).strftime('%d-%m-%Y')},1,test data\n")
     end
   end
 
   context 'Add timesheet' do
     let!(:user) { FactoryGirl.create(:user) }
     let!(:project) { FactoryGirl.create(:project) }
-
-    before do
-      FactoryGirl.create(:user_project,
+    let!(:user_project) { FactoryGirl.create(:user_project,
         user: user,
         project: project,
         start_date: Date.today - 10
       )
-    end
+    }
 
     it 'Should add timesheet' do
       params = { 
@@ -853,7 +873,7 @@ RSpec.describe TimeSheetsController, type: :controller do
                 }
       sign_in user
       post :add_time_sheet, user_id: user.id, user: params
-      expect(flash[:error]).to be_present
+      expect(TimeSheet.count).to eq(0)
       should render_template(:new)
     end
   end
