@@ -1,7 +1,4 @@
-require 'rails_helper'
 require 'spec_helper'
-require 'time'
-require 'date'
 
 RSpec.describe Schedule, :type => :model do
 
@@ -44,9 +41,8 @@ RSpec.describe Schedule, :type => :model do
       it "should not have invalid telephone no" do
         schedule = FactoryGirl.build(:schedule)
         schedule.candidate_details['telephone'] = 3433
-        schedule.candidate_details['telephone'].should_not match(
-          /^([0-9]{10})$/
-        )
+        schedule.candidate_details['telephone'].
+          should_not match(/^([0-9]{10})$/)
       end
     end
 
@@ -67,9 +63,8 @@ RSpec.describe Schedule, :type => :model do
       it "should have valid phone no or email id" do
         schedule = FactoryGirl.build(:schedule)
         (schedule.candidate_details[:telephone].should match(/^([0-9]{10})$/) or
-          schedule.candidate_details[:email].should match(
-            /^([a-z0-9][\w_+]*)*[a-z0-9]@(\w+\.)+\w+$/i
-          )
+          schedule.candidate_details[:email].
+            should match(/^([a-z0-9][\w_+]*)*[a-z0-9]@(\w+\.)+\w+$/i)
         ).should eq(true)
       end
     end
@@ -86,26 +81,23 @@ RSpec.describe Schedule, :type => :model do
       it "should not have invalid github profile" do
         schedule = FactoryGirl.build(:schedule)
         schedule.public_profile[:git] = 'http://github.in/78%'
-        schedule.public_profile['git'].should_not match(
-          /^http:\/\/github.com\/\w*$/
-        )
+        schedule.public_profile['git'].
+          should_not match(/^http:\/\/github.com\/\w*$/)
       end
     end
 
     context "profile should be linkedin profile" do
       it "should have valid linkedin profile" do
         schedule = FactoryGirl.build(:schedule)
-        schedule.public_profile[:linkedin].should match(
-          /^http:\/\/in.linkedin.com\/pub\/(\w|[-\/])*$/
-        )
+        schedule.public_profile[:linkedin].
+          should match(/^http:\/\/in.linkedin.com\/pub\/(\w|[-\/])*$/)
       end
 
       it "should not have invalid linkedin profile" do
         schedule = FactoryGirl.build(:schedule)
         schedule.public_profile[:linkedin] = 'http://in.linkedin.com/ad$'
-        schedule.public_profile['linkedin'].should_not match(
-          /^http:\/\/in.linkedin.com\/pub\/(\w|[-\/])*$/
-        )
+        schedule.public_profile['linkedin'].
+          should_not match(/^http:\/\/in.linkedin.com\/pub\/(\w|[-\/])*$/)
       end
     end
   end
@@ -119,10 +111,8 @@ RSpec.describe Schedule, :type => :model do
 
       it "should not have other format" do
         schedule = FactoryGirl.create(:schedule,
-                     file: fixture_file_upload(
-                             'spec/fixtures/files/sample1.doc'
-                           )
-                   )
+          file: fixture_file_upload('spec/fixtures/files/sample1.doc')
+        )
         schedule.file.file.extension.downcase.should_not eq('pdf')
       end
     end
@@ -130,22 +120,16 @@ RSpec.describe Schedule, :type => :model do
     context "microsoft document" do
       it "should have document type .doc,.docx" do
         schedule = FactoryGirl.create(:schedule,
-                     file: fixture_file_upload(
-                             'spec/fixtures/files/sample1.doc'
-                           )
-                   )
-        (['doc','docx'].include?(
-          schedule.file.file.extension.downcase
-          )
-        ).should eq(true)
+          file: fixture_file_upload('spec/fixtures/files/sample1.doc')
+        )
+        (['doc','docx'].include?(schedule.file.file.extension.downcase)).
+          should eq(true)
       end
 
       it "should not have other format" do
         schedule = FactoryGirl.create(:schedule)
-        (['doc','docx'].include?(
-          schedule.file.file.extension.downcase
-          )
-        ).should_not eq(true)
+        (['doc','docx'].include?(schedule.file.file.extension.downcase)).
+          should_not eq(true)
       end
     end
   end

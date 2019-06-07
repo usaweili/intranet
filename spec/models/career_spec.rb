@@ -25,9 +25,8 @@ RSpec.describe Career, type: :model do
     it 'Should fail because contact_number is not present' do
       career.contact_number = ' '
       expect(career).to be_invalid
-      expect(career.errors.full_messages).to eq(
-        ["Contact number can't be blank"]
-      )
+      expect(career.errors.full_messages).
+        to eq(["Contact number can't be blank"])
     end
 
     it 'Should fail because current_ctc is not present' do
@@ -39,9 +38,8 @@ RSpec.describe Career, type: :model do
     it 'Should fail because linkedin profile is not present' do
       career.linkedin_profile = ' '
       expect(career).to be_invalid
-      expect(career.errors.full_messages).to eq(
-        ["Linkedin profile can't be blank"]
-      )
+      expect(career.errors.full_messages).
+        to eq(["Linkedin profile can't be blank"])
     end
 
     it 'Should fail because resume is not uploaded' do

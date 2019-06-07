@@ -11,8 +11,8 @@ describe Address do
                           :pin_code
                          )
      }
-  it { should have_field(:same_as_permanent_address).of_type(
-                          Mongoid::Boolean).with_default_value_of(false) }
+  it { should have_field(:same_as_permanent_address).
+    of_type(Mongoid::Boolean).with_default_value_of(false) }
   it { should belong_to :private_profile }
   it { should belong_to :company }
 end

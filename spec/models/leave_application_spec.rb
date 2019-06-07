@@ -22,9 +22,8 @@ describe LeaveApplication do
       leave_application = FactoryGirl.create(:leave_application, user: @user)
       leave_application2 = FactoryGirl.build(:leave_application, user: @user)
       expect(leave_application2.valid?).to eq(false)
-      expect(leave_application2.errors[:base]).to eq(
-        ["Already applied for leave on same date"]
-      )
+      expect(leave_application2.errors[:base]).
+        to eq(["Already applied for leave on same date"])
     end
 
     it 'start date should not exists in the range of applied leaves'
@@ -83,9 +82,8 @@ describe LeaveApplication do
       it 'should add leaves back if status changed from approved to rejected' do
         leave_application = FactoryGirl.create(:leave_application, user: @user)
         @user.reload
-        expect(@user.employee_detail.available_leaves).to eq(
-          @available_leaves-@number_of_days
-        )
+        expect(@user.employee_detail.available_leaves).
+          to eq(@available_leaves - @number_of_days)
         @message = LeaveApplication.process_leave(
           leave_application.id,
           APPROVED,
@@ -93,9 +91,8 @@ describe LeaveApplication do
           ''
         )
         @user.reload
-        expect(@user.employee_detail.available_leaves).to eq(
-          @available_leaves - @number_of_days
-        )
+        expect(@user.employee_detail.available_leaves).
+          to eq(@available_leaves - @number_of_days)
 
         expect(@message).to eq({type: :notice, text: "Approved Successfully"})
 
@@ -116,9 +113,8 @@ describe LeaveApplication do
             user: @user
           )
           @user.reload
-          expect(@user.employee_detail.available_leaves).to eq(
-            @available_leaves - @number_of_days
-          )
+          expect(@user.employee_detail.available_leaves).
+            to eq(@available_leaves - @number_of_days)
         end
 
         it 'rejected to approved' do
@@ -126,9 +122,8 @@ describe LeaveApplication do
             user: @user
           )
           @user.reload
-          expect(@user.employee_detail.available_leaves).to eq(
-            @available_leaves - @number_of_days
-          )
+          expect(@user.employee_detail.available_leaves).
+            to eq(@available_leaves - @number_of_days)
 
           @message = LeaveApplication.process_leave(
             leave_application.id,
@@ -140,9 +135,8 @@ describe LeaveApplication do
             {type: :notice, text: "Rejected Successfully"}
           )
           @user.reload
-          expect(@user.employee_detail.available_leaves).to eq(
-            @available_leaves
-          )
+          expect(@user.employee_detail.available_leaves).
+            to eq(@available_leaves)
 
           @message = LeaveApplication.process_leave(
             leave_application.id,
@@ -151,9 +145,8 @@ describe LeaveApplication do
             ''
           )
           @user.reload
-          expect(@user.employee_detail.available_leaves).to eq(
-            @available_leaves - @number_of_days
-          )
+          expect(@user.employee_detail.available_leaves).
+            to eq(@available_leaves - @number_of_days)
 
           expect(@message).to eq(
             {type: :notice, text: "Approved Successfully"}
@@ -204,7 +197,8 @@ describe LeaveApplication do
           @user.reload
           expect(@user.employee_detail.available_leaves).to eq(available_leaves)
 
-          expect(@message).to eq({type: :error, text: "Leave is already Approved"})
+          expect(@message).
+            to eq({type: :error, text: "Leave is already Approved"})
         end
       end
     end

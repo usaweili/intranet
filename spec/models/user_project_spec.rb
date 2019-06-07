@@ -19,14 +19,16 @@ RSpec.describe UserProject, type: :model do
       user_project = FactoryGirl.build(:user_project)
       user_project.project_id = nil
       user_project.save
-      expect(user_project.errors.full_messages).to eq(["Project can't be blank"])
+      expect(user_project.errors.full_messages).
+        to eq(["Project can't be blank"])
     end
     
     it 'Should fail because start date not present' do
       user_project = FactoryGirl.build(:user_project)
       user_project.start_date = nil
       user_project.save
-      expect(user_project.errors.full_messages).to eq(["Start date can't be blank"])
+      expect(user_project.errors.full_messages).
+        to eq(["Start date can't be blank"])
     end
   end
 end

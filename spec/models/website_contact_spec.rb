@@ -13,17 +13,15 @@ RSpec.describe WebsiteContact, type: :model do
       it 'Should fail because name is not present' do
         website_contact.name = ''
         expect(website_contact).to be_invalid
-        expect(website_contact.errors.full_messages).to eq(
-          ["Name can't be blank"]
-        )
+        expect(website_contact.errors.full_messages).
+          to eq(["Name can't be blank"])
       end
 
       it 'Should fail because email is not present' do
         website_contact.email = ''
         expect(website_contact).to be_invalid
-        expect(website_contact.errors.full_messages).to eq(
-          ["Email Invalid email"]
-        )
+        expect(website_contact.errors.full_messages).
+          to eq(["Email Invalid email"])
       end
     end
   end

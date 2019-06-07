@@ -229,9 +229,8 @@ describe LeaveApplicationsController do
       leave_application = LeaveApplication.last
       expect(leave_application.leave_status).to eq("Approved")
       @user.reload
-      expect(@user.employee_detail.available_leaves).to eq(
-        available_leaves - number_of_days
-      )
+      expect(@user.employee_detail.available_leaves).
+        to eq(available_leaves - number_of_days)
 
       xhr :get, :process_leave, {
                                   id: leave_application.id,
@@ -249,9 +248,8 @@ describe LeaveApplicationsController do
       leave_application = LeaveApplication.last
       expect(leave_application.leave_status).to eq("Approved")
       @user.reload
-      expect(@user.employee_detail.available_leaves).to eq(
-        available_leaves - number_of_days
-      )
+      expect(@user.employee_detail.available_leaves).
+        to eq(available_leaves - number_of_days)
     end
 
     it "should be able to apply leave" do
@@ -367,9 +365,8 @@ describe LeaveApplicationsController do
       number_of_days = 2
       leave_application = FactoryGirl.create(:leave_application, user: @user)
       @user.reload
-      expect(@user.employee_detail.available_leaves).to eq(
-        available_leaves-number_of_days
-      )
+      expect(@user.employee_detail.available_leaves).
+        to eq(available_leaves-number_of_days)
       xhr :get, :process_leave, {
                                   id: leave_application.id,
                                   leave_action: :reject
@@ -428,9 +425,8 @@ describe LeaveApplicationsController do
                                                            end_at: end_at,
                                                            number_of_days: days
                                                          }
-      expect(flash[:alert]).to eq(
-        "You are not authorized to access this page."
-      )
+      expect(flash[:alert]).
+        to eq('You are not authorized to access this page.')
       l_app = assigns(:leave_application)
       expect(l_app.number_of_days).to eq(leave_app.number_of_days)
       expect(l_app.end_at).to eq(leave_app.end_at)
@@ -448,9 +444,8 @@ describe LeaveApplicationsController do
       l_app = assigns(:leave_application)
       l_app.number_of_days.should eq(days)
       l_app.end_at.should eq(end_at)
-      expect(employee.reload.employee_detail.available_leaves).to eq(
-        number_of_leaves - days
-      )
+      expect(employee.reload.employee_detail.available_leaves).
+        to eq(number_of_leaves - days)
     end
 
   end
