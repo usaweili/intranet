@@ -14,9 +14,9 @@ describe Project do
     company = FactoryGirl.create(:company)
     project = FactoryGirl.create(:project, company: company)
     new_project = FactoryGirl.build(:project,
-                    code: project.code,
-                    company: company
-                  )
+      code: project.code,
+      company: company
+    )
     expect(new_project).to be_valid
   end
 
@@ -35,26 +35,25 @@ describe Project do
     end
 
     it 'should fail beacause display name contain white space' do
-      project.display_name = 'The pediatric network'
+      project.display_name = 'Test project'
       project.save
 
-      expect(project.errors.full_messages).to eq(
-        ["Display name Name should not contain white space"]
-      )
+      expect(project.errors.full_messages).
+        to eq(["Display name Name should not contain white space"])
       expect(project.errors.count).to eq(1)
     end
 
     it 'should update display name when project name is change' do
-      project.name = 'Deal signal'
+      project.name = 'Test project'
       project.display_name = ''
       project.save
 
-      expect(project.display_name).to eq("Deal_signal")
+      expect(project.display_name).to eq("Test_project")
       expect(project.errors.count).to eq(0)
     end
 
     it 'Should not trigger validation because display name is correct' do
-      project.display_name = 'tpn'
+      project.display_name = 'abc'
 
       expect(project.errors.count).to eq(0)
     end
@@ -91,9 +90,9 @@ describe Project do
       params = { "project" => { "user_ids" => user_ids } }
       project.add_or_remove_team_member(params)
       user_project = UserProject.find_by(
-                      user_id: user.id,
-                      project_id: project.id
-                    )
+        user_id: user.id,
+        project_id: project.id
+      )
       expect(user_project.start_date).to eq(Date.today)
     end
 
@@ -111,9 +110,9 @@ describe Project do
           project: project
         )
         user_project = FactoryGirl.create(:user_project,
-                          user: user,
-                          project: project
-                        )
+          user: user,
+          project: project
+        )
         user_ids << first_team_member.id
         user_ids << second_team_member.id
 
@@ -124,9 +123,9 @@ describe Project do
 
       it 'Member count is one' do
         user_project = FactoryGirl.create(:user_project,
-                          user: user,
-                          project: project
-                        )
+          user: user,
+          project: project
+        )
         params = { "project" => { "user_ids" => [] } }
         project.add_or_remove_team_member(params)
         expect(user_project.reload.end_date).to eq(Date.today)
@@ -173,197 +172,201 @@ describe Project do
            }
     let!(:project) { FactoryGirl.create(:project) }
 
-    it 'Should give users record between from date and to date' do
-      FactoryGirl.create(:user_project,
-        user: @users[0],
-        project: project,
-        start_date: '01/08/2018'.to_date
-      )
-      FactoryGirl.create(:user_project,
-        user: @users[1],
-        project: project,
-        start_date: '06/09/2018'.to_date
-      )
-      FactoryGirl.create(:user_project,
-        user: @users[2],
-        project: project,
-        start_date: '05/09/2018'.to_date,
-        end_date: '15/09/2018'.to_date
-      )
-      FactoryGirl.create(:user_project,
-        user: @users[3],
-        project: project,
-        start_date: '08/09/2018'.to_date,
-        end_date: '23/09/2018'.to_date
-      )
-      FactoryGirl.create(:user_project,
-        user: @users[4],
-        project: project,
-        start_date: '05/08/2018'.to_date,
-        end_date: '10/09/2018'.to_date
-      )
-      FactoryGirl.create(:user_project,
-        user: @users[5],
-        project: project,
-        start_date: '01/08/2018'.to_date,
-        end_date: '10/10/2018'.to_date
-      )
-      FactoryGirl.create(:user_project,
-        user: @users[6],
-        project: project,
-        start_date: '25/09/2018'.to_date,
-        end_date: '30/09/2018'.to_date
-      )
-      FactoryGirl.create(:user_project,
-        user: @users[7],
-        project: project,
-        start_date: '01/08/2018'.to_date,
-        end_date: '25/08/2018'.to_date
-      )
-      from_date = '01/09/2018'.to_date
-      to_date = '20/09/2018'.to_date
-      user_projects = project.get_user_projects_from_project(from_date, to_date)
-      expect(user_projects.count).to eq(6)
-      [0, 1, 2, 3, 4, 5].each do |n|
-        expect(user_projects[n].email).to eq("user#{n+1}@#{ORGANIZATION_DOMAIN}")
+    context 'should give user record' do
+      it "between 'from date' and 'to date'" do
+        FactoryGirl.create(:user_project,
+          user: @users[0],
+          project: project,
+          start_date: '01/08/2018'.to_date
+        )
+        FactoryGirl.create(:user_project,
+          user: @users[1],
+          project: project,
+          start_date: '06/09/2018'.to_date
+        )
+        FactoryGirl.create(:user_project,
+          user: @users[2],
+          project: project,
+          start_date: '05/09/2018'.to_date,
+          end_date: '15/09/2018'.to_date
+        )
+        FactoryGirl.create(:user_project,
+          user: @users[3],
+          project: project,
+          start_date: '08/09/2018'.to_date,
+          end_date: '23/09/2018'.to_date
+        )
+        FactoryGirl.create(:user_project,
+          user: @users[4],
+          project: project,
+          start_date: '05/08/2018'.to_date,
+          end_date: '10/09/2018'.to_date
+        )
+        FactoryGirl.create(:user_project,
+          user: @users[5],
+          project: project,
+          start_date: '01/08/2018'.to_date,
+          end_date: '10/10/2018'.to_date
+        )
+        FactoryGirl.create(:user_project,
+          user: @users[6],
+          project: project,
+          start_date: '25/09/2018'.to_date,
+          end_date: '30/09/2018'.to_date
+        )
+        FactoryGirl.create(:user_project,
+          user: @users[7],
+          project: project,
+          start_date: '01/08/2018'.to_date,
+          end_date: '25/08/2018'.to_date
+        )
+        from_date = '01/09/2018'.to_date
+        to_date = '20/09/2018'.to_date
+        user_projects = project.get_user_projects_from_project(from_date, to_date)
+        expect(user_projects.count).to eq(6)
+        [0, 1, 2, 3, 4, 5].each do |n|
+          expect(user_projects[n].email).to eq("user#{n+1}@#{ORGANIZATION_DOMAIN}")
+        end
+      end
+
+      it "if user's project start date is less than from date & end date is nil" do
+        FactoryGirl.create(:user_project,
+          user: @users[0],
+          project: project,
+          start_date: '01/08/2018'.to_date
+        )
+        from_date = '01/09/2018'.to_date
+        to_date = '20/09/2018'.to_date
+        user_projects = project.get_user_projects_from_project(from_date, to_date)
+        expect(user_projects.count).to eq(1)
+        expect(user_projects[0].email).to eq("user1@#{ORGANIZATION_DOMAIN}")
+      end
+
+      it "if user's project start date is greater than from date & end date is nil" do
+        FactoryGirl.create(:user_project,
+          user: @users[1],
+          project: project,
+          start_date: '06/09/2018'.to_date,
+          end_date: '20/09/2018'.to_date
+        )
+        from_date = '01/09/2018'.to_date
+        to_date = '20/09/2018'.to_date
+        user_projects = project.get_user_projects_from_project(from_date, to_date)
+        expect(user_projects.count).to eq(1)
+        expect(user_projects[0].email).to eq("user2@#{ORGANIZATION_DOMAIN}")
+      end
+
+      it "if user's project start date is greater than from date & end date is less than to date" do
+        FactoryGirl.create(:user_project,
+          user: @users[2],
+          project: project,
+          start_date: '05/09/2018'.to_date,
+          end_date: '15/09/2018'.to_date
+        )
+        from_date = '01/09/2018'.to_date
+        to_date = '20/09/2018'.to_date
+        user_projects = project.get_user_projects_from_project(from_date, to_date)
+        expect(user_projects.count).to eq(1)
+        expect(user_projects[0].email).to eq("user3@#{ORGANIZATION_DOMAIN}")
+      end
+
+      it "if user's project start date is greater than from date & end date is greater than to date " do
+        FactoryGirl.create(:user_project,
+          user: @users[3],
+          project: project,
+          start_date: '08/09/2018'.to_date,
+          end_date: '23/09/2018'.to_date
+        )
+        from_date = '01/09/2018'.to_date
+        to_date = '20/09/2018'.to_date
+        user_projects = project.get_user_projects_from_project(from_date, to_date)
+        expect(user_projects.count).to eq(1)
+        expect(user_projects[0].email).to eq("user4@#{ORGANIZATION_DOMAIN}")
+      end
+
+      it "if user's project start date less than from date & end date less than to date" do
+        FactoryGirl.create(:user_project,
+          user: @users[4],
+          project: project,
+          start_date: '05/08/2018'.to_date,
+          end_date: '10/09/2018'.to_date
+        )
+        from_date = '01/09/2018'.to_date
+        to_date = '20/09/2018'.to_date
+        user_projects = project.get_user_projects_from_project(from_date, to_date)
+        expect(user_projects.count).to eq(1)
+        expect(user_projects[0].email).to eq("user5@#{ORGANIZATION_DOMAIN}")
+      end
+
+      it "if user's project start date is less than from date & end date is greater than to date" do
+        FactoryGirl.create(:user_project,
+          user: @users[7],
+          project: project,
+          start_date: '01/08/2018'.to_date,
+          end_date: '10/10/2018'.to_date
+        )
+        from_date = '01/09/2018'.to_date
+        to_date = '20/09/2018'.to_date
+        user_projects = project.get_user_projects_from_project(from_date, to_date)
+        expect(user_projects.count).to eq(1)
+        expect(user_projects[0].email).to eq("user8@#{ORGANIZATION_DOMAIN}")
       end
     end
 
-    it 'Should not give the user record, Its less than from date and to date' do
-      FactoryGirl.create(:user_project,
-        user: @users[5],
-        project: project,
-        start_date: '01/08/2018'.to_date,
-        end_date: '25/08/2018'.to_date
-      )
-      from_date = '01/09/2018'.to_date
-      to_date = '20/09/2018'.to_date
-      user_projects = project.get_user_projects_from_project(from_date, to_date)
-      expect(user_projects.count).to eq(0)
-    end
+    context 'Should not give the user record' do
+      it 'because its less than from date and to date' do
+        FactoryGirl.create(:user_project,
+          user: @users[5],
+          project: project,
+          start_date: '01/08/2018'.to_date,
+          end_date: '25/08/2018'.to_date
+        )
+        from_date = '01/09/2018'.to_date
+        to_date = '20/09/2018'.to_date
+        user_projects = project.get_user_projects_from_project(from_date, to_date)
+        expect(user_projects.count).to eq(0)
+      end
 
-    it 'Should not give user record, Its greater than from date and to date' do
-      FactoryGirl.create(:user_project,
-        user: @users[6],
-        project: project,
-        start_date: '25/09/2018'.to_date,
-        end_date: '30/09/2018'.to_date
-      )
-      from_date = '01/09/2018'.to_date
-      to_date = '20/09/2018'.to_date
-      user_projects = project.get_user_projects_from_project(from_date, to_date)
-      expect(user_projects.count).to eq(0)
-    end
+      it 'because its greater than from date and to date' do
+        FactoryGirl.create(:user_project,
+          user: @users[6],
+          project: project,
+          start_date: '25/09/2018'.to_date,
+          end_date: '30/09/2018'.to_date
+        )
+        from_date = '01/09/2018'.to_date
+        to_date = '20/09/2018'.to_date
+        user_projects = project.get_user_projects_from_project(from_date, to_date)
+        expect(user_projects.count).to eq(0)
+      end
 
-    it "Should give the record if user's project start date is less than from date and end date is nil" do
-      FactoryGirl.create(:user_project,
-        user: @users[0],
-        project: project,
-        start_date: '01/08/2018'.to_date
-      )
-      from_date = '01/09/2018'.to_date
-      to_date = '20/09/2018'.to_date
-      user_projects = project.get_user_projects_from_project(from_date, to_date)
-      expect(user_projects.count).to eq(1)
-      expect(user_projects[0].email).to eq("user1@#{ORGANIZATION_DOMAIN}")
-    end
+      it "because user's project start date & end date are not between from date & to date" do
+        FactoryGirl.create(:user_project,
+          user: @users[5],
+          project: project,
+          start_date: '01/08/2018'.to_date,
+          end_date: '25/08/2018'.to_date
+        )
+        from_date = '01/09/2018'.to_date
+        to_date = '20/09/2018'.to_date
+        user_projects = project.get_user_projects_from_project(from_date, to_date)
+        expect(user_projects.count).to eq(0)
+        expect(user_projects.present?).to eq(false)
+      end
 
-    it "Should give the record if user's project start date is greater than from date and end date is nil" do
-      FactoryGirl.create(:user_project,
-        user: @users[1],
-        project: project,
-        start_date: '06/09/2018'.to_date,
-        end_date: '20/09/2018'.to_date
-      )
-      from_date = '01/09/2018'.to_date
-      to_date = '20/09/2018'.to_date
-      user_projects = project.get_user_projects_from_project(from_date, to_date)
-      expect(user_projects.count).to eq(1)
-      expect(user_projects[0].email).to eq("user2@#{ORGANIZATION_DOMAIN}")
-    end
-
-    it "Should give the record if user's project start date is greater than from date and end date is less than to date" do
-      FactoryGirl.create(:user_project,
-        user: @users[2],
-        project: project,
-        start_date: '05/09/2018'.to_date,
-        end_date: '15/09/2018'.to_date
-      )
-      from_date = '01/09/2018'.to_date
-      to_date = '20/09/2018'.to_date
-      user_projects = project.get_user_projects_from_project(from_date, to_date)
-      expect(user_projects.count).to eq(1)
-      expect(user_projects[0].email).to eq("user3@#{ORGANIZATION_DOMAIN}")
-    end
-
-    it "Should give the record if user's project start date is greater than from date and end date is greater than to date " do
-      FactoryGirl.create(:user_project,
-        user: @users[3],
-        project: project,
-        start_date: '08/09/2018'.to_date,
-        end_date: '23/09/2018'.to_date
-      )
-      from_date = '01/09/2018'.to_date
-      to_date = '20/09/2018'.to_date
-      user_projects = project.get_user_projects_from_project(from_date, to_date)
-      expect(user_projects.count).to eq(1)
-      expect(user_projects[0].email).to eq("user4@#{ORGANIZATION_DOMAIN}")
-    end
-
-    it "Should give the record if user's project start date less than from date and end date less than to date" do
-      FactoryGirl.create(:user_project,
-        user: @users[4],
-        project: project,
-        start_date: '05/08/2018'.to_date,
-        end_date: '10/09/2018'.to_date
-      )
-      from_date = '01/09/2018'.to_date
-      to_date = '20/09/2018'.to_date
-      user_projects = project.get_user_projects_from_project(from_date, to_date)
-      expect(user_projects.count).to eq(1)
-      expect(user_projects[0].email).to eq("user5@#{ORGANIZATION_DOMAIN}")
-    end
-
-    it "Should give the record if user's project start date is less than from date and end date is greater than to date" do
-      FactoryGirl.create(:user_project,
-        user: @users[7],
-        project: project,
-        start_date: '01/08/2018'.to_date,
-        end_date: '10/10/2018'.to_date
-      )
-      from_date = '01/09/2018'.to_date
-      to_date = '20/09/2018'.to_date
-      user_projects = project.get_user_projects_from_project(from_date, to_date)
-      expect(user_projects.count).to eq(1)
-      expect(user_projects[0].email).to eq("user8@#{ORGANIZATION_DOMAIN}")
-    end
-
-    it "Should not give the record because user's project start date and end date is not between from date and to date" do
-      FactoryGirl.create(:user_project,
-        user: @users[5],
-        project: project,
-        start_date: '01/08/2018'.to_date,
-        end_date: '25/08/2018'.to_date
-      )
-      from_date = '01/09/2018'.to_date
-      to_date = '20/09/2018'.to_date
-      user_projects = project.get_user_projects_from_project(from_date, to_date)
-      expect(user_projects.count).to eq(0)
-      expect(user_projects.present?).to eq(false)
-    end
-
-    it "Should not give the record because user's project start date and end date is not between from date and to date" do
-      FactoryGirl.create(:user_project,
-        user: @users[6],
-        project: project,
-        start_date: '25/09/2018'.to_date,
-        end_date: '30/09/2018'.to_date
-      )
-      from_date = '01/09/2018'.to_date
-      to_date = '20/09/2018'.to_date
-      user_projects = project.get_user_projects_from_project(from_date, to_date)
-      expect(user_projects.count).to eq(0)
-      expect(user_projects.present?).to eq(false)
+      it "because user's project start date & end date are not between from date & to date" do
+        FactoryGirl.create(:user_project,
+          user: @users[6],
+          project: project,
+          start_date: '25/09/2018'.to_date,
+          end_date: '30/09/2018'.to_date
+        )
+        from_date = '01/09/2018'.to_date
+        to_date = '20/09/2018'.to_date
+        user_projects = project.get_user_projects_from_project(from_date, to_date)
+        expect(user_projects.count).to eq(0)
+        expect(user_projects.present?).to eq(false)
+      end
     end
   end
 end
