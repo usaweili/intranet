@@ -246,33 +246,33 @@ RSpec.describe TimeSheetsController, type: :controller do
 
   context 'index' do
     let!(:user) { FactoryGirl.create(:admin) }
-    let!(:tpn) { FactoryGirl.create(:project) }
+    let!(:project1) { FactoryGirl.create(:project) }
 
     it 'Should success' do
-      deal_signal = FactoryGirl.create(:project)
+      project2 = FactoryGirl.create(:project)
       FactoryGirl.create(:user_project,
         user: user,
-        project: tpn,
+        project: project1,
         start_date: DateTime.now - 3
       )
       FactoryGirl.create(:user_project,
         user: user,
-        project: deal_signal,
+        project: project2,
         start_date: DateTime.now - 3
       )
       FactoryGirl.create(:time_sheet,
         user: user,
-        project: tpn,
+        project: project1,
         date: DateTime.yesterday,
-        from_time: Time.parse("#{Date.yesterday} 9:00"),
-        to_time: Time.parse("#{Date.yesterday} 10:00")
+        from_time: "#{Date.yesterday} 9:00",
+        to_time: "#{Date.yesterday} 10:00"
       )
       FactoryGirl.create(:time_sheet,
         user: user,
-        project: deal_signal,
+        project: project2,
         date: DateTime.yesterday,
-        from_time: Time.parse("#{Date.yesterday} 11:00"),
-        to_time: Time.parse("#{Date.yesterday} 12:00")
+        from_time: "#{Date.yesterday} 11:00",
+        to_time: "#{Date.yesterday} 12:00"
       )
       params = {from_date: Date.yesterday - 1, to_date: Date.today}
       sign_in user
@@ -285,15 +285,15 @@ RSpec.describe TimeSheetsController, type: :controller do
       user = FactoryGirl.create(:user)
       FactoryGirl.create(:user_project,
         user: user,
-        project: tpn,
+        project: project1,
         start_date: Date.today - 3
       )
       FactoryGirl.create(:time_sheet,
         user: user,
-        project: tpn,
+        project: project1,
         date: DateTime.yesterday,
-        from_time: Time.parse("#{Date.yesterday} 9:00"),
-        to_time: Time.parse("#{Date.yesterday} 10:00")
+        from_time: "#{Date.yesterday} 9:00",
+        to_time: "#{Date.yesterday} 10:00"
       )
       params = {from_date: Date.yesterday - 1, to_time: Date.today}
       sign_in user
@@ -304,34 +304,34 @@ RSpec.describe TimeSheetsController, type: :controller do
 
   context 'Show' do
     let!(:user) { FactoryGirl.create(:admin) }
-    let!(:tpn) { FactoryGirl.create(:project) }
+    let!(:project1) { FactoryGirl.create(:project) }
 
     it 'users timesheet' do
       sign_in user
-      deal_signal = FactoryGirl.create(:project)
+      project2 = FactoryGirl.create(:project)
       FactoryGirl.create(:user_project,
         user: user,
-        project: tpn,
+        project: project1,
         start_date: DateTime.now - 3
       )
       FactoryGirl.create(:user_project,
         user: user,
-        project: deal_signal,
+        project: project2,
         start_date: DateTime.now - 3
       )
       FactoryGirl.create(:time_sheet,
         user: user,
-        project: tpn,
+        project: project1,
         date: DateTime.yesterday,
-        from_time: Time.parse("#{Date.yesterday} 9:00"),
-        to_time: Time.parse("#{Date.yesterday} 10:00")
+        from_time: "#{Date.yesterday} 9:00",
+        to_time: "#{Date.yesterday} 10:00"
       )
       FactoryGirl.create(:time_sheet,
         user: user,
-        project: deal_signal,
+        project: project2,
         date: DateTime.yesterday,
-        from_time: Time.parse("#{Date.yesterday} 11:00"),
-        to_time: Time.parse("#{Date.yesterday} 12:00")
+        from_time: "#{Date.yesterday} 11:00",
+        to_time: "#{Date.yesterday} 12:00"
       )
       params = {
                   user_id: user.id,
@@ -366,15 +366,15 @@ RSpec.describe TimeSheetsController, type: :controller do
         user: user_one,
         project: project,
         date: Date.today - 1,
-        from_time: "9:00",
-        to_time: "10:00"
+        from_time: "#{Date.today - 1} 9:00",
+        to_time: "#{Date.today - 1} 10:00"
       )
       FactoryGirl.create(:time_sheet,
         user: user_two,
         project: project,
         date: Date.today - 1,
-        from_time: "9:00",
-        to_time: "10:00"
+        from_time: "#{Date.today - 1} 9:00",
+        to_time: "#{Date.today - 1} 10:00"
       )
       params = {
                   from_date: Date.today.beginning_of_month.to_s,
@@ -397,8 +397,8 @@ RSpec.describe TimeSheetsController, type: :controller do
         user: user_one,
         project: project,
         date: Date.today - 1,
-        from_time: "9:00",
-        to_time: "10:00"
+        from_time: "#{Date.today - 1} 9:00",
+        to_time: "#{Date.today - 1} 10:00"
       )
       params = {
                   from_date: Date.today.beginning_of_month.to_s,
@@ -424,8 +424,8 @@ RSpec.describe TimeSheetsController, type: :controller do
         user: user,
         project: project,
         date: Date.today - 1,
-        from_time: "9:00",
-        to_time: "10:00"
+        from_time: "#{Date.today - 1} 9:00",
+        to_time: "#{Date.today - 1} 10:00"
       )
       sign_in user
       get :individual_project_report, id: project.id,
@@ -445,8 +445,8 @@ RSpec.describe TimeSheetsController, type: :controller do
         user: user,
         project: project,
         date: Date.today - 1,
-        from_time: "9:00",
-        to_time: "10:00"
+        from_time: "#{Date.today - 1} 9:00",
+        to_time: "#{Date.today - 1} 10:00"
       )
       sign_in user
       get :individual_project_report, id: project.id,
@@ -473,9 +473,8 @@ RSpec.describe TimeSheetsController, type: :controller do
           user: user,
           project: project,
           date: Date.today - 1,
-          from_time: Time.parse("#{Date.today - 1} 10:00"),
-          to_time: Time.parse("#{Date.today - 1} 11:30"),
-          description: 'Woked on test cases'
+          from_time: "#{Date.today - 1} 10:00",
+          to_time: "#{Date.today - 1} 11:30"
         )
         params = {
                     time_sheets_attributes: {
@@ -493,15 +492,12 @@ RSpec.describe TimeSheetsController, type: :controller do
         put :update_timesheet, user_id: user.id,
                                 user: params,
                                 time_sheet_date: Date.today - 1
-        expect(time_sheet.reload.from_time.to_s).to eq(
-          "#{Date.today - 1} - 09:00 AM"
-        )
-        expect(time_sheet.reload.to_time.to_s).to eq(
-          "#{Date.today - 1} - 11:15 AM"
-        )
-        expect(time_sheet.reload.description).to eq(
-          'testing API and call with client'
-        )
+        expect(time_sheet.reload.from_time.to_s).
+          to eq("#{Date.today - 1} - 09:00 AM")
+        expect(time_sheet.reload.to_time.to_s).
+          to eq("#{Date.today - 1} - 11:15 AM")
+        expect(time_sheet.reload.description).
+          to eq('testing API and call with client')
       end
 
       it 'if timesheet date is not less than 2 days in case of Employee' do
@@ -515,18 +511,16 @@ RSpec.describe TimeSheetsController, type: :controller do
           user: employee,
           project: project,
           date: Date.today - 1,
-          from_time: Time.parse("#{Date.today - 1} 10"),
-          to_time: Time.parse("#{Date.today - 1} 11:30"),
-          description: 'Woked on test cases'
+          from_time: "#{Date.today - 1} 10",
+          to_time: "#{Date.today - 1} 11:30"
         )
         params = {
                     time_sheets_attributes: {
                       "0" => {
                                 project_id: project.id,
                                 date: Date.today - 1,
-                                from_time: "#{Date.today - 1} - 11:00 AM",
-                                to_time: "#{Date.today - 1} - 10:00 AM",
-                                description: 'testing API and call with client',
+                                from_time: "#{Date.today - 1} - 9:00 AM",
+                                to_time: "#{Date.today - 1} - 11:15 AM",
                                 id: time_sheet.id
                              }
                       },
@@ -535,8 +529,10 @@ RSpec.describe TimeSheetsController, type: :controller do
         post :update_timesheet, user_id: employee.id,
                                 user: params,
                                 time_sheet_date: Date.today - 1
-        expect(flash[:error]).not_to be_present
-        should render_template(:edit_timesheet)
+        expect(time_sheet.reload.from_time.to_s).
+          to eq("#{Date.today - 1} - 09:00 AM")
+        expect(time_sheet.reload.to_time.to_s).
+          to eq("#{Date.today - 1} - 11:15 AM")
       end
 
       it 'if timesheet date is less than 2 days in case of Admin' do
@@ -550,18 +546,16 @@ RSpec.describe TimeSheetsController, type: :controller do
           user: user,
           project: project,
           date: Date.today - 3,
-          from_time: Time.parse("#{Date.today - 1} 10"),
-          to_time: Time.parse("#{Date.today - 1} 11:30"),
-          description: 'Woked on test cases'
+          from_time: "#{Date.today - 1} 10",
+          to_time: "#{Date.today - 1} 11:30"
         )
         params = {
                     time_sheets_attributes: {
                       "0" => {
                                 project_id: project.id,
                                 date: Date.today - 1,
-                                from_time: "#{Date.today - 1} - 11:00 AM",
-                                to_time: "#{Date.today - 1} - 10:00 AM",
-                                description: 'testing API and call with client',
+                                from_time: "#{Date.today - 1} - 9:00 AM",
+                                to_time: "#{Date.today - 1} - 11:15 AM",
                                 id: time_sheet.id
                              }
                       },
@@ -570,8 +564,10 @@ RSpec.describe TimeSheetsController, type: :controller do
         post :update_timesheet, user_id: user.id,
                                 user: params,
                                 time_sheet_date: Date.today - 3
-        expect(flash[:error]).not_to be_present
-        should render_template(:edit_timesheet)
+        expect(time_sheet.reload.from_time.to_s).
+          to eq("#{Date.today - 1} - 09:00 AM")
+        expect(time_sheet.reload.to_time.to_s).
+          to eq("#{Date.today - 1} - 11:15 AM")
       end
     end
 
@@ -587,8 +583,8 @@ RSpec.describe TimeSheetsController, type: :controller do
           user: user,
           project: project,
           date: Date.today - 1,
-          from_time: Time.parse("#{Date.today - 1} 10"),
-          to_time: Time.parse("#{Date.today - 1} 11:30"),
+          from_time: "#{Date.today - 1} 10",
+          to_time: "#{Date.today - 1} 11:30",
           description: 'Worked on test cases'
         )
         params = {
@@ -607,9 +603,7 @@ RSpec.describe TimeSheetsController, type: :controller do
         post :update_timesheet, user_id: user.id,
                                 user: params,
                                 time_sheet_date: Date.today - 1
-        expect(time_sheet.reload.description).to eq(
-          'Worked on test cases'
-        )
+        expect(time_sheet.reload.description).to eq('Worked on test cases')
         should render_template(:edit_timesheet)
       end
 
@@ -624,9 +618,8 @@ RSpec.describe TimeSheetsController, type: :controller do
           user: user,
           project: project,
           date: Date.today - 1,
-          from_time: Time.parse("#{Date.today - 1} 10"),
-          to_time: Time.parse("#{Date.today - 1} 11:30"),
-          description: 'Woked on test cases'
+          from_time: "#{Date.today - 1} 10",
+          to_time: "#{Date.today - 1} 11:30"
         )
         params = {
                     time_sheets_attributes: {
@@ -635,7 +628,6 @@ RSpec.describe TimeSheetsController, type: :controller do
                                 date: Date.today - 1,
                                 from_time: '',
                                 to_time: "#{Date.today - 1} - 11:15 AM",
-                                description: "testing API and call with client",
                                 id: time_sheet.id
                              }
                       },
@@ -644,9 +636,8 @@ RSpec.describe TimeSheetsController, type: :controller do
         post :update_timesheet, user_id: user.id,
                                 user: params,
                                 time_sheet_date: Date.today - 1
-        expect(time_sheet.reload.from_time).to eq(
-          Time.parse("#{Date.today - 1} 10")
-        )
+        expect(time_sheet.reload.from_time).
+          to eq(Time.parse("#{Date.today - 1} 10"))
         should render_template(:edit_timesheet)
       end
 
@@ -661,9 +652,8 @@ RSpec.describe TimeSheetsController, type: :controller do
           user: user,
           project: project,
           date: Date.today - 1,
-          from_time: Time.parse("#{Date.today - 1} 10"),
-          to_time: Time.parse("#{Date.today - 1} 11:30"),
-          description: 'Woked on test cases'
+          from_time: "#{Date.today - 1} 10",
+          to_time: "#{Date.today - 1} 11:30"
         )
         params = {
                     time_sheets_attributes: {
@@ -672,7 +662,6 @@ RSpec.describe TimeSheetsController, type: :controller do
                                 date: Date.today - 1,
                                 from_time: "#{Date.today - 1} - 09:00 AM",
                                 to_time: '',
-                                description: 'testing API and call with client',
                                 id: time_sheet.id
                              }
                       },
@@ -681,9 +670,8 @@ RSpec.describe TimeSheetsController, type: :controller do
         post :update_timesheet, user_id: user.id,
                                 user: params,
                                 time_sheet_date: Date.today - 1
-        expect(time_sheet.reload.to_time).to eq(
-          Time.parse("#{Date.today - 1} 11:30")
-        )                        
+        expect(time_sheet.reload.to_time).
+          to eq(Time.parse("#{Date.today - 1} 11:30"))
         should render_template(:edit_timesheet)
       end
 
@@ -698,9 +686,8 @@ RSpec.describe TimeSheetsController, type: :controller do
           user: user,
           project: project,
           date: Date.today - 1,
-          from_time: Time.parse("#{Date.today - 1} 10"),
-          to_time: Time.parse("#{Date.today - 1} 11:30"),
-          description: 'Worked on test cases'
+          from_time: "#{Date.today - 1} 10",
+          to_time: "#{Date.today - 1} 11:30"
         )
         params = {
                     time_sheets_attributes: {
@@ -709,7 +696,7 @@ RSpec.describe TimeSheetsController, type: :controller do
                                 date: Date.today - 1,
                                 from_time: "#{Date.today - 1} - 11:00 AM",
                                 to_time: "#{Date.today - 1} - 10:00 AM",
-                                description: 'testing API and call with client',
+                                description: 'testing API',
                                 id: time_sheet.id
                              }
                       },
@@ -718,15 +705,10 @@ RSpec.describe TimeSheetsController, type: :controller do
         post :update_timesheet, user_id: user.id,
                                 user: params,
                                 time_sheet_date: Date.today - 1
-        expect(time_sheet.reload.from_time).to eq(
-          Time.parse("#{Date.today - 1} 10")
-        )
-        expect(time_sheet.reload.to_time).to eq(
-          Time.parse("#{Date.today - 1} 11:30")
-        )
-        expect(time_sheet.reload.description).to eq(
-          'Worked on test cases'
-        )
+        expect(time_sheet.reload.from_time).
+          to eq(Time.parse("#{Date.today - 1} 10"))
+        expect(time_sheet.reload.to_time).
+          to eq(Time.parse("#{Date.today - 1} 11:30"))
         should render_template(:edit_timesheet)
       end
 
@@ -741,9 +723,8 @@ RSpec.describe TimeSheetsController, type: :controller do
           user: employee,
           project: project,
           date: Date.today - 3,
-          from_time: Time.parse("#{Date.today - 1} 10"),
-          to_time: Time.parse("#{Date.today - 1} 11:30"),
-          description: 'Woked on test cases'
+          from_time: "#{Date.today - 1} 10",
+          to_time: "#{Date.today - 1} 11:30"
         )
         params = {
                     time_sheets_attributes: {
@@ -761,6 +742,10 @@ RSpec.describe TimeSheetsController, type: :controller do
         post :update_timesheet, user_id: employee.id,
                                 user: params,
                                 time_sheet_date: Date.today - 3
+        expect(time_sheet.reload.from_time).
+          to eq(Time.parse("#{Date.today - 1} 10"))
+        expect(time_sheet.reload.to_time).
+          to eq(Time.parse("#{Date.today - 1} 11:30"))
         expect(flash[:error]).to eq(
           "Not allowed to edit timesheet for this date. You can edit timesheet for past #{TimeSheet::DAYS_FOR_UPDATE} days."
         )

@@ -128,13 +128,13 @@ RSpec.describe TimeSheet, type: :model do
         time_sheet = FactoryGirl.build(:time_sheet,
           user: user,
           project: project,
-          date: DateTime.now - 1,
-          from_time: '20:00',
-          to_time: '20:30'
+          date: Date.tomorrow,
+          from_time: "#{Date.tomorrow} 20:00",
+          to_time: "#{Date.tomorrow} 20:30"
         )
         expect(time_sheet.save).to eq(false)
-        expect(time_sheet.errors[:from_time]).
-          to eq(["Can't fill the timesheet for future time."])
+        expect(time_sheet.errors[:date]).
+          to eq(["Can't fill the timesheet for future date."])
       end
 
       #Code is changed
@@ -191,8 +191,8 @@ RSpec.describe TimeSheet, type: :model do
           user: user,
           project: project,
           date: DateTime.now - 1,
-          from_time: '08:00',
-          to_time: '07:00'
+          from_time: "#{Date.today - 1} 8:00",
+          to_time: "#{Date.today - 1} 7:00"
         )
         expect(time_sheet.save).to eq(false)
         expect(time_sheet.errors[:from_time]).
@@ -297,8 +297,8 @@ RSpec.describe TimeSheet, type: :model do
           user: user,
           project: project,
           date: 2.days.ago,
-          from_time: '9:00',
-          to_time: '10:00'
+          from_time: "#{Date.today - 2} 9:00",
+          to_time: "#{Date.today - 2} 10:00"
         )
         expect(HolidayList.is_holiday?(user.time_sheets[0].date + 1)).
           to eq(false)
@@ -328,8 +328,8 @@ RSpec.describe TimeSheet, type: :model do
             user: user,
             project: project,
             date: Date.today - x,
-            from_time: '9:00',
-            to_time: '10:00'
+            from_time: "#{Date.today - x} 9:00",
+            to_time: "#{Date.today - x} 10:00"
           )
         end
       end
@@ -371,8 +371,8 @@ RSpec.describe TimeSheet, type: :model do
     let!(:project) { FactoryGirl.build(:project) }
     let!(:time_sheet) { FactoryGirl.build(:time_sheet) }
     before do
-      project.name = 'The pediatric network'
-      project.display_name = 'The_pediatric_network'
+      project.name = 'Test project'
+      project.display_name = 'Test_project'
       project.save
       FactoryGirl.create(:user_project,
         user: user,
@@ -500,8 +500,7 @@ RSpec.describe TimeSheet, type: :model do
         project: project,
         date: DateTime.yesterday,
         from_time: Time.parse("#{Date.yesterday} 9:00"),
-        to_time: Time.parse("#{Date.yesterday} 10:00"),
-        description: 'Today I finish the work'
+        to_time: Time.parse("#{Date.yesterday} 10:00")
       )
       user_time_sheet = user.time_sheets[0]
       time_diff = TimeDifference.between(
@@ -518,8 +517,8 @@ RSpec.describe TimeSheet, type: :model do
     let!(:time_sheet) { FactoryGirl.build(:time_sheet) }
     let!(:project) { FactoryGirl.build(:project) }
     before do
-      project.name = 'The pediatric network'
-      project.display_name = 'The_pediatric_network'
+      project.name = 'Test project'
+      project.display_name = 'Test_project'
       project.save
       FactoryGirl.create(:user_project,
         user: user,
@@ -538,9 +537,8 @@ RSpec.describe TimeSheet, type: :model do
       local_var_minutes = milliseconds / (1000 * 60) % 60
       local_var_hours =
         local_var_minutes < 30 ? local_var_hours : local_var_hours + 1
-      expect(
-        TimeSheet.convert_milliseconds_to_hours(milliseconds)
-      ).to eq(local_var_hours) 
+      expect(TimeSheet.convert_milliseconds_to_hours(milliseconds)).
+        to eq(local_var_hours)
     end
 
     it 'Should give the user leaves count' do
@@ -558,28 +556,22 @@ RSpec.describe TimeSheet, type: :model do
     it 'Should return true because from date is less than to date' do
       from_date = Date.today - 2
       to_date = Date.today
-      expect(TimeSheet.from_date_less_than_to_date?(
-        from_date,
-        to_date
-      )).to eq(true)
+      expect(TimeSheet.from_date_less_than_to_date?(from_date, to_date)).
+        to eq(true)
     end
 
     it 'Should return true because from date is equal to to date' do
       from_date = Date.today
       to_date = Date.today
-      expect(TimeSheet.from_date_less_than_to_date?(
-        from_date,
-        to_date
-      )).to eq(true)
+      expect(TimeSheet.from_date_less_than_to_date?(from_date, to_date)).
+        to eq(true)
     end
 
     it 'Should return false because from date is greater than to date' do
       from_date = Date.today + 2
       to_date = Date.today
-      expect(TimeSheet.from_date_less_than_to_date?(
-        from_date,
-        to_date
-      )).to eq(false)
+      expect(TimeSheet.from_date_less_than_to_date?(from_date, to_date)).
+        to eq(false)
     end
 
     it 'Should give the expected JSON' do
@@ -617,29 +609,29 @@ RSpec.describe TimeSheet, type: :model do
   context 'Individual timesheet report' do
     let!(:user) { FactoryGirl.create(:user) }
     let!(:time_sheet) { FactoryGirl.build(:time_sheet) }
-    let!(:tpn) { FactoryGirl.build(:project) }
-    let!(:intranet) { FactoryGirl.build(:project) }
+    let!(:test_project1) { FactoryGirl.build(:project) }
+    let!(:test_project2) { FactoryGirl.build(:project) }
 
     it 'Should give expected JSON' do
-      tpn.name = 'The pediatric network'
-      tpn.display_name = 'The_pediatric_network'
-      tpn.save
-      intranet.name = 'Intranet'
-      intranet.display_name = 'Intranet'
-      intranet.save
+      test_project1.name = 'Test project1'
+      test_project1.display_name = 'Test_project1'
+      test_project1.save
+      test_project2.name = 'Test project2'
+      test_project2.display_name = 'Test_project2'
+      test_project2.save
       FactoryGirl.create(:user_project,
         user: user,
-        project: tpn,
+        project: test_project1,
         start_date: DateTime.now - 3
       )
       FactoryGirl.create(:user_project,
         user: user,
-        project: intranet,
+        project: test_project2,
         start_date: DateTime.now - 3
       )
       FactoryGirl.create(:time_sheet,
         user: user,
-        project: tpn,
+        project: test_project1,
         date: DateTime.yesterday,
         from_time: Time.parse("#{Date.yesterday} 9:00"),
         to_time: Time.parse("#{Date.yesterday} 10:00"),
@@ -647,7 +639,7 @@ RSpec.describe TimeSheet, type: :model do
       )
       FactoryGirl.create(:time_sheet,
         user: user,
-        project: intranet,
+        project: test_project2,
         date: DateTime.yesterday,
         from_time: Time.parse("#{Date.yesterday} 11:00"),
         to_time: Time.parse("#{Date.yesterday} 13:30"),
@@ -658,37 +650,36 @@ RSpec.describe TimeSheet, type: :model do
         TimeSheet.generate_individual_timesheet_report(user, params)
       expect(individual_time_sheet_data.count).to eq(2)
       expect(
-        individual_time_sheet_data[
-          'The pediatric network'
-        ]['total_worked_hours']
-      ).to eq('0 Days 1H (1H)')
+        individual_time_sheet_data['Test project1']['total_worked_hours']).
+          to eq('0 Days 1H (1H)'
+      )
       expect(
         individual_time_sheet_data[
-          'The pediatric network'
+          'Test project1'
         ]['daily_status'][0][0]['date'].to_s
       ).to eq(DateTime.yesterday.to_s)
       expect(
         individual_time_sheet_data[
-          'The pediatric network'
+          'Test project1'
         ]['daily_status'][0][0]['from_time']
       ).to eq('09:00AM')
       expect(
         individual_time_sheet_data[
-          'The pediatric network'
+          'Test project1'
         ]['daily_status'][0][0]['to_time']
       ).to eq('10:00AM')
       expect(
         individual_time_sheet_data[
-          'The pediatric network'
+          'Test project1'
         ]['daily_status'][0][0]['total_worked']
       ).to eq('1:00')
       expect(
         individual_time_sheet_data[
-          'The pediatric network'
+          'Test project1'
         ]['daily_status'][0][0]['description']
       ).to eq('Today I finish the work')
       expect(
-        individual_time_sheet_data['Intranet']['total_worked_hours']
+        individual_time_sheet_data['Test project2']['total_worked_hours']
       ).to eq('0 Days 3H (3H)')
       expect(total_work_and_leaves['total_work']).
       to eq('0 Days 4H (4H)')
@@ -1348,9 +1339,9 @@ RSpec.describe TimeSheet, type: :model do
       FactoryGirl.create(:time_sheet,
         user: user,
         project: project_other,
-        date: DateTime.now,
-        from_time: Time.parse("#{Date.today} 8"),
-        to_time: Time.parse("#{Date.today} 9")
+        date: Date.today - 1,
+        from_time: "#{Date.today - 1} 8:00",
+        to_time: "#{Date.today - 1} 9:00"
       )
       from_date = Date.today - 3
       to_date = Date.today + 3
@@ -1371,9 +1362,9 @@ RSpec.describe TimeSheet, type: :model do
       FactoryGirl.create(:time_sheet,
         user: user,
         project: project_other,
-        date: DateTime.now,
-        from_time: Time.parse("#{Date.today} 8"),
-        to_time: Time.parse("#{Date.today} 9")
+        date: Date.today - 1,
+        from_time: "#{Date.today - 1} 8:00",
+        to_time: "#{Date.today - 1} 9:00"
       )
       from_date = Date.today - 3
       to_date = Date.today + 3
