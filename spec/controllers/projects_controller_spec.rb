@@ -63,9 +63,9 @@ describe ProjectsController do
         update_project: 'update_project'
       }
       user_project = UserProject.where(
-                        user_id: user.id,
-                        project_id: project.id
-                      ).first
+        user_id: user.id,
+        project_id: project.id
+      ).first
       expect(user_project.start_date).to eq(Date.today)
     end
 
@@ -82,9 +82,9 @@ describe ProjectsController do
         start_date: DateTime.now - 1
       )
       user_project = UserProject.create(user_id: user.id,
-                       project_id: project.id,
-                       start_date: DateTime.now - 1
-                     )
+        project_id: project.id,
+        start_date: DateTime.now - 1
+      )
       user_ids << first_team_member.id
       user_ids << second_team_member.id
 
@@ -164,11 +164,11 @@ describe ProjectsController do
                              id: project.id,
                              project: { user_ids: user_ids }
       first_user_project = UserProject.where(user_id: first_user.id,
-                             project_id: project.id
-                           ).first
+        project_id: project.id
+      ).first
       second_user_project = UserProject.where(user_id: second_user.id,
-                              project_id: project.id
-                            ).first
+        project_id: project.id
+      ).first
       expect(first_user_project.start_date).to eq(Date.today)
       expect(second_user_project.start_date).to eq(Date.today)
     end
@@ -192,9 +192,9 @@ describe ProjectsController do
     it 'Should delete employee' do
       user = FactoryGirl.create(:user)
       user_project = UserProject.create(user_id: user.id,
-                        project_id: project.id,
-                        start_date: DateTime.now - 1
-                      )
+        project_id: project.id,
+        start_date: DateTime.now - 1
+      )
       project.save
       delete :remove_team_member, :format => :js,
                                   id: project.id,
@@ -232,9 +232,9 @@ describe ProjectsController do
     it 'Should delete Admin who added as team member' do
       user = FactoryGirl.create(:admin)
       user_project = UserProject.create(user_id: user.id,
-                       project_id: project.id,
-                       start_date: DateTime.now - 2
-                     )
+        project_id: project.id,
+        start_date: DateTime.now - 2
+      )
       project.save
       delete :remove_team_member, :format => :js,
                                   id: project.id,
@@ -247,7 +247,7 @@ describe ProjectsController do
   context 'Delete timesheet if project deleted' do
     let!(:user) { FactoryGirl.create(:user) }
     let!(:project_one) { FactoryGirl.create(:project) }
-    let!(:project_two) { FactoryGirl.create(:project, name: 'test') }
+    let!(:project_two) { FactoryGirl.create(:project) }
 
     it 'Should delete timesheet' do
       UserProject.create(user_id: user.id,
@@ -258,52 +258,43 @@ describe ProjectsController do
         project_id: project_two.id,
         start_date: Date.today - 5
       )
-
       TimeSheet.create(user_id: user.id,
         project_id: project_two.id,
         date: Date.today - 1,
         from_time: DateTime.now - 1,
-        to_time: DateTime.now - 1 + 1.hours,
-        description: 'Call'
+        to_time: DateTime.now - 1 + 1.hours
       )
       TimeSheet.create(user_id: user.id,
         project_id: project_one.id,
         date: Date.today - 1,
         from_time: DateTime.now - 1,
-        to_time: DateTime.now - 1 + 1.hours,
-        description: 'Call'
+        to_time: DateTime.now - 1 + 1.hours
       )
       TimeSheet.create(user_id: user.id,
         project_id: project_one.id,
         date: Date.today - 2,
         from_time: DateTime.now - 2,
-        to_time: DateTime.now - 2 + 1.hours,
-        description: 'Call'
+        to_time: DateTime.now - 2 + 1.hours
       )
       TimeSheet.create(user_id: user.id,
         project_id: project_one.id,
         date: Date.today - 3,
         from_time: DateTime.now - 3,
-        to_time: DateTime.now - 3 + 1.hours,
-        description: 'Call'
+        to_time: DateTime.now - 3 + 1.hours
       )
       TimeSheet.create(user_id: user.id,
         project_id: project_one.id,
         date: Date.today - 4,
         from_time: DateTime.now - 4,
-        to_time: DateTime.now - 4 + 1.hours,
-        description: 'Call'
+        to_time: DateTime.now - 4 + 1.hours
       )
-
       project_one_id = project_one.id
       project_name = project_one.name
-
       delete :destroy, id: project_one.id
 
       expect(Project.all.pluck(:name).include?(project_name)).to eq(false)
-      expect(
-              TimeSheet.all.pluck(:project_id).include?(project_one_id)
-            ).to eq(false)
+      expect(TimeSheet.all.pluck(:project_id).include?(project_one_id)).
+        to eq(false)
     end
   end
 end
