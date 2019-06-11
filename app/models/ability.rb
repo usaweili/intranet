@@ -65,7 +65,5 @@ class Ability
   def hr_abilities
     common_admin_hr
     can [:public_profile, :private_profile, :edit, :apply_leave], User
-    cannot :index, LeaveApplication
-    cannot :update, LeaveApplication
   end
 end

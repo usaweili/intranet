@@ -95,7 +95,7 @@ class LeaveApplicationsController < ApplicationController
   private
 
   def authorization_for_admin
-    if !current_user.role?("Admin")
+    unless current_user.is_admin_or_hr? 
       flash[:error] = 'Unauthorize access'
       redirect_to root_path
     else
