@@ -44,11 +44,23 @@ class LeaveApplicationsController < ApplicationController
   def view_leave_status
     @available_leaves = current_user.employee_detail.try(:available_leaves)
     if MANAGEMENT.include? current_user.role
-      @pending_leaves = LeaveApplication.where(:user_id.in => user_ids).any_of(search_conditions).order_by(:created_at.desc).pending.page(params[:page]).per(10)
-      @processed_leaves = LeaveApplication.where(:user_id.in => user_ids).any_of(search_conditions).order_by(:created_at.desc).processed.page(params[:page]).per(10)
+      @pending_leaves = LeaveApplication.where(:user_id.in => user_ids)
+        .any_of(search_conditions)
+        .pending
+        .order_by(:start_at.desc)
+      @processed_leaves = LeaveApplication.where(:user_id.in => user_ids)
+        .any_of(search_conditions)
+        .processed
+        .order_by(:start_at.desc)
     else
-      @pending_leaves = current_user.leave_applications.any_of(search_conditions).order_by(:created_at.desc).pending.page(params[:page]).per(10)
-      @processed_leaves = current_user.leave_applications.any_of(search_conditions).order_by(:created_at.desc).processed.page(params[:page]).per(10)
+      @pending_leaves = current_user.leave_applications
+        .pending
+        .any_of(search_conditions)
+        .order_by(:start_at.desc)
+      @processed_leaves = current_user.leave_applications
+        .processed
+        .any_of(search_conditions)
+        .order_by(:start_at.desc)
     end
   end
 
@@ -84,7 +96,7 @@ class LeaveApplicationsController < ApplicationController
 
     @message = LeaveApplication.process_leave(params[:id], @status, call_function, params[:reject_reason])
     @leave_application = LeaveApplication.find(params[:id])
-    @pending_leaves = LeaveApplication.order_by(:created_at.desc).pending
+    @pending_leaves = LeaveApplication.order_by(:start_at.desc).pending
 
 
     respond_to do|format|
@@ -105,10 +117,17 @@ class LeaveApplicationsController < ApplicationController
   end
 
   def search_conditions
-    if params[:from].present?
-      to = params[:to].empty? ? Date.today.strftime("%d-%m-%Y") : params[:to]
+    today = Date.today
+    beginning_of_year = today.beginning_of_year.strftime("%d-%m-%Y")
+    end_of_year = today.end_of_year.strftime("%d-%m-%Y")
+    if params[:from].present? 
+      to = params[:to].empty? ? today.strftime("%d-%m-%Y") : params[:to]
       start_at =  { start_at: params[:from]..to  }
       end_at = { end_at: params[:from]..to }
+      [start_at, end_at]
+    else
+      start_at =  { start_at: beginning_of_year..end_of_year }
+      end_at = { end_at: beginning_of_year..end_of_year }
       [start_at, end_at]
     end
   end

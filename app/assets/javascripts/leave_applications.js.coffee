@@ -12,3 +12,5 @@ CalculateWeekendDays = (fromDate, toDate) ->
     $("#leave_application_end_at").on "change", ->
         CalculateWeekendDays($("#leave_application_start_at").datepicker('getDate'), $("#leave_application_end_at").datepicker('getDate')) if $("#leave_application_start_at").val() 
 
+$(document).ready ->
+  $('.leave_table').dataTable 'ordering' : false

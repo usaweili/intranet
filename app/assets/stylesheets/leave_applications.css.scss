@@ -7,3 +7,20 @@
 {
   height: 25px;
 }
+.action_style{
+  display: inline-flex;
+}
+.btn_style{
+	margin-right: 2px;
+}
+.leave_btn_position{
+  position: relative;
+  top: 10px;
+}
+
+.leave_table {
+  font-size: 14px;
+  .date {
+    width: 60px !important;
+  }
+}

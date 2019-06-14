@@ -31,6 +31,7 @@
 //= require screamout/filter.js
 //= require screamout/global.js
 //= require redactor-rails
+//= require dataTables/jquery.dataTables
 //= require_tree .
 
 $(document).ready(function(){

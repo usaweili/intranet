@@ -1,17 +1,18 @@
 .form-horizontal{style: "margin: 0px"}
-  %table.table.table-hover
+  %table.table.table-hover.leave_table
     %thead
-      %th From
-      %th Start Date
-      %th Last Date
-      %th Days
-      %th Reason
-      %th Applied On
-      %th Status
-      - if (leave_data.present? and !leave_data.first.pending?) or can? :manage, LeaveApplication
-        %th Note
-      - if (leave_data.present? and leave_data.first.pending?) or can? :manage, LeaveApplication
-        %th Action
+      %tr
+        %th From
+        %th.date Start Date
+        %th.date Last Date
+        %th Days
+        %th Reason
+        %th.date Applied On
+        %th Status
+        - if (leave_data.present? and !leave_data.first.pending?) or can? :manage, LeaveApplication
+          %th Note
+        - if (leave_data.present? and leave_data.first.pending?) or can? :manage, LeaveApplication
+          %th Action
     %tbody
       - leave_data.each do|appr_leave|
         - pending_leave = appr_leave.pending?
@@ -24,21 +25,21 @@
           %td= appr_leave.reason
           %td= appr_leave.created_at.try(:strftime, "%d-%m-%Y")
           %td.status= appr_leave.leave_status
-          %td
-            %a.reason{class: 'reason_'+ leave_id, id: "#{leave_id}"}
-            %br
-            .prev_reason #{appr_leave.reject_reason + ';' if appr_leave.reject_reason.present?}
-          %td.spinner.hide= image_tag('select2-spinner.gif', :class => 'spinner')
-          %td.action{id: "#{appr_leave.id}"}
-            - if pending_leave and can? :edit, appr_leave
-              .btn.btn-mini= link_to 'Edit', edit_leave_application_path(appr_leave)
-              - if can? :manage, appr_leave
-                %div.process_btn{ class: 'btn btn-success btn-mini', data: {action: 'approve'}} Approve
-                %div.process_btn{ class: 'btn btn-danger btn-mini', data: {action: 'reject'}} Reject
-            - elsif can? :manage, appr_leave
-              - if appr_leave.leave_status == REJECTED
-                %div.process_btn{ class: 'btn btn-success btn-mini', data: {action: 'approve'}} Approve
-              - else
-                %div.process_btn{ class: 'btn btn-danger btn-mini', data: {action: 'reject'}} Reject
-.pull-right
-  = paginate leave_data
+          - if (leave_data.present? and !leave_data.first.pending?) or can? :manage, LeaveApplication
+            %td
+              %a.reason{class: 'reason_'+ leave_id, id: "#{leave_id}"}
+              %br
+              .prev_reason #{appr_leave.reject_reason + ';' if appr_leave.reject_reason.present?}
+          / %td.spinner.hide= image_tag('select2-spinner.gif', :class => 'spinner')
+          - if (leave_data.present? and leave_data.first.pending?) or can? :manage, LeaveApplication
+            %td.action_style.action{id: "#{appr_leave.id}"}
+              - if pending_leave and can? :edit, appr_leave
+                .btn.btn-mini.btn_style= link_to 'Edit', edit_leave_application_path(appr_leave)
+                - if can? :manage, appr_leave
+                  %div.process_btn.btn_style{ class: 'btn btn-success btn-mini', data: {action: 'approve'}} Approve
+                  %div.process_btn.btn_style{ class: 'btn btn-danger btn-mini', data: {action: 'reject'}} Reject
+              - elsif can? :manage, appr_leave
+                - if appr_leave.leave_status == REJECTED
+                  %div.process_btn.btn_style{ class: 'btn btn-success btn-mini', data: {action: 'approve'}} Approve
+                - else
+                  %div.process_btn.btn_style{ class: 'btn btn-danger btn-mini', data: {action: 'reject'}} Reject

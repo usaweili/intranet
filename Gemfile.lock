@@ -45,6 +45,16 @@ GIT
       activemodel (> 4, < 5.1)
 
 GIT
+  remote: git://github.com/rweng/jquery-datatables-rails.git
+  revision: d486b31b192a2924b1913e080ad23460e6b96d31
+  specs:
+    jquery-datatables-rails (3.4.0)
+      actionpack (>= 3.1)
+      jquery-rails
+      railties (>= 3.1)
+      sass-rails
+
+GIT
   remote: git://github.com/yourabi/twitter-typeahead-rails.git
   revision: b9e407f9a4224f0840b60a523a2df42eeca7dfe7
   specs:
@@ -1250,6 +1260,7 @@ DEPENDENCIES
   google-api-client
   google_drive
   haml-rails
+  jquery-datatables-rails!
   jquery-rails
   jquery-timepicker-rails
   jquery-turbolinks

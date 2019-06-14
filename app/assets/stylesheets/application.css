@@ -19,5 +19,6 @@
  *= require jquery-ui
  *= require redactor-rails
  *= require octicons/octicons.css
+ *= require dataTables/jquery.dataTables
  *= require_tree .
  */
