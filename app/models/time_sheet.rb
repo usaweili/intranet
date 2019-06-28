@@ -21,7 +21,8 @@ class TimeSheet
   validates :to_time, presence: true, if: :to_time_is_future_time?
   before_validation :valid_date_for_create?, on: :create
   validate :time_sheet_overlapping?
-  validate :check_validation_while_creating_or_updating_timesheet
+  validate :timesheet_date_greater_than_project_start_date, if: :is_project_assigned_to_user?
+  after_save :send_mail_if_project_is_not_assigned, unless: :is_project_assigned_to_user?
 
   MAX_TIMESHEET_COMMAND_LENGTH = 5
   DATE_FORMAT_LENGTH = 3
@@ -82,7 +83,7 @@ class TimeSheet
     return true
   end
   
-  def check_validation_while_creating_or_updating_timesheet
+  def timesheet_date_greater_than_project_start_date
     if timesheet_date_greater_than_assign_project_date
       text = "Not allowed to fill timesheet for this date. As you were not assigned on project for this date"
       errors.add(:date, text)
@@ -98,6 +99,14 @@ class TimeSheet
         return true
       end
     return false
+  end
+
+  def is_project_assigned_to_user?
+    UserProject.where(user_id: user.id, project_id: project_id).exists?
+  end
+
+  def send_mail_if_project_is_not_assigned
+    TimesheetRemainderMailer.user_timesheet_for_diffrent_project(user, self, project.name).deliver_now
   end
 
   def valid_date_for_update?
