@@ -23,17 +23,17 @@ describe AttachmentsController do
 
     it 'will make is_visible false' do
       post :update, {
-                      id: @attachment.id,
-                      attachment: {is_visible_to_all: false}
-                    }
+        id: @attachment.id,
+        attachment: {is_visible_to_all: false}
+      }
       expect(@attachment.reload.is_visible_to_all).to eq(false)
     end
 
     it 'will make is_visible true' do
       post :update, {
-                      id: @attachment.id,
-                      attachment: {is_visible_to_all: true}
-                    }
+        id: @attachment.id,
+        attachment: {is_visible_to_all: true}
+      }
       expect(@attachment.reload.is_visible_to_all).to eq(true)
     end
   end

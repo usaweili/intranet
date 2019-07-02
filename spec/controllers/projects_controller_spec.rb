@@ -39,6 +39,7 @@ describe ProjectsController do
       post :create, {
         project: FactoryGirl.attributes_for(:project).merge(name: '')
       }
+      assigns(:project).errors.full_messages == ["Name can't be blank"]
       should render_template(:new)
     end
   end
@@ -161,8 +162,8 @@ describe ProjectsController do
       user_ids << second_user.id
 
       post :add_team_member, :format => :js,
-                             id: project.id,
-                             project: { user_ids: user_ids }
+        id: project.id,
+        project: { user_ids: user_ids }
       first_user_project = UserProject.where(user_id: first_user.id,
         project_id: project.id
       ).first
@@ -182,9 +183,9 @@ describe ProjectsController do
       project.save
       user.save
       delete :remove_team_member, :format => :js,
-                                  id: project.id,
-                                  user_id: user.id,
-                                  role: ROLE[:manager]
+        id: project.id,
+        user_id: user.id,
+        role: ROLE[:manager]
       expect(project.reload.manager_ids.include?(user.id)).to eq(false)
       expect(user.reload.managed_project_ids.include?(project.id)).to eq(false)
     end
@@ -197,9 +198,9 @@ describe ProjectsController do
       )
       project.save
       delete :remove_team_member, :format => :js,
-                                  id: project.id,
-                                  user_id: user.id,
-                                  role: ROLE[:team_member]
+        id: project.id,
+        user_id: user.id,
+        role: ROLE[:team_member]
       expect(user_project.reload.end_date).to eq(Date.today)
     end
 
@@ -211,9 +212,9 @@ describe ProjectsController do
       )
       project.save
       delete :remove_team_member, :format => :js,
-                                  id: project.id,
-                                  user_id: user.id,
-                                  role: ROLE[:team_member]
+        id: project.id,
+        user_id: user.id,
+        role: ROLE[:team_member]
       expect(user_project.reload.end_date).to eq(Date.today)
     end
 
@@ -222,9 +223,9 @@ describe ProjectsController do
       project.managers << user
       project.save
       delete :remove_team_member, :format => :js,
-                                  id: project.id,
-                                  user_id: user.id,
-                                  role: ROLE[:manager]
+        id: project.id,
+        user_id: user.id,
+        role: ROLE[:manager]
       expect(project.reload.manager_ids.include?(user.id)).to eq(false)
       expect(user.reload.managed_project_ids.include?(project.id)).to eq(false)
     end
@@ -237,9 +238,9 @@ describe ProjectsController do
       )
       project.save
       delete :remove_team_member, :format => :js,
-                                  id: project.id,
-                                  user_id: user.id,
-                                  role: ROLE[:team_member]
+        id: project.id,
+        user_id: user.id,
+        role: ROLE[:team_member]
       expect(user_project.reload.end_date).to eq(Date.today)
     end
   end

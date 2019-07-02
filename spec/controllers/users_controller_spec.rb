@@ -36,40 +36,36 @@ describe UsersController do
 
     it "public_profile" do
       params = {
-                  public_profile: FactoryGirl.attributes_for(:public_profile),
-                  id: user.id
-               }
+        public_profile: FactoryGirl.attributes_for(:public_profile),
+        id: user.id
+      }
       put :public_profile, params
-
       user.errors.full_messages.should eq([])
     end
 
     it "should fail in case of public profile if required field missing" do
       params = {
-                  public_profile: FactoryGirl.attributes_for(:public_profile),
-                  id: user.id
-               }
-
+        public_profile: FactoryGirl.attributes_for(:public_profile),
+        id: user.id
+      }
       put :public_profile, params
       user.errors.full_messages.should_not eq(nil)
     end
 
     it "private profile successfully " do
       params = {
-                 private_profile: FactoryGirl.attributes_for(:private_profile),
-                 id: user.id
-               }
-
+        private_profile: FactoryGirl.attributes_for(:private_profile),
+        id: user.id
+      }
       put :private_profile, params
       user.errors.full_messages.should eq([])
     end
 
     it "should fail if required data not sent" do
       params = {
-                 private_profile: FactoryGirl.attributes_for(:private_profile),
-                 id: user.id
-               }
-
+        private_profile: FactoryGirl.attributes_for(:private_profile),
+        id: user.id
+      }
       put :private_profile, params
       user.errors.full_messages.should eq([])
     end
@@ -79,7 +75,6 @@ describe UsersController do
       project_ids << ""
       project_ids << project.id
       params = { user: { project_ids: project_ids } }
-
       patch :update, id: user.id, user: { project_ids: project_ids }
       user_project = UserProject.where(
         user_id: user.id, project_id: project.id
@@ -109,7 +104,6 @@ describe UsersController do
       project_ids << ""
       project_ids << first_project.id
       project_ids << second_project.id
-
       patch :update, id: user.id, user: { project_ids: project_ids }
       expect(user_project.reload.end_date).to eq(Date.today)
     end
@@ -135,7 +129,6 @@ describe UsersController do
 
     it "should fetch github entries" do
       params = {"feed_type" => "github", "id" => @user.id}
-
       raw_response_file = File.new("spec/sample_feeds/github_example_feed.xml")
       allow(Feedjira::Feed).to receive(:fetch_raw).and_return(
         raw_response_file.read

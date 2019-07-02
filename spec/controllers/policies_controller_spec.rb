@@ -14,20 +14,18 @@ RSpec.describe PoliciesController, :type => :controller do
 
     describe '#create' do
       it 'creates new policy (is_published: true)' do
-        post :create, {
-          policy: FactoryGirl.attributes_for(:policy).merge(is_published: true)
-        }
-        policy = Policy.last
-        expect(policy.is_published).to eq(true)
+        policy = FactoryGirl.build(:policy, is_published: true)
+        post :create, { policy: policy.attributes }
+        expect(Policy.last.is_published).to eq(true)
+        expect(Policy.last.title).to eq(policy.title)
         expect(response).to redirect_to(attachments_path)
       end
 
       it 'creates new policy (is_published: false)' do
-        post :create, {
-          policy: FactoryGirl.attributes_for(:policy).merge(is_published: false)
-        }
-        policy = Policy.last
-        expect(policy.is_published).to eq(false)
+        policy = FactoryGirl.build(:policy, is_published: false)
+        post :create, { policy: policy.attributes }
+        expect(Policy.last.is_published).to eq(false)
+        expect(Policy.last.title).to eq(policy.title)
         expect(response).to redirect_to(attachments_path)
       end
     end
@@ -52,26 +50,26 @@ RSpec.describe PoliciesController, :type => :controller do
       it 'make is_published false' do
         @policy.is_published = true
         post :update, {
-                        id: @policy.id,
-                        policy: { is_published: false }
-                      }
+          id: @policy.id,
+          policy: { is_published: false }
+        }
         expect(@policy.reload.is_published).to eq(false)
       end
 
       it 'make is_published true' do
         @policy.is_published = false
         post :update, {
-                        id: @policy.id,
-                        policy: { is_published: true }
-                      }
+          id: @policy.id,
+          policy: { is_published: true }
+        }
         expect(@policy.reload.is_published).to eq(true)
       end
 
       it 'redirects to attachments_path' do
         post :update, {
-                        id: @policy.id,
-                        policy: { is_published: true }
-                      }
+          id: @policy.id,
+          policy: { is_published: true }
+        }
         expect(response).to redirect_to(attachments_path)
       end
     end
