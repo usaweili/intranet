@@ -26,9 +26,9 @@ describe LeaveApplicationsController do
         @user.save
         @leave_application = FactoryGirl.build(:leave_application, user: @user)
         post :create, {
-                        user_id: @user.id,
-                        leave_application: @leave_application.attributes
-                      }
+          user_id: @user.id,
+          leave_application: @leave_application.attributes
+        }
         user2 = FactoryGirl.create(:user)
         user2.build_private_profile(
           FactoryGirl.build(:private_profile).attributes
@@ -37,9 +37,9 @@ describe LeaveApplicationsController do
         user2.save
         @leave_application = FactoryGirl.build(:leave_application, user: user2)
         post :create, {
-                        user_id: user2.id,
-                        leave_application: @leave_application.attributes
-                      }
+          user_id: user2.id,
+          leave_application: @leave_application.attributes
+        }
       end
 
       it "should show only his leaves if user is not admin" do
@@ -109,10 +109,10 @@ describe LeaveApplicationsController do
           end_at: Date.today + 10.days
         )
         get :view_leave_status, {
-                                  name: '',
-                                  from: Date.today + 5.days,
-                                  to: Date.today + 10.days
-                                }
+          name: '',
+          from: Date.today + 5.days,
+          to: Date.today + 10.days
+        }
         assigns(:pending_leaves).count.should eq(1)
       end
 
@@ -126,10 +126,10 @@ describe LeaveApplicationsController do
           end_at: Date.today + 10.days
         )
         get :view_leave_status, {
-                                  name: 'Test Search',
-                                  from: Date.today + 5.days,
-                                  to: Date.today + 10.days
-                                }
+          name: 'Test Search',
+          from: Date.today + 5.days,
+          to: Date.today + 10.days
+        }
         assigns(:pending_leaves).count.should eq(1)
       end
     end
@@ -141,11 +141,11 @@ describe LeaveApplicationsController do
       @user.public_profile = FactoryGirl.build(:public_profile)
       @user.save
       remaining_leave = @user.employee_detail.available_leaves -
-                          @leave_application.number_of_days
+        @leave_application.number_of_days
       post :create, {
-                      user_id: @user.id,
-                      leave_application: @leave_application.attributes
-                    }
+        user_id: @user.id,
+        leave_application: @leave_application.attributes
+      }
       LeaveApplication.count.should == 1
       @user.reload
       expect(@user.employee_detail.available_leaves).to eq(remaining_leave)
@@ -159,9 +159,9 @@ describe LeaveApplicationsController do
       @user.save
       @user.employee_detail.update_attribute(:available_leaves, 1)
       post :create, {
-                      user_id: @user.id,
-                      leave_application: @leave_application.attributes
-                    }
+        user_id: @user.id,
+        leave_application: @leave_application.attributes
+      }
       expect(LeaveApplication.count).to eq 0
       @user.reload
       expect(@user.employee_detail.available_leaves).to eq(1)
@@ -201,9 +201,9 @@ describe LeaveApplicationsController do
     it "Admin as a role should accept leaves " do
       leave_application = FactoryGirl.create(:leave_application, user: @user)
       xhr :get, :process_leave, {
-                                  id: leave_application.id,
-                                  leave_action: :approve
-                                }
+        id: leave_application.id,
+        leave_action: :approve
+      }
       leave_application = LeaveApplication.last
       expect(leave_application.leave_status).to eq "Approved"
     end
@@ -212,9 +212,9 @@ describe LeaveApplicationsController do
       leave_application = FactoryGirl.create(:leave_application, user: @user)
       Sidekiq::Extensions::DelayedMailer.jobs.clear
       xhr :get, :process_leave, {
-                                  id: leave_application.id,
-                                  leave_action: :approve
-                                }
+        id: leave_application.id,
+        leave_action: :approve
+      }
       Sidekiq::Extensions::DelayedMailer.jobs.size.should eq(1)
     end
 
@@ -223,28 +223,26 @@ describe LeaveApplicationsController do
       number_of_days = 2
       leave_application = FactoryGirl.create(:leave_application, user: @user)
       xhr :get, :process_leave, {
-                                  id: leave_application.id,
-                                  leave_action: :approve
-                                }
+        id: leave_application.id,
+        leave_action: :approve
+      }
       leave_application = LeaveApplication.last
       expect(leave_application.leave_status).to eq("Approved")
       @user.reload
       expect(@user.employee_detail.available_leaves).
         to eq(available_leaves - number_of_days)
-
       xhr :get, :process_leave, {
-                                  id: leave_application.id,
-                                  leave_action: :reject
-                                }
+        id: leave_application.id,
+        leave_action: :reject
+      }
       leave_application = LeaveApplication.last
       expect(leave_application.leave_status).to eq("Rejected")
       @user.reload
       expect(@user.employee_detail.available_leaves).to eq(available_leaves)
-
       xhr :get, :process_leave, {
-                                  id: leave_application.id,
-                                  leave_action: :approve
-                                }
+        id: leave_application.id,
+        leave_action: :approve
+      }
       leave_application = LeaveApplication.last
       expect(leave_application.leave_status).to eq("Approved")
       @user.reload
@@ -291,19 +289,18 @@ describe LeaveApplicationsController do
     it ' Approve leave' do
       leave_application = FactoryGirl.create(:leave_application, user: @user)
       xhr :get, :process_leave, {
-                                  id: leave_application.id,
-                                  leave_action: :approve
-                                }
+        id: leave_application.id,
+        leave_action: :approve
+      }
     end
 
     it ' Reject leave' do
       leave_application = FactoryGirl.create(:leave_application, user: @user)
       xhr :get, :process_leave, {
-                                  id: leave_application.id,
-                                  leave_action: :reject
-                                }
+        id: leave_application.id,
+        leave_action: :reject
+      }
     end
-
   end
 
   context "Rejecting leaves" do
@@ -319,19 +316,18 @@ describe LeaveApplicationsController do
       leave_application = FactoryGirl.create(:leave_application, user: @user)
       reason = 'Invalid Reason'
       xhr :get, :process_leave, {
-                                  id: leave_application.id,
-                                  reject_reason: reason,
-                                  leave_action: :reject
-                                }
+        id: leave_application.id,
+        reject_reason: reason,
+        leave_action: :reject
+      }
       leave_application = LeaveApplication.last
       expect(leave_application.leave_status).to eq "Rejected"
       expect(leave_application.reject_reason).to eq reason
-
       xhr :get, :process_leave, {
-                                  id: leave_application.id,
-                                  reject_reason: reason,
-                                  leave_action: :approve
-                                }
+        id: leave_application.id,
+        reject_reason: reason,
+        leave_action: :approve
+      }
       leave_application = LeaveApplication.last
       expect(leave_application.leave_status).to eq "Approved"
       expect(leave_application.reject_reason).to eq "#{reason};#{reason}"
@@ -341,10 +337,10 @@ describe LeaveApplicationsController do
       leave_application = FactoryGirl.create(:leave_application, user: @user)
       reason = 'Invalid Reason'
       xhr :get, :process_leave, {
-                                  id: leave_application.id,
-                                  reject_reason: reason,
-                                  leave_action: :reject
-                                }
+        id: leave_application.id,
+        reject_reason: reason,
+        leave_action: :reject
+      }
       leave_application = LeaveApplication.last
       expect(leave_application.leave_status).to eq "Rejected"
       expect(leave_application.reject_reason).to eq reason
@@ -354,9 +350,9 @@ describe LeaveApplicationsController do
       leave_application = FactoryGirl.create(:leave_application, user: @user)
       Sidekiq::Extensions::DelayedMailer.jobs.clear
       xhr :get, :process_leave, {
-                                  id: leave_application.id,
-                                  leave_action: :reject
-                                }
+        id: leave_application.id,
+        leave_action: :reject
+      }
       Sidekiq::Extensions::DelayedMailer.jobs.size.should eq(1)
     end
 
@@ -368,18 +364,17 @@ describe LeaveApplicationsController do
       expect(@user.employee_detail.available_leaves).
         to eq(available_leaves-number_of_days)
       xhr :get, :process_leave, {
-                                  id: leave_application.id,
-                                  leave_action: :reject
-                                }
+        id: leave_application.id,
+        leave_action: :reject
+      }
       leave_application = LeaveApplication.last
       expect(leave_application.leave_status).to eq "Rejected"
       @user.reload
       expect(@user.employee_detail.available_leaves).to eq(available_leaves)
-
       xhr :get, :process_leave, {
-                                  id: leave_application.id,
-                                  leave_action: :reject
-                                }
+        id: leave_application.id,
+        leave_action: :reject
+      }
       leave_application = LeaveApplication.last
       expect(leave_application.leave_status).to eq "Rejected"
       @user.reload
@@ -394,11 +389,11 @@ describe LeaveApplicationsController do
     it 'Admin should be able to update leave' do
       sign_in FactoryGirl.create(:admin)
       end_at, days = leave_app.end_at.to_date + 1.day,
-                     leave_app.number_of_days + 1
+        leave_app.number_of_days + 1
       post :update, id: leave_app.id, leave_application: {
-                                                           end_at: end_at,
-                                                           number_of_days: days
-                                                         }
+        end_at: end_at,
+        number_of_days: days
+      }
       l_app = assigns(:leave_application)
       l_app.number_of_days.should eq(days)
       l_app.end_at.should eq(end_at)
@@ -407,11 +402,11 @@ describe LeaveApplicationsController do
     it 'Employee should be able to update his own leave' do
       sign_in employee
       end_at, days = leave_app.end_at.to_date + 1.day,
-                     leave_app.number_of_days + 1
+        leave_app.number_of_days + 1
       post :update, id: leave_app.id, leave_application: {
-                                                           end_at: end_at,
-                                                           number_of_days: days
-                                                         }
+        end_at: end_at,
+        number_of_days: days
+      }
       l_app = assigns(:leave_application)
       l_app.number_of_days.should eq(days)
       l_app.end_at.should eq(end_at)
@@ -420,11 +415,11 @@ describe LeaveApplicationsController do
     it 'Employee should not be able to update leave of other employee' do
       sign_in FactoryGirl.create(:user)
       end_at, days = leave_app.end_at.to_date + 1.day,
-                     leave_app.number_of_days + 1
+        leave_app.number_of_days + 1
       post :update, id: leave_app.id, leave_application: {
-                                                           end_at: end_at,
-                                                           number_of_days: days
-                                                         }
+        end_at: end_at,
+        number_of_days: days
+      }
       expect(flash[:alert]).
         to eq('You are not authorized to access this page.')
       l_app = assigns(:leave_application)
@@ -436,18 +431,17 @@ describe LeaveApplicationsController do
       sign_in employee
       number_of_leaves = employee.employee_detail.available_leaves
       end_at, days = leave_app.end_at.to_date + 1.day,
-                     leave_app.number_of_days + 1
+        leave_app.number_of_days + 1
       post :update, id: leave_app.id, leave_application: {
-                                                           end_at: end_at,
-                                                           number_of_days: days
-                                                         }
+        end_at: end_at,
+        number_of_days: days
+      }
       l_app = assigns(:leave_application)
       l_app.number_of_days.should eq(days)
       l_app.end_at.should eq(end_at)
       expect(employee.reload.employee_detail.available_leaves).
         to eq(number_of_leaves - days)
     end
-
   end
 
   context 'Update', update_leave: true do
@@ -457,15 +451,13 @@ describe LeaveApplicationsController do
     it 'should update available leaves if number of days changed' do
       sign_in employee
       end_at, days = leave_app.end_at.to_date + 1.day,
-                     leave_app.number_of_days - 1
+        leave_app.number_of_days - 1
       employee.employee_detail.available_leaves = 10
       employee.save
-
       post :update, id: leave_app.id, leave_application: {
-                                                           end_at: end_at,
-                                                           number_of_days: days
-                                                         }
-
+        end_at: end_at,
+        number_of_days: days
+      }
       l_app = assigns(:leave_application)
 
       #TODO

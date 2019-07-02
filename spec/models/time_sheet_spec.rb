@@ -291,14 +291,19 @@ RSpec.describe TimeSheet, type: :model do
         FactoryGirl.create(:user_project,
           user: user,
           project: project,
-          start_date: Date.today - 2
+          start_date: Date.today - 5
         )
+        if Date.today.day == 6
+          date = Date.today - 2
+        else
+          date = Date.today - 1 
+        end
         FactoryGirl.create(:time_sheet,
           user: user,
           project: project,
-          date: 2.days.ago,
-          from_time: "#{Date.today - 2} 9:00",
-          to_time: "#{Date.today - 2} 10:00"
+          date: date,
+          from_time: "#{date} 9:00",
+          to_time: "#{date} 10:00"
         )
         expect(HolidayList.is_holiday?(user.time_sheets[0].date + 1)).
           to eq(false)
