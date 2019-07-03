@@ -18,7 +18,7 @@ branch = ENV['branch'] || 'master'
 index = ENV['index'] || false
 
 if env == 'production'
-  ip = '162.243.86.174'
+  ip = '139.59.30.77'
   #branch = 'develop' # Always production!!
 else
   #staging
@@ -27,8 +27,8 @@ end
 set :term_mode, nil
 set :domain, ip
 set :user, 'deploy'
-set :identity_file, "#{ENV['HOME']}/.ssh/id_joshsite_rsa"
-set :deploy_to, "/home/deploy/projects/intranet/#{env}"
+#set :identity_file, "#{ENV['HOME']}/.ssh/id_joshsite_rsa"
+set :deploy_to, "/home/deploy/projects/intranet"
 set :repository, 'git@github.com:joshsoftware/intranet.git'
 set :branch, branch
 set :rails_env, env
