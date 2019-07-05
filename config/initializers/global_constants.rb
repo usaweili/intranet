@@ -21,5 +21,4 @@ ROLE = { admin: 'Admin', employee: 'Employee', HR: 'HR', manager: 'manager', int
 
 EMAIL_ADDRESS = /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i
 
-DEFAULT_TIMESHEET_MANAGERS =
-  ["test1@#{ORGANIZATION_DOMAIN}", "test2@#{ORGANIZATION_DOMAIN}"]
+DEFAULT_TIMESHEET_MANAGERS = []
