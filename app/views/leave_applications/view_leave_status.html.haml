@@ -5,7 +5,8 @@
   .leave_link{float: right;}
 .alert-message
 .leave_link
-  =link_to "Apply Leave", new_user_leave_application_path(current_user)
+  =link_to "Apply Leave", new_user_leave_application_path(current_user), class: 'btn btn-primary'
+  %h5 Available leaves:#{@available_leaves} 
 
 %ul.leave_applicationTab.nav.nav-tabs
   %li.active
