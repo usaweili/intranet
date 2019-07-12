@@ -42,7 +42,8 @@ class LeaveApplicationsController < ApplicationController
   end
 
   def view_leave_status
-    if ["Admin", "HR", "Manager"].include? current_user.role
+    @available_leaves = current_user.employee_detail.try(:available_leaves)
+    if MANAGEMENT.include? current_user.role
       @pending_leaves = LeaveApplication.where(:user_id.in => user_ids).any_of(search_conditions).order_by(:created_at.desc).pending.page(params[:page]).per(10)
       @processed_leaves = LeaveApplication.where(:user_id.in => user_ids).any_of(search_conditions).order_by(:created_at.desc).processed.page(params[:page]).per(10)
     else
@@ -95,7 +96,7 @@ class LeaveApplicationsController < ApplicationController
   private
 
   def authorization_for_admin
-    if !current_user.role?("Admin")
+    if !(current_user.role?("Admin") || current_user.role?("Manager"))
       flash[:error] = 'Unauthorize access'
       redirect_to root_path
     else
