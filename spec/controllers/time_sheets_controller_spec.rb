@@ -722,20 +722,21 @@ RSpec.describe TimeSheetsController, type: :controller do
           project: project,
           start_date: Date.today - 10
         )
-        time_sheet = FactoryGirl.create(:time_sheet,
+        time_sheet = FactoryGirl.build(:time_sheet,
           user: employee,
           project: project,
-          date: Date.today - 3,
-          from_time: "#{Date.today - 3} 10",
-          to_time: "#{Date.today - 3} 11:30"
+          date: Date.today - 9,
+          from_time: "#{Date.today - 9} 10",
+          to_time: "#{Date.today - 9} 11:30"
         )
+        time_sheet.save(:validate => false)
         params = {
           time_sheets_attributes: {
             "0" => {
               project_id: project.id,
-              date: Date.today - 1,
-              from_time: "#{Date.today - 1} 11:00",
-              to_time: "#{Date.today - 1} 10:00",
+              date: Date.today - 9,
+              from_time: "#{Date.today - 9} 11:00",
+              to_time: "#{Date.today - 9} 10:00",
               description: 'testing API and call with client',
               id: time_sheet.id
             }
@@ -744,11 +745,11 @@ RSpec.describe TimeSheetsController, type: :controller do
         }
         post :update_timesheet, user_id: employee.id,
           user: params,
-          time_sheet_date: Date.today - 3
+          time_sheet_date: Date.today - 9
         expect(time_sheet.reload.from_time).
-          to eq(Time.parse("#{Date.today - 3} 10"))
+          to eq(Time.parse("#{Date.today - 9} 10"))
         expect(time_sheet.reload.to_time).
-          to eq(Time.parse("#{Date.today - 3} 11:30"))
+          to eq(Time.parse("#{Date.today - 9} 11:30"))
         expect(flash[:error]).to eq(
           "Not allowed to edit timesheet for this date. You can edit timesheet for past #{TimeSheet::DAYS_FOR_UPDATE} days."
         )
