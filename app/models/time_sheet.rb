@@ -27,7 +27,7 @@ class TimeSheet
   DATE_FORMAT_LENGTH = 3
   MAX_DAILY_STATUS_COMMAND_LENGTH = 2
   ALLOCATED_HOURS = 8
-  DAYS_FOR_UPDATE = 2
+  DAYS_FOR_UPDATE = 7
   DAYS_FOR_CREATE = 7
 
   def parse_timesheet_data(params)
