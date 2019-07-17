@@ -141,15 +141,23 @@ class TimeSheetsController < ApplicationController
   def export_project_report
     @from_date = params[:from_date] || Date.today.beginning_of_month.to_s
     @to_date = params[:to_date] || Date.today.to_s
-    @project = Project.where(id: params[:project_id]).first if params[:project_id].present?
+    @params = params['summary']
+    if @params.present?
+      @project_employee = TimeSheet.create_all_projects_employees_timesheet_summary(@from_date.to_date, @to_date.to_date)
+      @projects_summary = TimeSheet.create_all_projects_summary(@from_date, @to_date)
+      @employee_summary = TimeSheet.create_all_employee_summary(@from_date, @to_date)
+    end
+    if params[:project_id].present?
+      @project = Project.where(id: params[:project_id]).first
+      @report = TimeSheet.create_project_timesheet_report(@project, @from_date.to_date, @to_date.to_date)
+    end
+
     respond_to do |format|
       format.html
-      format.csv {
-        filename = @project.name + '_' + @from_date.to_date.strftime('%b') + '_' + @from_date.to_date.strftime('%Y') + '.csv'
-        report = TimeSheet.create_project_report_in_csv(@project, @from_date.to_date, @to_date.to_date)
-        send_data report, filename: filename
+      format.xlsx{
+         response.headers['Content-Disposition'] = "attachment; filename = Timesheet_summary_report_from #{@from_date} to #{@to_date}.xlsx"
       }
-    end
+    end 
   end
 
   private

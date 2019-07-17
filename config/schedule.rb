@@ -72,3 +72,12 @@ end
 every :day, :at => '03:00pm' do
   rake "timesheet_reminder:ts_reminders"
 end
+
+every :monday, :at => '09:30am' do
+  rake "user_without_timesheet:weekly_report"
+end
+
+every :month, :at => 'start of the month at 09:30am' do
+  rake "user_without_timesheet:monthly_report"
+end
+

@@ -1,0 +1,31 @@
+wb = xlsx_package.workbook
+
+unless @params.present? 
+  wb.add_worksheet(name: "#{@project.name}") do |sheet|
+    sheet.add_row %w(EmployeeName Date TotalWorkingHours Description)
+    @report.each do | project |
+     sheet.add_row [ project[:user_name], project[:date], project[:total_hours], project[:description]]
+    end
+  end
+else
+  wb.add_worksheet(name: "Project and Employees summary") do |sheet|
+    sheet.add_row %w(Project EmployeeId EmployeeName TotalWorkingHours)
+    @project_employee.each do | project |
+     sheet.add_row [ project[:project_name], project[:emp_id], project[:user_name], project[:total_work_days]]
+    end
+  end
+
+  wb.add_worksheet(name: "Projects summary") do |sheet|
+    sheet.add_row %w(ProjectName TotalWorkingHours)
+     @projects_summary.each do | project |
+     sheet.add_row [ project[:project_name], project[:total_hours] ]
+    end
+  end
+
+  wb.add_worksheet(name: "Employee Summary") do |sheet|
+    sheet.add_row %w(EmployeeId EmployeeName TotalWorkingHours)
+    @employee_summary.each do | project |
+      sheet.add_row [ project[:emp_id], project[:user_name], project[:total_worked_hours] ]
+    end
+  end
+end

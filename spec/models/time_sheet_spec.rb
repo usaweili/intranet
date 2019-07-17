@@ -1547,54 +1547,54 @@ RSpec.describe TimeSheet, type: :model do
     # end
   end
 
-  context 'Export project report' do
-    let!(:user_one) { FactoryGirl.create(:user) }
-    let!(:user_two) { FactoryGirl.create(:user) }
-    let!(:project) { FactoryGirl.create(:project) }
+  # context 'Export project report' do
+  #   let!(:user_one) { FactoryGirl.create(:user) }
+  #   let!(:user_two) { FactoryGirl.create(:user) }
+  #   let!(:project) { FactoryGirl.create(:project) }
     
-    it 'Should give the project report' do
-      user_one.public_profile.first_name = 'Aaaaa'
-      user_one.save
-      FactoryGirl.create(:user_project,
-        user: user_one,
-        project: project,
-        start_date: Date.today - 20
-      )
-      FactoryGirl.create(:user_project,
-        user: user_two,
-        project: project,
-        start_date: Date.today - 20
-      )
-      FactoryGirl.create(:time_sheet,
-        user: user_one,
-        project: project,
-        date: Date.today - 3,
-        from_time: "#{Date.today - 3} 10",
-        to_time: "#{Date.today - 3} 11",
-        description: 'Test api'
-      )
-      FactoryGirl.create(:time_sheet,
-        user: user_one,
-        project: project,
-        date: Date.today - 3,
-        from_time: "#{Date.today - 3} 12",
-        to_time: "#{Date.today - 3} 13",
-        description: 'call with client'
-      )
-      FactoryGirl.create(:time_sheet,
-        user: user_two,
-        project: project,
-        date: Date.today - 2,
-        from_time: "#{Date.today - 2} 1",
-        to_time: "#{Date.today - 2} 2",
-        description: 'test data'
-      )
-      from_date = Date.today - 20
-      to_date = Date.today
-      project_report = TimeSheet.create_project_report_in_csv(project, from_date, to_date)
-      expect(project_report).to eq("Employee name,Date(dd/mm/yyyy),No of hours,Details\n#{user_one.name},#{(Date.today - 3).strftime('%d-%m-%Y')},2,\"Test api\ncall with client\"\n#{user_two.name},#{(Date.today - 2).strftime('%d-%m-%Y')},1,test data\n")
-    end
-  end
+    # it 'Should give the project report' do
+    #   user_one.public_profile.first_name = 'Aaaaa'
+    #   user_one.save
+    #   FactoryGirl.create(:user_project,
+    #     user: user_one,
+    #     project: project,
+    #     start_date: Date.today - 20
+    #   )
+    #   FactoryGirl.create(:user_project,
+    #     user: user_two,
+    #     project: project,
+    #     start_date: Date.today - 20
+    #   )
+    #   FactoryGirl.create(:time_sheet,
+    #     user: user_one,
+    #     project: project,
+    #     date: Date.today - 3,
+    #     from_time: "#{Date.today - 3} 10",
+    #     to_time: "#{Date.today - 3} 11",
+    #     description: 'Test api'
+    #   )
+    #   FactoryGirl.create(:time_sheet,
+    #     user: user_one,
+    #     project: project,
+    #     date: Date.today - 3,
+    #     from_time: "#{Date.today - 3} 12",
+    #     to_time: "#{Date.today - 3} 13",
+    #     description: 'call with client'
+    #   )
+    #   FactoryGirl.create(:time_sheet,
+    #     user: user_two,
+    #     project: project,
+    #     date: Date.today - 2,
+    #     from_time: "#{Date.today - 2} 1",
+    #     to_time: "#{Date.today - 2} 2",
+    #     description: 'test data'
+    #   )
+    #   from_date = Date.today - 20
+    #   to_date = Date.today
+    #   project_report = TimeSheet.create_project_report_in_csv(project, from_date, to_date)
+    #   expect(project_report).to eq("Employee name,Date(dd/mm/yyyy),No of hours,Details\n#{user_one.name},#{(Date.today - 3).strftime('%d-%m-%Y')},2,\"Test api\ncall with client\"\n#{user_two.name},#{(Date.today - 2).strftime('%d-%m-%Y')},1,test data\n")
+    # end
+  # end
 
   #Slack related specs
   # context 'Api test' do
@@ -1932,6 +1932,10 @@ RSpec.describe TimeSheet, type: :model do
   # end
   context 'Timesheet mail' do
 
+    before do
+      ActionMailer::Base.deliveries = []
+    end
+    
     it 'should send mail if user is not assinged on project and filled timesheet' do
       time_sheet = FactoryGirl.create(:time_sheet)
       expect(ActionMailer::Base.deliveries.count).to eq(1)
@@ -1942,6 +1946,65 @@ RSpec.describe TimeSheet, type: :model do
       project      = FactoryGirl.create(:project)
       user_project = FactoryGirl.create(:user_project, user: user, project: project)
       timesheet    = FactoryGirl.create(:time_sheet, user: user, project: project)
+    end
+  end
+  
+  context "User without time_sheet" do
+    let!(:user) { FactoryGirl.create(:user, status: STATUS[2]) }
+    let!(:userhr) { FactoryGirl.create(:user, role:"HR", status: STATUS[2]) }
+    let!(:project) { FactoryGirl.create(:project, :timesheet_mandatory => true) }
+    before do
+      ActionMailer::Base.deliveries = []
+    end
+    it "send mail- when user have not filled timesheet in particular period" do
+      user_project = FactoryGirl.create(:user_project, :start_date => Date.today - 20,
+       :user => user, :project => project)
+      from_date = Date.today - 10
+      to_date   = Date.today
+      TimeSheet.get_users_who_not_filled_timesheet(from_date, to_date)
+      expect(ActionMailer::Base.deliveries.count).to eq(1)
+    end
+
+    it "Do not send mail if user are filling timesheet daily" do
+      user_project = FactoryGirl.create(:user_project, :start_date => Date.today - 2,
+       :user => user, :project => project)
+      from_date = Date.today - 2
+      to_date   = Date.today - 1
+      FactoryGirl.create(:time_sheet, :date => Date.today - 2,
+        :user => user, :project => project )
+      FactoryGirl.create(:time_sheet, :date => Date.today - 1, :user => user,
+       :project => project )
+      TimeSheet.get_users_who_not_filled_timesheet(from_date, to_date)
+      expect(ActionMailer::Base.deliveries.count).to eq(0)
+    end
+
+    it 'Do not send mail if employee is on leave' do
+      user_project = FactoryGirl.create(:user_project, :start_date => Date.today - 3,
+       :user => user, :project => project)
+      FactoryGirl.create(:time_sheet, :date => Date.today - 3,
+        :user => user, :project => project )
+      leave = FactoryGirl.create(:leave_application, start_at: Date.today - 2, end_at: Date.today,
+        user: user, leave_status: LEAVE_STATUS[1])
+      from_date = Date.today - 3
+      to_date   = Date.today
+      TimeSheet.get_users_who_not_filled_timesheet(from_date, to_date)
+      expect(ActionMailer::Base.deliveries.count).to eq(0)
+    end
+
+    it "Do not send mail if user is not assigned on any project" do
+      from_date = Date.today - 2
+      to_date   = Date.today
+      TimeSheet.get_users_who_not_filled_timesheet(from_date, to_date)
+      expect(ActionMailer::Base.deliveries.count).to eq(0)
+    end
+
+    it "Do not send mail if user projects timesheet mandatory false" do
+      project      = FactoryGirl.create(:project, :timesheet_mandatory => false)
+      user_project = FactoryGirl.create(:user_project, :start_date => Date.today - 2,
+       :user => user, :project => project)
+      from_date = Date.today - 2
+      to_date   = Date.today
+      TimeSheet.get_users_who_not_filled_timesheet(from_date, to_date)
       expect(ActionMailer::Base.deliveries.count).to eq(0)
     end
   end

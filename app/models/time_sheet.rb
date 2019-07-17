@@ -474,22 +474,85 @@ class TimeSheet
     time_sheet_record
   end
 
-  def self.create_project_report_in_csv(project, from_date, to_date)
+  def self.create_project_timesheet_report(project, from_date, to_date)
     time_sheet_details = {}
-    time_sheet_log = []
+    time_sheet_log     = []
     time_sheet_records = load_time_sheet_and_calculate_total_work(project.id, from_date, to_date)
     time_sheet_records.each do |time_sheet_record|
       user = User.find(time_sheet_record["_id"].to_s)
       time_sheet_record['working_status'].each do |record|
-        time_sheet_data = []
-        total_hours = convert_milliseconds_to_hours(record['total_time'])
-        description = load_time_sheet_and_get_description(user, project, record['date'])
-        time_sheet_data.push(user.name, record['date'].strftime('%d-%m-%Y'), total_hours, description)
+        time_sheet_data = {}
+        total_hours     = convert_milliseconds_to_hours(record['total_time'])
+        description     = load_time_sheet_and_get_description(user, project, record['date'])
+        time_sheet_data = {
+          user_name: user.name,
+          date: record['date'].strftime('%d-%m-%Y'),
+          total_hours: total_hours,
+          description: description
+        }
         time_sheet_log << time_sheet_data
       end
     end
     time_sheet_log.sort!{|previous_record, next_record| previous_record[0] <=> next_record[0]}
-    generate_csv_for_project_record(time_sheet_log)
+    time_sheet_log
+  end
+
+  def self.create_all_projects_employees_timesheet_summary(from_date, to_date)
+    timesheet_summary = []
+    Project.all_active.each do|project|
+      time_sheet_records = load_time_sheet_and_calculate_total_work(project.id, from_date, to_date)
+      time_sheet_records.each do |time_sheet_record|
+        total_hours     = 0
+        time_sheet_data = {}
+        user            = User.find(time_sheet_record["_id"].to_s)
+        time_sheet_record['working_status'].each do |record|
+          total_hrs    = convert_milliseconds_to_hours(record['total_time'])
+          total_hours += total_hrs
+        end
+        total_days_work = convert_hours_to_days(total_hours)
+        time_sheet_data = {
+          project_name: project.name,
+          emp_id: user.employee_detail.employee_id,
+          user_name: user.name,
+          total_work_days: total_days_work
+        }
+        timesheet_summary << time_sheet_data
+      end
+    end
+    timesheet_summary
+  end
+
+  def self.create_all_projects_summary(from_date, to_date)
+    timesheet_summary = []
+    params            = { from_date: from_date, to_date: to_date }
+    Project.all_active.each do |project|
+      timesheet_data = {}
+      @individual_project_report, @project_report =
+        generate_individual_project_report(project, params)
+      timesheet_data = {
+        project_name: project.name,
+        total_hours: @project_report['total_worked_hours']
+      }
+      timesheet_summary << timesheet_data
+    end
+    timesheet_summary
+  end
+
+  def self.create_all_employee_summary(from_date, to_date)
+    params            = {from_date: from_date, to_date: to_date}
+    timesheet_summary = []
+    User.approved.employees.each do | user |
+      timesheet_data = {}
+      @individual_time_sheet_data, @total_work_and_leaves =
+        generate_individual_timesheet_report(user, params)
+      timesheet_data = {
+        emp_id: user.employee_detail.employee_id,
+        user_name: user.name,
+        total_worked_hours: @total_work_and_leaves['total_work']
+      }
+      timesheet_summary << timesheet_data
+    end
+    timesheet_summary
   end
 
   def self.load_time_sheet_and_get_description(user, project, date)
@@ -694,6 +757,36 @@ class TimeSheet
     user_ids = TimeSheet.where(date: {"$gte" => from_date, "$lte" => to_date}).distinct(:user_id)
     users = User.not_in(id: user_ids)
     users.where(status: STATUS[2], "$or" => [{role: ROLE[:employee]}, {role: ROLE[:intern]}]).order("public_profile.first_name" => :asc)
+  end
+
+  def self.get_users_who_not_filled_timesheet(from_date, to_date)
+    users          = User.get_approved_users_to_send_reminder
+    employee_list  = []
+    timesheet_data = []
+    users.each do| user |
+      next if user.user_projects.empty?
+      next if user.projects.where(timesheet_mandatory: true).count.eql?(0)
+      user_and_date  = []
+      timesheet_data = get_time_sheet(user, from_date, to_date)
+      unless timesheet_data.empty?
+        (from_date..to_date).each do |date|
+          date_wise = []
+          next if HolidayList.is_holiday?(date)
+          next if user_on_leave?(user, date)
+          next if time_sheet_filled?(user, date)
+          date_wise.push(user.employee_detail.employee_id, user.name, user.email, date)
+          employee_list << date_wise
+        end
+      else
+        user_and_date.push(user.employee_detail.employee_id, user.name, user.email, "#{from_date} To #{to_date}")
+        employee_list << user_and_date
+      end
+    end
+    send_employee_list_through_mail(employee_list, from_date, to_date) if employee_list.present?
+  end
+
+  def self.get_time_sheet(user, from_date, to_date)
+    TimeSheet.where(date: {"$gte" => from_date, "$lte" => to_date}).where(user_id: user.id)
   end
 
   def self.get_holiday_count(from_date, to_date)
@@ -989,5 +1082,24 @@ class TimeSheet
       }
     ])
   end
-end
 
+  def self.generate_csv_for_employees_not_filled_timesheet(employee_list)
+    headers = ['Employee ID', 'Employee Name', 'Employee Email', 'Date_Not_filled']
+      weekly_report_in_csv =
+        CSV.generate(headers: true) do |csv|
+          csv << headers
+          employee_list.each do |employee|
+            csv << employee
+          end
+        end
+    weekly_report_in_csv
+  end
+
+  def self.send_employee_list_through_mail(employee_list,from_date, to_date)
+    emails  = User.get_hr_emails
+    csv     = generate_csv_for_employees_not_filled_timesheet(employee_list)
+    text    = "PFA Employee List- Who have not filled timesheet from #{from_date} to #{to_date}"
+    options = { csv: csv, text: text, emails: emails, from_date: from_date, to_date: to_date }
+    WeeklyTimesheetReportMailer.send_report_who_havent_filled_timesheet(options).deliver!
+  end
+end

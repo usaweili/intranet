@@ -1002,6 +1002,8 @@ GEM
       cocaine (~> 0.5.5)
       mime-types
       mimemagic (~> 0.3.0)
+    quiet_assets (1.1.0)
+      railties (>= 3.1, < 5.0)
     rack (1.6.11)
     rack-cors (1.0.2)
     rack-protection (1.5.3)
@@ -1264,6 +1266,7 @@ DEPENDENCIES
   mongoid_slug
   nested_form
   omniauth-google-oauth2
+  quiet_assets
   rack-cors
   rack-proxy (~> 0.6.4)
   rails (= 4.2.5.2)
