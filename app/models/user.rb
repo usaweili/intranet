@@ -190,6 +190,10 @@ class User
     managers_emails
   end
 
+  def self.get_hr_emails
+    User.where(role: "HR").pluck(:email)
+  end
+
   def project_ids
     project_ids = user_projects.where(end_date: nil).pluck(:project_id)
   end
