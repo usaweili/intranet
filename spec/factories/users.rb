@@ -32,4 +32,11 @@ FactoryGirl.define do
     email { "employee@#{ORGANIZATION_DOMAIN}" }
     password { Faker::Internet.password }
   end
+
+  factory :manager, class: User do
+    role { 'Manager' }
+    email { "manager@#{ORGANIZATION_DOMAIN}" }
+    password { Faker::Internet.password }
+  end
+
 end

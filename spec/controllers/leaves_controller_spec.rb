@@ -7,6 +7,7 @@ describe LeaveApplicationsController do
       @admin = FactoryGirl.create(:admin)
       hr = FactoryGirl.create(:hr)
       @user = FactoryGirl.create(:user)
+      @manager = FactoryGirl.create(:manager)
       sign_in @user
       @leave_application = FactoryGirl.build(:leave_application, user: @user)
     end
@@ -50,6 +51,13 @@ describe LeaveApplicationsController do
       it "user is admin he could see all leaves" do
         sign_out @user
         sign_in @admin
+        get :view_leave_status
+        assigns(:pending_leaves).count.should eq(2)
+      end
+
+      it "user is manager then he could see all leaves" do
+        sign_out @user
+        sign_in @manager
         get :view_leave_status
         assigns(:pending_leaves).count.should eq(2)
       end

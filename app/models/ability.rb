@@ -15,6 +15,8 @@ class Ability
       can :manage, Project
       can :manage, Company
       can [:public_profile, :private_profile, :apply_leave], User
+      can :manage, TimeSheet
+      can :manage, LeaveApplication
     elsif user.role? 'Employee'
       employee_abilities(user.id)
     elsif user.role? 'Intern'

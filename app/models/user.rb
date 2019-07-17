@@ -83,7 +83,7 @@ class User
   def sent_mail_for_approval(leave_application_id)
     notified_users = [
                       User.approved.where(role: 'HR').pluck(:email), User.approved.where(role: 'Admin').first.try(:email),
-                      self.employee_detail.try(:notification_emails).try(:split, ',')
+                      self.employee_detail.try(:notification_emails).try(:split, ','), self.get_managers_emails
                      ].flatten.compact.uniq
     UserMailer.delay.leave_application(self.email, notified_users, leave_application_id)
   end
@@ -112,7 +112,13 @@ class User
 
   def is_admin_or_hr?
     [ROLE[:HR], ROLE[:admin]].include?(role)
-  end  
+  end
+
+  ["Admin", "Manager"].each do | method |
+    define_method "is_#{method.downcase}?" do
+      role.eql?(method)
+    end
+  end
 
   def allow_in_listing?
     return true if self.status == 'approved'
