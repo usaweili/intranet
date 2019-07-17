@@ -1930,4 +1930,19 @@ RSpec.describe TimeSheet, type: :model do
   #     end
   #   end
   # end
+  context 'Timesheet mail' do
+
+    it 'should send mail if user is not assinged on project and filled timesheet' do
+      time_sheet = FactoryGirl.create(:time_sheet)
+      expect(ActionMailer::Base.deliveries.count).to eq(1)
+    end
+
+    it 'should not send mail if project is assigned to this user' do
+      user         = FactoryGirl.create(:user)
+      project      = FactoryGirl.create(:project)
+      user_project = FactoryGirl.create(:user_project, user: user, project: project)
+      timesheet    = FactoryGirl.create(:time_sheet, user: user, project: project)
+      expect(ActionMailer::Base.deliveries.count).to eq(0)
+    end
+  end
 end
