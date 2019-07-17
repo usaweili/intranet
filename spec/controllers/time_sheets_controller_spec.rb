@@ -715,7 +715,7 @@ RSpec.describe TimeSheetsController, type: :controller do
         should render_template(:edit_timesheet)
       end
 
-      it 'if timesheet date is less than 2 days in case of Employee' do
+      it "if timesheet date is less than #{ TimeSheet::DAYS_FOR_UPDATE } days in case of Employee" do
         sign_in employee
         FactoryGirl.create(:user_project,
           user: employee,

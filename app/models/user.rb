@@ -112,7 +112,13 @@ class User
 
   def is_admin_or_hr?
     [ROLE[:HR], ROLE[:admin]].include?(role)
-  end  
+  end
+
+  ["Admin", "Manager"].each do | method |
+    define_method "is_#{method.downcase}?" do
+      role.eql?(method)
+    end
+  end
 
   def allow_in_listing?
     return true if self.status == 'approved'
