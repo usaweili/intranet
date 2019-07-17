@@ -1,7 +1,7 @@
 %span
 	Hi #{@user.name},
 %br
-%span You have filled timesheet for #{@project_name} (which is not assinged to you as of now) with details as below- 
+%span You have filled timesheet for #{@project_name} (which is not assigned to you as of now) with details as below- 
 %br
 %span - #{@timesheet.date.strftime("%d %B %Y")} Time: #{@timesheet.from_time.strftime("%I:%M %p")} to #{@timesheet.to_time.strftime("%I:%M %p")}.
 %br
