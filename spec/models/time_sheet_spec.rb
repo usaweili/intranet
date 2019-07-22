@@ -1931,19 +1931,18 @@ RSpec.describe TimeSheet, type: :model do
   #   end
   # end
   context 'Timesheet mail' do
-
     before do
       ActionMailer::Base.deliveries = []
     end
-    
+    let!(:user) { FactoryGirl.create(:user, status: STATUS[2]) }
+    let!(:project) { FactoryGirl.create(:project, start_date: Date.today - 5) }
     it 'should send mail if user is not assinged on project and filled timesheet' do
-      time_sheet = FactoryGirl.create(:time_sheet)
+      time_sheet = FactoryGirl.create(:time_sheet, user: user, project: project, date: Date.today - 1)
+      TimeSheet.get_users_and_timesheet_who_have_filled_timesheet_for_diffrent_project
       expect(ActionMailer::Base.deliveries.count).to eq(1)
     end
 
     it 'should not send mail if project is assigned to this user' do
-      user         = FactoryGirl.create(:user)
-      project      = FactoryGirl.create(:project)
       user_project = FactoryGirl.create(:user_project, user: user, project: project)
       timesheet    = FactoryGirl.create(:time_sheet, user: user, project: project)
     end
@@ -2005,6 +2004,13 @@ RSpec.describe TimeSheet, type: :model do
       from_date = Date.today - 2
       to_date   = Date.today
       TimeSheet.get_users_who_not_filled_timesheet(from_date, to_date)
+      timesheet    = FactoryGirl.create(:time_sheet, user: user, project: project, date: Date.today - 1)
+      TimeSheet.get_users_and_timesheet_who_have_filled_timesheet_for_diffrent_project
+      expect(ActionMailer::Base.deliveries.count).to eq(0)
+    end
+
+    it "should not send mail if timesheet data empty" do
+      TimeSheet.get_users_and_timesheet_who_have_filled_timesheet_for_diffrent_project
       expect(ActionMailer::Base.deliveries.count).to eq(0)
     end
   end

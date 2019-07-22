@@ -22,7 +22,6 @@ class TimeSheet
   before_validation :valid_date_for_create?, on: :create
   validate :time_sheet_overlapping?
   validate :timesheet_date_greater_than_project_start_date, if: :is_project_assigned_to_user?
-  after_save :send_mail_if_project_is_not_assigned, unless: :is_project_assigned_to_user?
 
   MAX_TIMESHEET_COMMAND_LENGTH = 5
   DATE_FORMAT_LENGTH = 3
@@ -103,10 +102,6 @@ class TimeSheet
 
   def is_project_assigned_to_user?
     UserProject.where(user_id: user.id, project_id: project_id).exists?
-  end
-
-  def send_mail_if_project_is_not_assigned
-    TimesheetRemainderMailer.user_timesheet_for_diffrent_project(user, self, project.name).deliver_now
   end
 
   def valid_date_for_update?
@@ -962,6 +957,28 @@ class TimeSheet
   
   def self.load_project_with_id(project_id)
     Project.find_by(id: project_id)
+  end
+
+  def self.get_users_and_timesheet_who_have_filled_timesheet_for_diffrent_project
+    User.approved.each do | user |
+      user_timesheet = []
+      time_sheets    = user.time_sheets.where(date: Date.today - 1)
+      next if time_sheets.empty?
+      time_sheets.each do|time_sheet|
+        time_sheet_data = {}
+        next if user.user_projects.where(project_id: time_sheet.project_id).exists?
+        time_sheet_data = {
+          project_name: time_sheet.project.name,
+          date:         time_sheet.date,
+          from_time:    time_sheet.from_time,
+          to_time:      time_sheet.to_time
+        }
+        user_timesheet << time_sheet_data
+      end
+      if user_timesheet.present?
+        TimesheetRemainderMailer.user_timesheet_for_diffrent_project(user, user_timesheet).deliver_now
+      end
+    end
   end
 
   def self.load_timesheet(timesheet_ids, from_date, to_date)
