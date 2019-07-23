@@ -18,7 +18,7 @@ class TimesheetRemainderMailer < ActionMailer::Base
     @timesheet      = timesheet
     @project_name   = project_name
     mail( 
-      subject: 'Timesheet for project which is not assingned to you',
+      subject: 'Timesheet for project which is not assigned to you',
       to: user.email,
       cc: managers_emails + hr_emails
     )
