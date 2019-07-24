@@ -12,7 +12,7 @@
     %tbody
       = f.fields_for :time_sheets, @time_sheets do |time_sheet|
         %tr
-          %td= time_sheet.select :project_id, options_for_select(@user.projects.pluck(:name, :id), time_sheet.object.project_id), {}, {style: "margin-bottom: 16px"}
+          %td= time_sheet.select :project_id, options_for_select(active_project_ids(@user), selected: time_sheet.object.project_id), {}, {style: "margin-bottom: 16px"}
           %td= time_sheet.input :date, input_html: {class: 'timesheet-input datepicker',
             'data-behaviour' => 'datepicker', value: time_sheet.object.date.try(:strftime, "%d-%m-%Y"),
             'readonly' => true}, label: false

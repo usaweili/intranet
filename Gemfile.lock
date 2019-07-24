@@ -935,6 +935,8 @@ GEM
     kgio (2.9.2)
     launchy (2.4.3)
       addressable (~> 2.3)
+    letter_opener (1.7.0)
+      launchy (~> 2.2)
     libv8 (3.16.14.3)
     loofah (2.1.1)
       crass (~> 1.0.2)
@@ -1265,6 +1267,7 @@ DEPENDENCIES
   jquery-timepicker-rails
   jquery-turbolinks
   kaminari
+  letter_opener
   light!
   mina!
   mina_extensions!

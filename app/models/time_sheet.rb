@@ -962,7 +962,8 @@ class TimeSheet
   def self.get_users_and_timesheet_who_have_filled_timesheet_for_diffrent_project
     User.approved.each do | user |
       user_timesheet = []
-      time_sheets    = user.time_sheets.where(date: Date.today - 1)
+      date = Date.yesterday
+      time_sheets    =  user.time_sheets.where(:created_at => date.beginning_of_day..date.end_of_day)
       next if time_sheets.empty?
       time_sheets.each do|time_sheet|
         time_sheet_data = {}

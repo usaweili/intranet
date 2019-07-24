@@ -32,14 +32,6 @@ Intranet::Application.configure do
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
   config.action_mailer.perform_deliveries = true
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = {
-    :address => "smtp.sendgrid.net",
-    :port => 25,
-    :domain => "sendgrid.me",
-    :authentication => :plain,
-    :user_name => ENV['USERNAME'],
-    :password => ENV['PASSWORD']
-  }
+  config.action_mailer.delivery_method = :letter_opener
   config.action_mailer.default_url_options = { host: 'localhost:3000' }
 end

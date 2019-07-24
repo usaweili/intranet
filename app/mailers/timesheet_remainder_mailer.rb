@@ -17,7 +17,7 @@ class TimesheetRemainderMailer < ActionMailer::Base
     hr_emails       = User.get_hr_emails
     @timesheets     = timesheets
     mail( 
-      subject: 'Timesheet for project which is not assigned to you',
+      subject: 'Timesheet for project(s) which are not yet assigned',
       to: user.email,
       cc: managers_emails + hr_emails
     )

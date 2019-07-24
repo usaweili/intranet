@@ -1,23 +1,17 @@
 %span
 	Hi #{@user.name},
-%br
-%span You have filled timesheet for project(which is not assigned to you as of now) with details as below- 
-%br
+
+%p You have filled timesheet for project(s) (which are not assigned to you as of now) with details as below -
+%p
 - @timesheets.each do|timesheet|
-	%span - #{timesheet[:project_name]}. #{timesheet[:date].strftime("%d %B %Y")} Time: #{timesheet[:from_time].strftime("%I:%M %p")} to #{timesheet[:to_time].strftime("%I:%M %p")}.
+	%span #{timesheet[:project_name]} - #{timesheet[:date].strftime("%d %B %Y")} - #{timesheet[:from_time].strftime("%I:%M %p")} to #{timesheet[:to_time].strftime("%I:%M %p")}.
 	%br
-%br
+
+%p
 	If it’s a wrong entry then kindly update it as soon as possible.
 
 %br
-%br
-%span
-	Hi HR and Managers,
-%br
-%span
-	#{@user.name} has filled timesheet for project, which is not assigned to him/her.
-%br
-%br
-%span
-	Thanks.
-
+%p
+	Hi HR and Manager(s),
+%p
+	#{@user.name} has filled timesheet for project(s), which are not assigned to him/her in system yet. 
