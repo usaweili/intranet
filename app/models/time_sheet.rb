@@ -736,7 +736,7 @@ class TimeSheet
     days = hours = 0
     days = total_allocated_hourse / ALLOCATED_HOURS
     hours = total_allocated_hourse % ALLOCATED_HOURS
-    result = hours > 0 ? "#{days} Days #{hours}H (#{total_allocated_hourse}H)" : "#{days} Days (#{total_allocated_hourse}H)"
+    result = hours > 0 ? "#{days} Days #{hours}h (#{total_allocated_hourse}h)" : "#{days} Days (#{total_allocated_hourse}h)"
     result
   end
 
@@ -1101,5 +1101,37 @@ class TimeSheet
     text    = "PFA Employee List- Who have not filled timesheet from #{from_date} to #{to_date}"
     options = { csv: csv, text: text, emails: emails, from_date: from_date, to_date: to_date }
     WeeklyTimesheetReportMailer.send_report_who_havent_filled_timesheet(options).deliver!
+  end
+
+  def self.generate_summary_report(from_date, to_date, params, current_user)
+    project_employee = create_all_projects_employees_timesheet_summary(from_date.to_date, to_date.to_date)
+    projects_summary = create_all_projects_summary(from_date, to_date)
+    employee_summary = create_all_employee_summary(from_date, to_date)
+    subject          = "Timesheet summary report from #{from_date} to #{to_date}"
+    options          = { 
+      project_employee: project_employee,
+      projects_summary: projects_summary,
+      employee_summary: employee_summary,
+      params:           params,
+      user_email:       current_user.email,
+      user_name:        current_user.name,
+      from_date:        from_date, to_date: to_date,
+      subject:          subject
+    }
+  end
+
+  def self.generate_project_report(from_date, to_date, project, params, current_user)
+    report  = create_project_timesheet_report(project, from_date.to_date, to_date.to_date)
+    subject = "Timesheet report - #{project.name} from #{from_date} to #{to_date}"
+    options = { 
+      report:       report, 
+      project_name: project.name,
+      params:       params, 
+      user_email:   current_user.email,
+      user_name:    current_user.name, 
+      from_date:    from_date,
+      to_date:      to_date,
+      subject:      subject
+    }
   end
 end

@@ -142,22 +142,16 @@ class TimeSheetsController < ApplicationController
     @from_date = params[:from_date] || Date.today.beginning_of_month.to_s
     @to_date = params[:to_date] || Date.today.to_s
     @params = params['summary']
-    if @params.present?
-      @project_employee = TimeSheet.create_all_projects_employees_timesheet_summary(@from_date.to_date, @to_date.to_date)
-      @projects_summary = TimeSheet.create_all_projects_summary(@from_date, @to_date)
-      @employee_summary = TimeSheet.create_all_employee_summary(@from_date, @to_date)
-    end
     if params[:project_id].present?
-      @project = Project.where(id: params[:project_id]).first
-      @report = TimeSheet.create_project_timesheet_report(@project, @from_date.to_date, @to_date.to_date)
+      if @params.present?
+        options = TimeSheet.generate_summary_report(@from_date, @to_date, @params, current_user)
+      else
+        project = Project.where(id: params[:project_id]).first
+        options = TimeSheet.generate_project_report(@from_date, @to_date, project, @params, current_user)
+      end
+      WeeklyTimesheetReportMailer.delay.send_timesheet_summary_report(options) if options.present?
+      flash[:success] = "You will receive summary report to your mail shortly."
     end
-
-    respond_to do |format|
-      format.html
-      format.xlsx{
-         response.headers['Content-Disposition'] = "attachment; filename = Timesheet_summary_report_from #{@from_date} to #{@to_date}.xlsx"
-      }
-    end 
   end
 
   private
