@@ -8,13 +8,12 @@ class UsersController < ApplicationController
   after_action :notify_document_download, only: :download_document
 
   def index
-    offset = params[:offset] || 0
-    limit = params[:limit] || 50
-    @users = current_user.is_admin_or_hr? ? User.employees.offset(offset).limit(limit) : User.employees.approved.offset(offset).limit(limit)
+    @users = params[:all].present? ?  User.employees : User.employees.approved
     @usersxls = params[:status] == "all" ? User.employees : User.employees.approved
     respond_to do |format|
       format.html # index.html.erb
       format.xlsx
+      format.js
       format.json { render json: @users.to_json }
     end
   end

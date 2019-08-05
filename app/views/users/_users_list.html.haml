@@ -1,0 +1,29 @@
+%table.table.table-hover#user_table
+  %thead
+    %tr
+      %th Id
+      %th
+      %th Employee Name
+      %th Email
+      %th Mobile No
+      - if can? :edit, User
+        %th Role
+        %th Status
+        %th
+  %tbody
+    - users.each_with_index do |user, i|
+      %tr
+        %td= user.employee_detail.try(:employee_id) if user.employee_detail
+        %td= image_tag(user.public_profile.image.thumb.url, class: 'img-polaroid') if user.public_profile
+        %td= link_to user.name, user_path(user) if user.public_profile
+        %td= user.email
+        %td= user.public_profile.try(:mobile_number)
+        - if can? :edit, User
+          %td= user.role
+          %td
+            - status_class = (user.status == 'approved') ? 'label-success' : 'label-warning'
+            .label{class: status_class}
+              = user.status
+          %td= link_to '', public_profile_user_path(user), class: 'icon-edit', data: {'no-turbolink' =>  true}
+:coffeescript
+  $('#user_table').dataTable('order':[[2, "asc"]], 'columnDefs': [{'targets': [1,3,4,-1,-2], 'orderable': false}])
