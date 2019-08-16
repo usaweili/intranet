@@ -8,7 +8,7 @@ describe PrivateProfile do
                           :passport_number,
                           :qualification,
                           :date_of_joining,
-                          :work_experience,
+                          :previous_work_experience,
                           :previous_company
                          )
      }
@@ -18,11 +18,8 @@ describe PrivateProfile do
   it { should be_embedded_in(:user) }
   it { should accept_nested_attributes_for(:addresses) }
   it { should accept_nested_attributes_for(:contact_persons) }
-=begin
-  it { should validate_presence_of(:qualification).on(:update) }
+  it { should validate_numericality_of(:previous_work_experience) }
   it { should validate_presence_of(:date_of_joining).on(:update) }
-  it { should validate_presence_of(:personal_email).on(:update) }
-=end
 
   context 'While updating user, should not update user' do
     let!(:user) { FactoryGirl.create(:user) }

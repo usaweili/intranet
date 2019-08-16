@@ -5,6 +5,6 @@ FactoryGirl.define do
     passport_number { Faker::Code.nric }
     qualification { Faker::Educator.course }
     date_of_joining { Date.new(Date.today.year, 01, 01) }
-    work_experience { Faker::Number.between(1, 15) }
+    previous_work_experience { Faker::Number.between(1, 15) }
   end
 end

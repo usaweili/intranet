@@ -10,12 +10,14 @@ class PrivateProfile
   field :previous_company
   field :bonusly_auth_token
   field :tshirt_size
+  field :previous_work_experience, :type => Integer #in months
 
   embedded_in :user
   embeds_many :contact_persons
   has_many :addresses, autosave: true
 
   validates :date_of_joining, presence: true, if: :check_status_and_role?, on: :update
+  validates :previous_work_experience, numericality: { only_integer: true }
 
   accepts_nested_attributes_for :addresses
   accepts_nested_attributes_for :contact_persons
