@@ -12,6 +12,7 @@ class Ability
     elsif user.role? 'Finance'
       can [:public_profile, :private_profile, :edit, :apply_leave], User
     elsif user.role? 'Manager'
+      employee_abilities(user.id)
       can :manage, Project
       can :manage, Company
       can [:public_profile, :private_profile, :apply_leave], User
