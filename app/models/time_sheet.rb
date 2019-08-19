@@ -21,7 +21,7 @@ class TimeSheet
   validates :to_time, presence: true, if: :to_time_is_future_time?
   before_validation :valid_date_for_create?, on: :create
   validate :time_sheet_overlapping?
-  validate :timesheet_date_greater_than_project_start_date, if: :is_project_assigned_to_user?
+  # validate :timesheet_date_greater_than_project_start_date, if: :is_project_assigned_to_user?
 
   MAX_TIMESHEET_COMMAND_LENGTH = 5
   DATE_FORMAT_LENGTH = 3
@@ -82,23 +82,23 @@ class TimeSheet
     return true
   end
   
-  def timesheet_date_greater_than_project_start_date
-    if timesheet_date_greater_than_assign_project_date
-      text = "Not allowed to fill timesheet for this date. As you were not assigned on project for this date"
-      errors.add(:date, text)
-      return false
-    end
-    return true
-  end
+  # def timesheet_date_greater_than_project_start_date
+  #   if timesheet_date_greater_than_assign_project_date
+  #     text = "Not allowed to fill timesheet for this date. As you were not assigned on project for this date"
+  #     errors.add(:date, text)
+  #     return false
+  #   end
+  #   return true
+  # end
 
-  def timesheet_date_greater_than_assign_project_date
-    user = User.find(self.user_id)
-    user_project = UserProject.find_by(user_id: user.id, project_id: project_id, end_date: nil)
-      if date < user_project.start_date
-        return true
-      end
-    return false
-  end
+  # def timesheet_date_greater_than_assign_project_date
+  #   user = User.find(self.user_id)
+  #   user_project = UserProject.find_by(user_id: user.id, project_id: project_id, end_date: nil)
+  #     if date < user_project.start_date
+  #       return true
+  #     end
+  #   return false
+  # end
 
   def is_project_assigned_to_user?
     UserProject.where(user_id: user.id, project_id: project_id).exists?

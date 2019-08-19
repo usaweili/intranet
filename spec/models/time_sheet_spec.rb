@@ -93,18 +93,18 @@ RSpec.describe TimeSheet, type: :model do
       #   }
       #   expect(time_sheet.parse_timesheet_data(params)).to eq(false)
       # end
-
-      it 'fail because date is greater than assigned project date' do
-        time_sheet = FactoryGirl.build(:time_sheet,
-          date: DateTime.now - 5,
-          user: user,
-          project: project
-        )
-        expect(time_sheet.save).to eq(false)
-        expect(time_sheet.errors[:date]).to eq(
-          ['Not allowed to fill timesheet for this date. As you were not assigned on project for this date']
-        )
-      end
+#removed this validation when user are allowed to fill timesheet irrespective of assigned date.
+      # it 'fail because date is greater than assigned project date' do
+      #   time_sheet = FactoryGirl.build(:time_sheet,
+      #     date: DateTime.now - 5,
+      #     user: user,
+      #     project: project
+      #   )
+      #   expect(time_sheet.save).to eq(false)
+      #   expect(time_sheet.errors[:date]).to eq(
+      #     ['Not allowed to fill timesheet for this date. As you were not assigned on project for this date']
+      #   )
+      # end
 
       it 'fail because date is not within this week' do
         time_sheet = FactoryGirl.build(:time_sheet, date: DateTime.now - 10)
@@ -604,9 +604,9 @@ RSpec.describe TimeSheet, type: :model do
       expect(timesheet_data[0][0]['project_details'][0]['project_name']).
         to eq("#{project.name}")
       expect(timesheet_data[0][0]['project_details'][0]['worked_hours']).
-        to eq('0 Days 1H (1H)')
+        to eq('0 Days 1h (1h)')
       expect(timesheet_data[0][0]['total_worked_hours']).
-        to eq('0 Days 1H (1H)')
+        to eq('0 Days 1h (1h)')
       expect(timesheet_data[0][0]['leaves']).to eq(0)
     end
   end
@@ -656,7 +656,7 @@ RSpec.describe TimeSheet, type: :model do
       expect(individual_time_sheet_data.count).to eq(2)
       expect(
         individual_time_sheet_data['Test project1']['total_worked_hours']).
-          to eq('0 Days 1H (1H)'
+          to eq('0 Days 1h (1h)'
       )
       expect(
         individual_time_sheet_data[
@@ -685,9 +685,9 @@ RSpec.describe TimeSheet, type: :model do
       ).to eq('Today I finish the work')
       expect(
         individual_time_sheet_data['Test project2']['total_worked_hours']
-      ).to eq('0 Days 3H (3H)')
+      ).to eq('0 Days 3h (3h)')
       expect(total_work_and_leaves['total_work']).
-      to eq('0 Days 4H (4H)')
+      to eq('0 Days 4h (4h)')
       expect(total_work_and_leaves['leaves']).to eq(0)
     end
   end
@@ -709,7 +709,7 @@ RSpec.describe TimeSheet, type: :model do
         allocated_hours = TimeSheet.get_allocated_hours(
           project, from_date, to_date
         )
-        expect(allocated_hours).to eq("13 Days (104H)")
+        expect(allocated_hours).to eq("13 Days (104h)")
       end
 
       it 'if there is one haliday' do
@@ -724,7 +724,7 @@ RSpec.describe TimeSheet, type: :model do
         allocated_hours = TimeSheet.get_allocated_hours(
           project, from_date, to_date
         )
-        expect(allocated_hours).to eq("12 Days (96H)")
+        expect(allocated_hours).to eq("12 Days (96h)")
       end
     end
 
@@ -741,7 +741,7 @@ RSpec.describe TimeSheet, type: :model do
         allocated_hours = TimeSheet.get_allocated_hours(
           project, from_date, to_date
         )
-        expect(allocated_hours).to eq("8 Days (64H)")
+        expect(allocated_hours).to eq("8 Days (64h)")
       end
 
       it 'if there is one holiday' do
@@ -757,7 +757,7 @@ RSpec.describe TimeSheet, type: :model do
         allocated_hours = TimeSheet.get_allocated_hours(
           project, from_date, to_date
         )
-        expect(allocated_hours).to eq("7 Days (56H)")
+        expect(allocated_hours).to eq("7 Days (56h)")
       end
     end
 
@@ -773,7 +773,7 @@ RSpec.describe TimeSheet, type: :model do
         allocated_hours = TimeSheet.get_allocated_hours(
           project, from_date, to_date
         )
-        expect(allocated_hours).to eq("10 Days (80H)")
+        expect(allocated_hours).to eq("10 Days (80h)")
       end
 
       it 'if there is one holiday' do
@@ -788,7 +788,7 @@ RSpec.describe TimeSheet, type: :model do
         allocated_hours = TimeSheet.get_allocated_hours(
           project, from_date, to_date
         )
-        expect(allocated_hours).to eq("9 Days (72H)")
+        expect(allocated_hours).to eq("9 Days (72h)")
       end
     end
 
@@ -805,7 +805,7 @@ RSpec.describe TimeSheet, type: :model do
         allocated_hours = TimeSheet.get_allocated_hours(
           project, from_date, to_date
         )
-        expect(allocated_hours).to eq("3 Days (24H)")
+        expect(allocated_hours).to eq("3 Days (24h)")
       end
 
       it 'if there is one holiday' do
@@ -821,7 +821,7 @@ RSpec.describe TimeSheet, type: :model do
         allocated_hours = TimeSheet.get_allocated_hours(
           project, from_date, to_date
         )
-        expect(allocated_hours).to eq("2 Days (16H)")
+        expect(allocated_hours).to eq("2 Days (16h)")
       end
     end
 
@@ -860,7 +860,7 @@ RSpec.describe TimeSheet, type: :model do
         allocated_hours = TimeSheet.get_allocated_hours(
           project, from_date, to_date
         )
-        expect(allocated_hours).to eq("31 Days (248H)")
+        expect(allocated_hours).to eq("31 Days (248h)")
       end
     end
   end
@@ -1003,8 +1003,8 @@ RSpec.describe TimeSheet, type: :model do
         )
       expect(projects_report[0]["project_name"]).to eq("#{project.name}")
       expect(projects_report[0]["no_of_employee"]).to eq(1)
-      expect(projects_report[0]["total_hours"]).to eq("0 Days 1H (1H)")
-      expect(projects_report[0]["allocated_hours"]).to eq("13 Days (104H)")
+      expect(projects_report[0]["total_hours"]).to eq("0 Days 1h (1h)")
+      expect(projects_report[0]["allocated_hours"]).to eq("13 Days (104h)")
       expect(projects_report[0]["leaves"]).to eq(1)
       expect(project_without_timesheet.present?).to eq(false)
     end
@@ -1175,24 +1175,24 @@ RSpec.describe TimeSheet, type: :model do
 
       expect(
         individual_project_report['test1_user test1_user'][0]['total_work']
-      ).to eq('0 Days 3H (3H)')
+      ).to eq('0 Days 3h (3h)')
       expect(
         individual_project_report['test1_user test1_user'][0]['allocated_hours']
-      ).to eq('14 Days (112H)')
+      ).to eq('14 Days (112h)')
       expect(
         individual_project_report['test1_user test1_user'][0]['leaves']
       ).to eq(3)
       expect(
         individual_project_report['test2_user test2_user'][0]['total_work']
-      ).to eq('0 Days 3H (3H)')
+      ).to eq('0 Days 3h (3h)')
       expect(
         individual_project_report['test2_user test2_user'][0]['allocated_hours']
-      ).to eq('14 Days (112H)')
+      ).to eq('14 Days (112h)')
       expect(
         individual_project_report['test2_user test2_user'][0]['leaves']
       ).to eq(0)
-      expect(project_report['total_worked_hours']).to eq('0 Days 6H (6H)')
-      expect(project_report['total_allocated_hourse']).to eq('28 Days (224H)')
+      expect(project_report['total_worked_hours']).to eq('0 Days 6h (6h)')
+      expect(project_report['total_allocated_hourse']).to eq('28 Days (224h)')
       expect(project_report['total_leaves']).to eq(3)
     end
   end
@@ -1200,12 +1200,12 @@ RSpec.describe TimeSheet, type: :model do
   context 'Generate weekly report in csv format' do
     it 'Should generate csv' do
       weekly_report = [
-        ['employee_test1', 'project_test1', '0 days 6H (6H)', 1, 0],
-        ['employee_test2', 'project_test2', '0 days 3H (3H)', 2, 1]
+        ['employee_test1', 'project_test1', '0 days 6h (6h)', 1, 0],
+        ['employee_test2', 'project_test2', '0 days 3h (3h)', 2, 1]
       ]
       csv = TimeSheet.generate_weekly_report_in_csv_format(weekly_report)
       expect(csv).to eq(
-        "Employee name,Project name,No of days worked,Leaves,Holidays\nemployee_test1,project_test1,0 days 6H (6H),1,0\nemployee_test2,project_test2,0 days 3H (3H),2,1\n"
+        "Employee name,Project name,No of days worked,Leaves,Holidays\nemployee_test1,project_test1,0 days 6h (6h),1,0\nemployee_test2,project_test2,0 days 3h (3h),2,1\n"
       )
     end
   end
