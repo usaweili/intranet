@@ -13,6 +13,7 @@ class PublicProfile
   field :blood_group
   field :date_of_birth, :type => Date
   field :skills
+  field :technical_skills, type: Array
   field :skype_id
   field :pivotal_tracker_id
   field :github_handle
@@ -24,6 +25,10 @@ class PublicProfile
   field :slack_handle
 
   #validates_attachment :photo, :content_type => { :content_type => "image/jpg" }
+  TECHNICAL_SKILLS = ["Android", "Angular", "Delivery Management", "Design", "DevOps",
+    "Go", "iOS", "Ionic", "NodeJs", "PHP", "Python", "QA-Automation", "QA-Manual", "ROR",
+    "React", "UI", "UX"]
+
 
   embedded_in :user
 
@@ -37,7 +42,7 @@ class PublicProfile
     self.user.set_details("dob", self.date_of_birth) if self.date_of_birth_changed? #set the dob_day and dob_month
   end
 
-  after_update :delete_team_cache, :send_email_to_hr, if: Proc.new{ updated_at_changed? && !slack_handle_changed? }
+  # after_update :delete_team_cache, :send_email_to_hr, if: Proc.new{ updated_at_changed? && !slack_handle_changed? }
 
   def name
     "#{first_name} #{last_name}"
