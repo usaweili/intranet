@@ -8,8 +8,8 @@
       - if can? :edit, User
         = link_to "", public_profile_user_path(@user), class: 'icon-edit user-edit', data: {'no-turbolink' =>  true}
     .skills
-      - if @user.public_profile.skills?
-        = truncate(@user.public_profile.skills, length: 200)
+      - if @user.public_profile.technical_skills?
+        = @user.public_profile.try(:technical_skills).join(', ')
   .profile-info
     %table.table{style: "width: 0%"}
       %tbody
