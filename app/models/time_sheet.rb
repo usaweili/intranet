@@ -357,7 +357,7 @@ class TimeSheet
     return projects_report_in_json, project_without_timesheet
   end
 
-  def self.generate_individual_timesheet_report(user, params)
+  def self.generate_individual_timesheet_report(user, params, convert_hrs = true)
     time_sheet_log = []
     individual_time_sheet_data = {}
     total_minutes = 0
@@ -376,7 +376,10 @@ class TimeSheet
         time_sheet_data = []
       end
       working_details = {}
-      total_worked_hours = convert_hours_to_days(total_worked_in_hours(total_minutes.to_i))
+      total_worked_hours =
+        convert_hrs ?
+        convert_hours_to_days(total_worked_in_hours(total_minutes.to_i)) :
+        total_worked_in_hours(total_minutes.to_i)
       working_details['daily_status'] = time_sheet_log
       working_details['total_worked_hours'] = total_worked_hours
       individual_time_sheet_data["#{project.name}"] = working_details
@@ -384,12 +387,12 @@ class TimeSheet
       working_details = {}
       total_minutes   = 0
     end
-    total_work_and_leaves = get_total_work_and_leaves(user, params, total_minutes_worked_on_projects.to_i)
+    total_work_and_leaves = get_total_work_and_leaves(user, params, total_minutes_worked_on_projects.to_i, convert_hrs)
     return individual_time_sheet_data, total_work_and_leaves
   end
 
 
-  def self.generate_individual_project_report(project, params)
+  def self.generate_individual_project_report(project, params, convert_hrs = true)
     individual_project_report = {}
     total_minutes = 0
     total_minutes_worked_on_projects = 0
@@ -404,14 +407,16 @@ class TimeSheet
       user_projects = user.get_user_projects_from_user(project.id, params[:from_date].to_date, params[:to_date].to_date)
       allocated_hours = total_allocated_hours(user_projects, params[:from_date].to_date, params[:to_date].to_date)
       leaves_count = total_leaves_count(user, user_projects, params[:from_date].to_date, params[:to_date].to_date)
-      report_details['total_work'] = convert_hours_to_days(total_worked_in_hours(total_minutes.to_i))
+      report_details['total_work'] = convert_hrs ?
+        convert_hours_to_days(total_worked_in_hours(total_minutes.to_i)) :
+        total_worked_in_hours(total_minutes.to_i)
       report_details['allocated_hours'] = convert_hours_to_days(allocated_hours)
       report_details['leaves'] = leaves_count
       time_sheet_log << report_details
       individual_project_report["#{user.name}"] = time_sheet_log
       total_minutes = 0      
     end
-    project_report = get_total_work_and_leaves_for_project_report(project, params, total_minutes_worked_on_projects)
+    project_report = get_total_work_and_leaves_for_project_report(project, params, total_minutes_worked_on_projects, convert_hrs)
     return individual_project_report, project_report
   end
 
@@ -504,12 +509,11 @@ class TimeSheet
           total_hrs    = convert_milliseconds_to_hours(record['total_time'])
           total_hours += total_hrs
         end
-        total_days_work = convert_hours_to_days(total_hours)
         time_sheet_data = {
           project_name: project.name,
           emp_id: user.employee_detail.employee_id,
           user_name: user.name,
-          total_work_days: total_days_work
+          total_work_days: total_hours
         }
         timesheet_summary << time_sheet_data
       end
@@ -523,7 +527,7 @@ class TimeSheet
     Project.all_active.each do |project|
       timesheet_data = {}
       @individual_project_report, @project_report =
-        generate_individual_project_report(project, params)
+        generate_individual_project_report(project, params, false)
       timesheet_data = {
         project_name: project.name,
         total_hours: @project_report['total_worked_hours']
@@ -539,7 +543,7 @@ class TimeSheet
     User.approved.employees.each do | user |
       timesheet_data = {}
       @individual_time_sheet_data, @total_work_and_leaves =
-        generate_individual_timesheet_report(user, params)
+        generate_individual_timesheet_report(user, params, false)
       timesheet_data = {
         emp_id: user.employee_detail.employee_id,
         user_name: user.name,
@@ -561,9 +565,12 @@ class TimeSheet
     return from_time, to_time
   end
 
-  def self.get_total_work_and_leaves_for_project_report(project, params, total_minutes_worked_on_projects)
+  def self.get_total_work_and_leaves_for_project_report(project, params, total_minutes_worked_on_projects, convert_hrs)
     project_report = {}
-    total_hours_worked_on_project = convert_hours_to_days(total_worked_in_hours(total_minutes_worked_on_projects.to_i))
+    total_hours_worked_on_project =
+      convert_hrs ?
+      convert_hours_to_days(total_worked_in_hours(total_minutes_worked_on_projects.to_i)) :
+      total_worked_in_hours(total_minutes_worked_on_projects.to_i)
     total_allocated_hours_on_projects = get_allocated_hours(project, params[:from_date].to_date, params[:to_date].to_date)
     total_leaves = get_leaves(project, params[:from_date].to_date, params[:to_date].to_date)
     project_report['total_worked_hours'] = total_hours_worked_on_project
@@ -572,10 +579,11 @@ class TimeSheet
     project_report
   end
 
-  def self.get_total_work_and_leaves(user, params, total_minutes_worked_on_projects)
+  def self.get_total_work_and_leaves(user, params, total_minutes_worked_on_projects, convert_hrs)
     total_work_and_leaves = {}
     total_worked_hours = total_worked_in_hours(total_minutes_worked_on_projects.to_i)
-    total_work_and_leaves['total_work'] = convert_hours_to_days(total_worked_hours)
+    total_work_and_leaves['total_work'] =
+      convert_hrs ? convert_hours_to_days(total_worked_hours) : total_worked_hours
     total_work_and_leaves['leaves'] = approved_leaves_count(user, params[:from_date], params[:to_date])
     total_work_and_leaves
   end

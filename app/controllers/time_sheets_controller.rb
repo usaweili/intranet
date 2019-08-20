@@ -149,8 +149,8 @@ class TimeSheetsController < ApplicationController
         project = Project.where(id: params[:project_id]).first
         options = TimeSheet.generate_project_report(@from_date, @to_date, project, @params, current_user)
       end
-      WeeklyTimesheetReportMailer.delay.send_timesheet_summary_report(options) if options.present?
       flash[:success] = "You will receive summary report to your mail shortly."
+      WeeklyTimesheetReportMailer.delay.send_timesheet_summary_report(options) if options.present?
     end
   end
 
