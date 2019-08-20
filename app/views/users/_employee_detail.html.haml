@@ -5,6 +5,9 @@
     = e.input :description, as: :text, input_html: {class: 'text-description'}
     = e.input :date_of_relieving, input_html: {class: 'datepicker', 'data-behaviour' => 'datepicker', value: @user.employee_detail.date_of_relieving.try(:strftime, '%d-%m-%Y')}
     = e.input :notification_emails, collection: @emails, input_html: {class: 'notification_emails', multiple: true, style: "width:240px;", "data-placeholder" => "You can add multiple emails"}
+    = e.label "Is Billable"
+    .make-switch{"data-on" => "success", "data-off" => "warning", "data-on-label" => "Yes", "data-off-label" => "No"}
+      = e.check_box :is_billable, {}, 'Yes', 'No'
   = f.input :project_ids, collection: @projects, input_html: {class: 'notification_emails', multiple: true, style: "width:240px;", "data-placeholder" => "Add projects"}, label: "Projects" 
   = f.submit :save, class: "btn controls"
 - if @notify_users

@@ -10,6 +10,7 @@ class EmployeeDetail
   field :available_leaves, type: Integer, default: 0
   field :designation, type: String
   field :description
+  field :is_billable, type: Boolean, default: false
 
   DESIGNATIONS = ["Co-Founder & Director", "Director", "Director Engineering" , "Software Architect", "Team Lead","Operations Head",
                   "Senior QA & Developer", "Senior Software Engineer","Senior Accountant", "HR Executive", "Android Developer", "Software Engineer", "iOS Developer", "People & Culture Manager"]

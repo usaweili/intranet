@@ -1,4 +1,5 @@
 $(document).ready ->
+  $('.resource').dataTable('ordering' : false)
   $('tr[hidden]').attr("hide", "true")
   $('#show').click ->
     if $(this).text() == 'Show All'

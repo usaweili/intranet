@@ -238,8 +238,23 @@ class User
       end
     end
   end
-  
-  def get_user_projects_from_user(project_id, from_date, to_date)
+
+  def experience_as_of_today
+    previous_work_experience = private_profile.try(:previous_work_experience)
+    if private_profile.try(:date_of_joining).present?
+      date_of_joining = private_profile.date_of_joining
+
+      today  = Date.today
+      # get number of completed months
+      months = (today.year - date_of_joining.year) * 12
+      # if current months is not completed then reduce by 1
+      months += today.month - date_of_joining.month - (today.day >= date_of_joining.day ? 0 : 1)
+
+      previous_work_experience ? previous_work_experience + months : months
+    end
+  end
+
+   def get_user_projects_from_user(project_id, from_date, to_date)
     user_projects.where("$and"=>[
         {
           "$or" => [
