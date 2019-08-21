@@ -2,67 +2,13 @@
   %h2 Employees
   - if can? :edit, User
     .align.align-right
-      %h5.btn{id: 'show'} Show Approved
+      %h5.btn{id: 'show'} Show All
       %h5.btn{id:'download_btn'}Download
-      %h5{id: 'user_note_text'} Showing all users.
+      %h5{id: 'show_text'} Showing active users only.
   %br
   %br
-.form-horizontal
-  %table#user_stream_table.table.table-hover
-    %thead
-      %tr
-        %th Id
-        %th
-        %th Employee Name
-        %th Email
-        %th Mobile No
-        - if can? :edit, User
-          %th Role
-          %th Status
-    %tbody
-      %script#template{type: "text/html"}
-        %tr
-          {{#record}}
-          - if can? :edit, User
-            %td {{id}}
-            %td
-              %img.img-polaroid{src: "{{image}}"} 
-            %td
-              %a{href: "/users/{{record._slugs}}"}
-                {{name}}
-            %td {{email}}
-            %td {{mobile_number}}
-            %td {{role}}
-            {{#is_approved}}
-            %td
-              .label{class: 'label-success'} {{status}}
-            {{/is_approved}}
-            {{^is_approved}}
-            %td
-              .label{class: 'label-warning'} {{status}}
-            {{/is_approved}}
-            {{#is_slug}}  
-            %td 
-              %a{href: "/users/{{record._slugs}}/public_profile", class: "icon-edit", data: {'no-turbolink' =>  true}}
-            {{/is_slug}}
-            {{^is_slug}}
-            %td
-              %a{href: "/users/{{record._id.$oid}}/public_profile", class: "icon-edit", data: {'no-turbolink' =>  true}}
-            {{/is_slug}}
-          - else  
-            %td {{id}}
-            %td
-              %img.img-polaroid{src: "{{image}}"}
-            %td
-              %a{href: "/users/{{record._slugs}}"}
-                {{name}}
-            %td {{email}}
-            %td {{mobile_number}}
-          {{/record}}
-        
-
+.form-horizontal#user_list
+  = render 'users_list', users: @users
+  
 :css
   .table td{ vertical-align: middle; }
-
-:coffeescript
-  @data = #{@users.to_json}
