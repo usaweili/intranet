@@ -80,7 +80,10 @@
                                                       Days : #{@leave_application.number_of_days}
                                                       %br/
                                                       Remaining leaves: #{User.find(@leave_application.user_id).employee_detail.available_leaves}
+                                                      %br/
+                                                      Sanctioning Manager: #{@user.get_managers_names.join(', ')}
                                                       %br
+
                                                       = link_to "Approve", process_leave_url(id: @leave_application.id, leave_action: 'approve'), class: 'btn btn-success'
                                                       |
                                                       = link_to "Reject", process_leave_url(id: @leave_application.id, leave_action: 'reject'), class: 'btn btn-danger'
