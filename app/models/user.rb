@@ -191,6 +191,11 @@ class User
     managers_emails
   end
 
+  def get_managers_names
+    manager_ids = projects.where(timesheet_mandatory:true).pluck(:manager_ids).flatten.uniq
+    User.in(id: manager_ids).collect(&:name)
+  end
+
   def self.get_hr_emails
     User.approved.where(role: "HR").pluck(:email)
   end
