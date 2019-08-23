@@ -87,6 +87,17 @@ class UserMailer < ActionMailer::Base
     mail(subject: 'Profile updated', to: hr)
   end
 
+  def pending_leave_reminder(user, managers, leave)
+    @user     = user
+    hr_emails = User.get_hr_emails
+    @leave    = leave
+    mail(
+      subject: 'Action Required on Pending Leave Requests',
+      to: managers,
+      cc: hr_emails
+    )
+  end
+
   private
 
   def get_leave(id)

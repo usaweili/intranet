@@ -85,3 +85,6 @@ every :day, :at => '10:00am' do
   rake "timesheet_reminder:timesheet_for_diffrent_project"
 end
 
+every :day, :at => '09:30am' do
+  rake "leave_reminder:pending_leave"  
+end

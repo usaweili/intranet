@@ -201,6 +201,36 @@ describe LeaveApplication do
             to eq({type: :error, text: "Leave is already Approved"})
         end
       end
+
+      context 'Leave reminder mail' do
+        let!(:user) { FactoryGirl.create(:user) }
+        let!(:project) { FactoryGirl.create(:project, manager_ids: [user.id])}
+        let!(:user_project) { FactoryGirl.create(:user_project, user: user, project: project
+        )}
+        before do
+          ActionMailer::Base.deliveries = []
+        end
+        it 'send reminder mail if leave begins in next 2 day' do
+          leave_application = FactoryGirl.create(:leave_application, user: user)
+          LeaveApplication.pending_leaves_reminder
+          expect(ActionMailer::Base.deliveries.count).to eq(1)
+        end
+
+        it 'send reminder mail if leave begins in next 1 day' do
+          leave_application = FactoryGirl.create(:leave_application,
+            user: user,
+            start_at: Date.today + 1,
+            end_at: Date.today + 1,
+          )
+          LeaveApplication.pending_leaves_reminder
+          expect(ActionMailer::Base.deliveries.count).to eq(1)
+        end
+
+        it 'should not send mail if leave application is empty' do
+          LeaveApplication.pending_leaves_reminder
+          expect(ActionMailer::Base.deliveries.count).to eq(0)
+        end
+      end
     end
   end
 end
