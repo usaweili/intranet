@@ -475,4 +475,20 @@ describe User do
         to eq(internuser.employee_detail.available_leaves)
     end
   end
+
+  context "calculate Employee Experience" do
+    let!(:user) { FactoryGirl.create(:user) }
+    it "calculate employee experience if previous employee experience is present" do
+      previous_work_experience = user.private_profile.try(:previous_work_experience)
+      date_of_joining = user.private_profile.date_of_joining
+
+      today  = Date.today
+      # get number of completed months
+      months = (today.year - date_of_joining.year) * 12
+      # if current months is not completed then reduce by 1
+      months += today.month - date_of_joining.month - (today.day >= date_of_joining.day ? 0 : 1)
+      experience = previous_work_experience + months
+      expect(user.experience_as_of_today).to eq(experience)
+    end
+  end
 end

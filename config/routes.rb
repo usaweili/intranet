@@ -36,6 +36,7 @@ Rails.application.routes.draw do
   get 'contacts' => 'admins#contacts_from_site', as: 'site_contacts'
 
   get 'calendar' => 'home#calendar', as: :calendar
+  get 'resource_list', to: 'users#resource_list'
   resources :leave_applications, only: [:index, :edit, :update]
   resources :users, except: [:new, :create, :destroy] do
     resources :leave_applications, except: [:view_leave_status, :index, :edit, :update]

@@ -1,0 +1,25 @@
+.form-heading
+  %h3 Resource List
+.form-horizontal
+  %table.table.table-hover.resource.table-bordered
+    %thead.font_style
+      %tr
+        %th#engg_name Engineer Name
+        %th Joining Date
+        %th.heading_style Experience Prior to Josh (In Months)
+        %th.exp_style Experience as of Today (In Months)
+        %th Designation
+        %th Is Billable?
+        %th#center_style Technical Skills
+        %th#center_style Projects
+    %tbody.font_style
+      - @users.each do | user |
+        %tr
+          %td= link_to user.name, public_profile_user_path(user) if user.public_profile
+          %td=user.private_profile.try(:date_of_joining)
+          %td=user.private_profile.try(:previous_work_experience)
+          %td=user.experience_as_of_today
+          %td=user.employee_detail.designation
+          %td=user.employee_detail.is_billable? ? "Yes" : "No"
+          %td= "#{user.public_profile.technical_skills.join(', ') if user.public_profile.technical_skills.present?}"
+          %td="#{user.projects.collect(&:name).join(', ')}"

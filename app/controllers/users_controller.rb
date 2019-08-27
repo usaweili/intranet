@@ -117,6 +117,10 @@ class UsersController < ApplicationController
     end
   end
 
+  def resource_list
+    @users = User.employees.approved
+  end
+
   private
   def load_user
     @user = User.find(params[:id])
@@ -125,7 +129,7 @@ class UsersController < ApplicationController
   def user_params
     safe_params = []
     if params[:user][:employee_detail_attributes].present?
-      safe_params = [ employee_detail_attributes: [:id, :employee_id, :date_of_relieving, :designation, :description, :notification_emails => [] ] ]
+      safe_params = [ employee_detail_attributes: [:id, :employee_id, :date_of_relieving, :designation, :description, :is_billable, :notification_emails => [] ] ]
     elsif params[:user][:attachments_attributes].present?
       safe_params = [attachments_attributes: [:id, :name, :document, :_destroy]]
     else
