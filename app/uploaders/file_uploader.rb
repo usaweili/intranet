@@ -40,7 +40,7 @@ class FileUploader < CarrierWave::Uploader::Base
   end
 
   version :medium, :if => :image? do
-    process :resize_to_fit  => [150, 130]
+    process :resize_to_fit  => [255, 222]
   end
 
   # Add a white list of extensions which are allowed to be uploaded.

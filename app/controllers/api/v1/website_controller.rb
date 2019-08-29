@@ -6,7 +6,7 @@ class Api::V1::WebsiteController < ApplicationController
   skip_before_filter :verify_authenticity_token
 
   def team
-    render :json => User.visible_on_website.asc(:website_sequence_number).as_json(team_fields)
+    render json: { leaders: User.leaders.as_json(team_fields), members: User.members.as_json(team_fields) }
   end
 
   def portfolio

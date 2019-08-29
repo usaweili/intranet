@@ -34,8 +34,6 @@ class User
   field :visible_on_website, :type => Boolean, :default => false
   field :website_sequence_number, :type => Integer
 
-
-
   has_many :leave_applications
   has_many :attachments
   has_many :time_sheets
@@ -68,6 +66,8 @@ class User
   delegate :date_of_birth, to: :public_profile, :allow_nil => true
   delegate :date_of_relieving, to: :employee_detail, :allow_nil =>true
   
+  scope :leaders, ->{ visible_on_website.asc(:website_sequence_number).in(role: ROLE[:admin]) }
+  scope :members, ->{ visible_on_website.asc(:website_sequence_number).nin(role: ROLE[:admin]) }
 
 
   before_create do
