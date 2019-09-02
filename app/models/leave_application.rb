@@ -86,6 +86,24 @@ class LeaveApplication
     LeaveApplication.where(start_at: date, leave_status: APPROVED)
   end
 
+  def self.pending_leaves_reminder
+    count = 0
+    date  = Date.today
+    while count < 2
+      date  += 1
+      count += 1 unless HolidayList.is_holiday?(date)
+      #checking count for 2 days - sending mail only for 1 and 2 day remaining leaves.
+      if count == 1 || 2
+        leave_applications = LeaveApplication.where(start_at: date, leave_status: PENDING)
+        next if leave_applications.empty?
+        leave_applications.each do |leave_application|
+          managers = leave_application.user.get_managers_emails
+          UserMailer.pending_leave_reminder(leave_application.user, managers, leave_application).deliver_now
+        end
+      end
+    end
+  end
+
   private
 
   def deduct_available_leave_send_mail
