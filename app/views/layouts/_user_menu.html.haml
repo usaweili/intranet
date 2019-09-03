@@ -6,7 +6,7 @@
     %li
       = link_to "Schedules", main_app.schedules_path
     %li
-      = link_to 'Resource List', resource_list_path
+      = link_to 'Resource List', main_app.resource_list_path
   - if can? :invite_user, User
     %li
       = link_to "Invite Employee", main_app.invite_user_path
