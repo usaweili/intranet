@@ -9,7 +9,6 @@
     - projects.each do |project|
       %tr
         %td= link_to project.name, project_path(project)
-        %td= project.number_of_employees
         %td= link_to project.url
         %td
           .label{ "class": set_label(project.is_active) }
