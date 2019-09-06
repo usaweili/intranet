@@ -1,8 +1,11 @@
+
 %h2
   Policies
 - if can? :manage, Policy
-  = link_to "Add Policy", new_policy_path
-  = link_to " Add Holiday", new_holiday_list_path, style: 'margin-left: 5px'
+  .btn_position
+    = link_to "Add Policy", new_policy_path
+  .btn_margin
+    = link_to " Add Holiday", new_holiday_list_path
 
 .form-horizontal
   - unless @policies.empty?
@@ -19,6 +22,6 @@
     %h4
       = "No policies found"
   .holiday_list
-    = link_to "Holiday List #{Date.today.year}", holiday_lists_path
+    = link_to "Holiday List", holiday_lists_path
 :css 
   .table td{ border-top: 1px solid white; padding: 0px;}

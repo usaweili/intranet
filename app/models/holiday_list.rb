@@ -21,9 +21,11 @@ class HolidayList
   end
 
   def is_weekend?
-    day = holiday_date.strftime("%A")
-    if day.eql?('Saturday') || day.eql?('Sunday')
-      errors.add(:holiday_date, 'cant create holiday on Saturday or Sunday')
+    if holiday_date.present?
+      day = holiday_date.strftime("%A")
+      if day.eql?('Saturday') || day.eql?('Sunday')
+        errors.add(:holiday_date, 'cant create holiday on Saturday or Sunday')
+      end
     end
   end
 

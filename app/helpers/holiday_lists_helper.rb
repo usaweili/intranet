@@ -1,2 +1,0 @@
-module HolidayListsHelper
-end

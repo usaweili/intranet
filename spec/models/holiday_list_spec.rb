@@ -7,6 +7,9 @@ describe HolidayList do
     it { should validate_presence_of(:holiday_date) }
     it { should validate_presence_of(:reason) }
     it { should validate_uniqueness_of(:holiday_date) }
+  end
+
+  context 'Weekends' do
 
     it 'Do not create on saturday' do
       holiday = FactoryGirl.build(:holiday,
@@ -23,5 +26,5 @@ describe HolidayList do
       holiday.valid?
       expect(holiday.errors[:holiday_date]).to eq(["cant create holiday on Saturday or Sunday"])
     end
-  end 
+  end
 end

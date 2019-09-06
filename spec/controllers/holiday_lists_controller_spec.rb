@@ -5,7 +5,7 @@ RSpec.describe HolidayListsController, type: :controller do
     it 'create holiday' do
       params = FactoryGirl.attributes_for(:holiday)
       post :create, {:holiday_list => params}
-      expect(flash[:success]).to eq('Holiday created Succesfully')
+      expect(flash[:success]).to eq('Holiday Created Succesfully')
     end
   end
 
@@ -14,6 +14,23 @@ RSpec.describe HolidayListsController, type: :controller do
       get :index
       expect(response).to have_http_status(200)
       expect(response).to render_template :index
+    end
+  end
+
+  context '#edit' do
+    let!(:holiday) { FactoryGirl.create(:holiday) }
+    it 'should success and render to edit page' do
+     get :edit, id: holiday.id
+     expect(response).to have_http_status(200)
+     expect(response).to render_template :edit
+    end
+  end
+
+  context '#new' do
+    it 'create new holiday' do
+      get :new
+      expect(response).to have_http_status(200)
+      expect(response).to render_template :new
     end
   end
 
@@ -34,7 +51,7 @@ RSpec.describe HolidayListsController, type: :controller do
       reason: 'test' 
      }   
      put :update, id: holiday.id, holiday_list: params
-     expect(flash[:success]).to eq('Holiday updated Succesfully')
+     expect(flash[:success]).to eq('Holiday Updated Succesfully')
     end
   end
 end
