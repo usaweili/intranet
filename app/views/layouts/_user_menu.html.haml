@@ -43,9 +43,12 @@
             = link_to "Projects", main_app.projects_report_time_sheets_path, class: 'menu-font'
           %li
             = link_to "Export Project Report", main_app.export_project_report_time_sheets_path, class: 'menu-font'
+  %li
+    = link_to "Assessments", ENV['snowflake_url']
   %li.divider
   %li
     = link_to 'Sign out', main_app.destroy_user_session_path, method: :delete
 :css
   .img-rounded{width: 4%; position: absolute; top: 26px; z-index: 1; margin-left: 10px;height: 36px;}
   .user-name{position: relative; left: 40px;}
+

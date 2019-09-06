@@ -847,6 +847,10 @@ GEM
     diff-lcs (1.2.5)
     domain_name (0.5.20180417)
       unf (>= 0.0.5, < 1.0.0)
+    dotenv (2.7.5)
+    dotenv-rails (2.7.5)
+      dotenv (= 2.7.5)
+      railties (>= 3.2, < 6.1)
     easy_diff (0.0.3)
     erubis (2.7.0)
     eventmachine (1.0.8)
@@ -1255,6 +1259,7 @@ DEPENDENCIES
   colorbox-rails
   database_cleaner
   devise
+  dotenv-rails
   execjs
   factory_girl_rails
   faker
