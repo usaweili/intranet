@@ -9,6 +9,8 @@ class TimeSheet
   field :from_time,       :type => Time
   field :to_time,         :type => Time
   field :description,     :type => String
+  field :created_by,      :type => String
+  field :updated_by,      :type => String
 
   belongs_to :user
   belongs_to :project
@@ -19,7 +21,7 @@ class TimeSheet
   validates :date, presence: true, if: :is_future_date?
   validates :from_time, presence: true, if: :from_time_is_future_time?
   validates :to_time, presence: true, if: :to_time_is_future_time?
-  before_validation :valid_date_for_create?, on: :create
+  before_validation :valid_date_for_create?, on: :create, unless: :is_management?
   validate :time_sheet_overlapping?
   # validate :timesheet_date_greater_than_project_start_date, if: :is_project_assigned_to_user?
 
@@ -106,6 +108,10 @@ class TimeSheet
 
   def valid_date_for_update?
     date > Date.today - DAYS_FOR_UPDATE
+  end
+
+  def is_management?
+    TIMESHEET_MANAGEMENT.include?(User.find(created_by).role) if created_by.present?
   end
 
   def valid_date_for_create?
@@ -839,13 +845,14 @@ class TimeSheet
     return false
   end
 
-  def self.update_time_sheet(time_sheets, params)
+  def self.update_time_sheet(time_sheets, current_user, params)
     return_value = []
     updated_time_sheets = []
     params['time_sheets_attributes'].each do |key, value|
       time_sheet = time_sheets.find(value[:id])
-      value['from_time'] = value['date'] + ' ' + value['from_time']
-      value['to_time'] = value['date'] + ' ' + value['to_time'] 
+      value['updated_by'] = current_user.id
+      value['from_time']  = value['date'] + ' ' + value['from_time']
+      value['to_time']    = value['date'] + ' ' + value['to_time']
       updated_time_sheets << time_sheet
       unless time_sheet.time_validation(value['date'], value['from_time'], value['to_time'], 'from_ui')
         return_value << false
@@ -860,13 +867,14 @@ class TimeSheet
     return return_value, updated_time_sheets
   end
 
-  def self.create_time_sheet(user_id, params)
+  def self.create_time_sheet(user_id, current_user, params)
     time_sheets = []
     return_value = []
     params['time_sheets_attributes'].each do |key, value|
-      value['user_id'] = user_id
-      value['from_time'] = value['date'] + ' ' + value['from_time']
-      value['to_time'] = value['date'] + ' ' + value['to_time']
+      value['user_id']    = user_id
+      value['created_by'] = current_user.id
+      value['from_time']  = value['date'] + ' ' + value['from_time']
+      value['to_time']    = value['date'] + ' ' + value['to_time']
       time_sheet = TimeSheet.new
       time_sheet.attributes = value
       unless time_sheet.time_validation(value['date'], value['from_time'], value['to_time'], 'from_ui')
