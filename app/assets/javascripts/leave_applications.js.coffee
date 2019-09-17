@@ -61,3 +61,7 @@ $(document).ready ->
     document.getElementById("from").value = "";
     document.getElementById("to").value = "";
     $('#submit_btn').click();
+  $('#project_id').on 'change', ->
+    $('#user_id').attr("disabled", true);
+  $('#user_id').on 'change', ->
+    $('#project_id').attr("disabled", true);
