@@ -95,12 +95,20 @@ describe PrivateProfile do
   context 'probation period notification' do
     let!(:user) { FactoryGirl.create(:user, status: 'approved') }
     let!(:hr_user) { FactoryGirl.create(:user, role: 'HR', status: 'approved')}
+    before do
+      ActionMailer::Base.deliveries = []
+    end
     it 'send mail before 7 days when probation period ends' do
       private_profile = FactoryGirl.create(:private_profile, user: user,
         end_of_probation: Date.today + 7)
       PrivateProfile.notify_probation_end
       expect( ActionMailer::Base.deliveries[0].subject).to eq('End of probation period')
       expect(ActionMailer::Base.deliveries.count).to eq(1)
+    end
+
+    it 'dont send mail if no any user is having probation end date after 7 days' do
+      PrivateProfile.notify_probation_end
+      expect(ActionMailer::Base.deliveries.count).to eq(0)
     end
   end
 

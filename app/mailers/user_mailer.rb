@@ -92,7 +92,7 @@ class UserMailer < ActionMailer::Base
     hr_emails = User.get_hr_emails
     @leave    = leave
     mail(
-      subject: 'Action Required on Pending Leave Requests',
+      subject: 'Action Required: Probation period of employees ending soon',
       to: managers,
       cc: hr_emails
     )
