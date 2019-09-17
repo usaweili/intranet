@@ -53,3 +53,11 @@ convert = (fromDate) ->
       month
       day
     ].join '-'
+
+$(document).ready ->
+  $("#reset_filter").on 'click', ->
+    $('#project_id').prop('selectedIndex',0);
+    $('#user_id').prop('selectedIndex',0)
+    document.getElementById("from").value = "";
+    document.getElementById("to").value = "";
+    $('#submit_btn').click();

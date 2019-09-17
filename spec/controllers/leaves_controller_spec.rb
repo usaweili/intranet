@@ -6,7 +6,7 @@ describe LeaveApplicationsController do
     before(:each) do
       @admin = FactoryGirl.create(:admin)
       hr = FactoryGirl.create(:hr)
-      @user = FactoryGirl.create(:user)
+      @user = FactoryGirl.create(:user, status: 'approved')
       @manager = FactoryGirl.create(:manager)
       sign_in @user
       @leave_application = FactoryGirl.build(:leave_application, user: @user)
@@ -30,7 +30,7 @@ describe LeaveApplicationsController do
           user_id: @user.id,
           leave_application: @leave_application.attributes
         }
-        user2 = FactoryGirl.create(:user)
+        user2 = FactoryGirl.create(:user, status: 'approved')
         user2.build_private_profile(
           FactoryGirl.build(:private_profile).attributes
         )
@@ -65,47 +65,46 @@ describe LeaveApplicationsController do
       it 'should search all leaves if search parameters are empty' do
         sign_out @user
         sign_in @admin
-        get :view_leave_status, { name: '', from: '', to: ''}
+        get :view_leave_status, { user_id: '', from: '', to: ''}
         assigns(:pending_leaves).count.should eq(2)
       end
 
-      it 'should search leaves by employee first name' do
+      # it 'should search leaves by employee first name' do
+      #   sign_out @user
+      #   sign_in @admin
+      #   @user.public_profile.update(first_name: 'Test', last_name: 'Search')
+      #   get :view_leave_status, { name: 'Test', from: '', to: ''}
+      #   assigns(:pending_leaves).count.should eq(1)
+      # end
+
+      # it 'should search leaves by employee last name' do
+      #   sign_out @user
+      #   sign_in @admin
+      #   @user.public_profile.update(first_name: 'Test', last_name: 'Search')
+      #   get :view_leave_status, { name: 'Search', from: '', to: ''}
+      #   assigns(:pending_leaves).count.should eq(1)
+      # end
+
+      it 'should search leaves by employee Id' do
         sign_out @user
         sign_in @admin
-        @user.public_profile.update(first_name: 'Test', last_name: 'Search')
-        get :view_leave_status, { name: 'Test', from: '', to: ''}
+        get :view_leave_status, { user_id: @user.id, from: '', to: ''}
         assigns(:pending_leaves).count.should eq(1)
       end
 
-      it 'should search leaves by employee last name' do
-        sign_out @user
-        sign_in @admin
-        @user.public_profile.update(first_name: 'Test', last_name: 'Search')
-        get :view_leave_status, { name: 'Search', from: '', to: ''}
-        assigns(:pending_leaves).count.should eq(1)
-      end
-
-      it 'should search leaves by employee first name and last name' do
-        sign_out @user
-        sign_in @admin
-        @user.public_profile.update(first_name: 'Test', last_name: 'Search')
-        get :view_leave_status, { name: 'Test Search', from: '', to: ''}
-        assigns(:pending_leaves).count.should eq(1)
-      end
-
-      it 'should search leaves for case insensetive employee name' do
-        sign_out @user
-        sign_in @admin
-        @user.public_profile.update(first_name: 'Test', last_name: 'Search')
-        get :view_leave_status, { name: 'test search', from: '', to: ''}
-        assigns(:pending_leaves).count.should eq(1)
-      end
+      # it 'should search leaves for case insensetive employee name' do
+      #   sign_out @user
+      #   sign_in @admin
+      #   @user.public_profile.update(first_name: 'Test', last_name: 'Search')
+      #   get :view_leave_status, { name: 'test search', from: '', to: ''}
+      #   assigns(:pending_leaves).count.should eq(1)
+      # end
 
       it 'should search leaves if some characters of employee name match' do
         sign_out @user
         sign_in @admin
         @user.public_profile.update(first_name: 'Test', last_name: 'Search')
-        get :view_leave_status, { name: 'tes', from: '', to: ''}
+        get :view_leave_status, { user_id: @user.id, from: '', to: ''}
         assigns(:pending_leaves).count.should eq(1)
       end
 
@@ -117,7 +116,6 @@ describe LeaveApplicationsController do
           end_at: Date.today + 10.days
         )
         get :view_leave_status, {
-          name: '',
           from: Date.today + 5.days,
           to: Date.today + 10.days
         }
@@ -134,7 +132,7 @@ describe LeaveApplicationsController do
           end_at: Date.today + 10.days
         )
         get :view_leave_status, {
-          name: 'Test Search',
+          user_id: @user.id,
           from: Date.today + 5.days,
           to: Date.today + 10.days
         }
