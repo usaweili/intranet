@@ -498,6 +498,7 @@ RSpec.describe TimeSheetsController, type: :controller do
           to eq("#{Date.today - 1} - 11:15 AM")
         expect(time_sheet.reload.description).
           to eq('testing API and call with client')
+        expect(time_sheet.reload.updated_by).to eq(user.id.to_s)
       end
 
       it 'if timesheet date is not less than 2 days in case of Employee' do
@@ -568,6 +569,40 @@ RSpec.describe TimeSheetsController, type: :controller do
           to eq("#{Date.today - 5} - 09:00 AM")
         expect(time_sheet.reload.to_time.to_s).
           to eq("#{Date.today - 5} - 11:15 AM")
+      end
+
+      it 'if timesheet date is greter than 7 days' do
+        sign_in user
+        FactoryGirl.create(:user_project,
+          user: user,
+          project: project,
+          start_date: Date.today - 15
+        )
+        time_sheet = FactoryGirl.create(:time_sheet,
+          user: user,
+          project: project,
+          date: Date.today - 1,
+          from_time: "#{Date.today - 1} 10",
+          to_time: "#{Date.today - 1} 11:30"
+        )
+        params = {
+          time_sheets_attributes: {
+            "0" => {
+              project_id: project.id,
+              date: Date.today - 12,
+              from_time: "#{Date.today - 12} 10:00",
+              to_time: "#{Date.today - 12} 11:00",
+              description: 'testing API',
+              id: time_sheet.id
+            }
+          },
+          id:user.id
+        }
+        post :update_timesheet, user_id: user.id,
+          user: params,
+          time_sheet_date: Date.today - 1
+        expect(time_sheet.reload.date).to eq(Date.today - 12)
+        expect(flash[:notice]).to eq('Timesheet Updated Succesfully')
       end
     end
 
@@ -678,40 +713,6 @@ RSpec.describe TimeSheetsController, type: :controller do
           ["To time Invalid time format. Format should be HH:MM"]
         expect(time_sheet.reload.to_time).
           to eq(Time.parse("#{Date.today - 1} 11:30"))
-        should render_template(:edit_timesheet)
-      end
-
-      it 'if timesheet date is less than 7 days' do
-        sign_in user
-        FactoryGirl.create(:user_project,
-          user: user,
-          project: project,
-          start_date: Date.today - 15
-        )
-        time_sheet = FactoryGirl.create(:time_sheet,
-          user: user,
-          project: project,
-          date: Date.today - 1,
-          from_time: "#{Date.today - 1} 10",
-          to_time: "#{Date.today - 1} 11:30"
-        )
-        params = {
-          time_sheets_attributes: {
-            "0" => {
-              project_id: project.id,
-              date: Date.today - 12,
-              from_time: "#{Date.today - 12} 10:00",
-              to_time: "#{Date.today - 12} 11:00",
-              description: 'testing API',
-              id: time_sheet.id
-            }
-          },
-          id:user.id
-        }
-        post :update_timesheet, user_id: user.id,
-          user: params,
-          time_sheet_date: Date.today - 1
-        expect(time_sheet.reload.date).to eq(Date.today - 1)
         should render_template(:edit_timesheet)
       end
 
@@ -842,6 +843,7 @@ RSpec.describe TimeSheetsController, type: :controller do
       expect(flash[:notice]).to be_present
       expect(user.reload.time_sheets[0].user_id).to eq(user.id)
       expect(user.time_sheets[0].project_id).to eq(project.id)
+      expect(user.time_sheets[0].created_by).to eq(user.id.to_s)
     end
 
     it 'Should not add timesheet because validation failure' do

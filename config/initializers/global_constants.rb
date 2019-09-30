@@ -24,3 +24,4 @@ EMAIL_ADDRESS = /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i
 DEFAULT_TIMESHEET_MANAGERS = []
 
 MANAGEMENT = ["Admin", "HR", "Manager", "Finance"]
+TIMESHEET_MANAGEMENT = ['Admin', 'HR', 'Manager']
