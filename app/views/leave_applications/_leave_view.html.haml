@@ -25,13 +25,12 @@
           %td= appr_leave.reason
           %td= appr_leave.created_at.try(:strftime, "%d-%m-%Y")
           %td.status= appr_leave.leave_status
-          - if (leave_data.present? and !leave_data.first.pending?) or can? :manage, LeaveApplication
+          - if (!pending_leave) or can? :manage, LeaveApplication
             %td
               %a.reason{class: 'reason_'+ leave_id, id: "#{leave_id}"}
               %br
               .prev_reason #{appr_leave.reject_reason + ';' if appr_leave.reject_reason.present?}
-          / %td.spinner.hide= image_tag('select2-spinner.gif', :class => 'spinner')
-          - if (leave_data.present? and leave_data.first.pending?) or can? :manage, LeaveApplication
+          - if (pending_leave) or can? :manage, LeaveApplication
             %td.action_style.action{id: "#{appr_leave.id}"}
               - if pending_leave and can? :edit, appr_leave
                 .btn.btn-mini.btn_style= link_to 'Edit', edit_leave_application_path(appr_leave)

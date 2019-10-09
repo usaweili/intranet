@@ -47,20 +47,20 @@ class LeaveApplicationsController < ApplicationController
       @pending_leaves = LeaveApplication.where(:user_id.in => user_ids)
         .any_of(search_conditions)
         .pending
-        .order_by(:start_at.desc)
+        .order_by(:start_at.desc).includes(:user).to_a
       @processed_leaves = LeaveApplication.where(:user_id.in => user_ids)
         .any_of(search_conditions)
         .processed
-        .order_by(:start_at.desc)
+        .order_by(:start_at.desc).includes(:user).to_a
     else
       @pending_leaves = current_user.leave_applications
         .pending
         .any_of(search_conditions)
-        .order_by(:start_at.desc)
+        .order_by(:start_at.desc).includes(:user).to_a
       @processed_leaves = current_user.leave_applications
         .processed
         .any_of(search_conditions)
-        .order_by(:start_at.desc)
+        .order_by(:start_at.desc).includes(:user).to_a
     end
   end
 
@@ -138,12 +138,10 @@ class LeaveApplicationsController < ApplicationController
   end
 
   def user_ids
-    user_id = []
     if params[:project_id].present?
-      project = Project.find(params[:project_id])
-      project.user_projects.where("end_date.ne" => nil).collect{|u| u.user_id}
+      UserProject.where(project_id: params[:project_id], "end_date.ne" => nil).pluck(:user_id)
     elsif params[:user_id].present?
-      user_id << User.find(params[:user_id]).id
+      [ params[:user_id] ]
     else
       User.approved.pluck(:id)
     end
