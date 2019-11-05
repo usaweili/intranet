@@ -3,8 +3,9 @@
 %ul.dropdown-menu.drop
   
   - if can? :manage, Schedule
-    %li
-      = link_to "Schedules", main_app.schedules_path
+    /
+      %li
+        = link_to "Schedules", main_app.schedules_path
     %li
       = link_to 'Resource List', main_app.resource_list_path
   - if can? :invite_user, User
