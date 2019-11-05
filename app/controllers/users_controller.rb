@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   before_action :authenticate_user!
-  before_action :load_user, only: [:edit, :update, :show, :public_profile, :private_profile, :get_feed]
+  before_action :load_user, only: [:edit, :update, :show, :public_profile, :private_profile, :get_feed, :register_vpn, :revoke_vpn]
   before_action :load_profiles, only: [:public_profile, :private_profile, :update, :edit]
   before_action :build_addresses, only: [:public_profile, :private_profile, :edit]
   before_action :authorize, only: [:public_profile, :edit]
@@ -119,6 +119,30 @@ class UsersController < ApplicationController
 
   def resource_list
     @users = User.employees.approved
+  end
+
+  def register_vpn
+    p "User Id #{@user.email}"
+    vpn = VPN.new
+    p "Params #{params  }"
+    result = vpn.register(params[:user][:email], params[:user][:password])
+    if result[:success]
+      send_data result[:data], filename: "cert.ovpn", type: "application/text"
+    else
+      render 'vpn', notice: "VPN registeration successfull"
+    end
+  end
+
+  def revoke_vpn
+    p "User Id #{@user.email}"
+    vpn = VPN.new
+    result = vpn.revoke(params[:email])
+    msg = result[:success] ? "VPN Revoked for #{user.email}" : "Failed to Revoked VPN for #{user.email}"
+    render 'vpn', notice: msg
+  end
+
+  def vpn
+
   end
 
   private
