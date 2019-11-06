@@ -10,15 +10,19 @@ class VPN
         response = RestClient.post(register_url, params.to_json)
         success = response.code == 200 ? true : false
         {success: success, data: response.body}
+    rescue
+        {success: false}
     end
 
     def revoke(user)
         params = {
             user: user
         }
-        RestClient.post(register_url, params.to_json)
+        response = RestClient.post(revoke_url, params.to_json)
         success = response.code == 200 ? true : false
         {success: success, data: response.body}
+    rescue
+        {success: false}
     end
 
     def register_url

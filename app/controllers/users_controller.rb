@@ -122,27 +122,30 @@ class UsersController < ApplicationController
   end
 
   def register_vpn
-    p "User Id #{@user.email}"
     vpn = VPN.new
-    p "Params #{params  }"
+    vpn.revoke(params[:user][:email])
     result = vpn.register(params[:user][:email], params[:user][:password])
     if result[:success]
+      flash[:notice] = "Successfully Register to VPN"
       send_data result[:data], filename: "cert.ovpn", type: "application/text"
     else
-      render 'vpn', notice: "VPN registeration successfull"
+      flash[:error] = "Failed to Register VPN"
+      redirect_to :back
     end
   end
 
   def revoke_vpn
-    p "User Id #{@user.email}"
     vpn = VPN.new
-    result = vpn.revoke(params[:email])
-    msg = result[:success] ? "VPN Revoked for #{user.email}" : "Failed to Revoked VPN for #{user.email}"
-    render 'vpn', notice: msg
+    result = vpn.revoke(params[:user][:email])
+    if result[:success]
+      flash[:notice] = "VPN Revoked for #{user.email}"
+    else
+      flash[:error] = "Failed to Revoked VPN for #{user.email}"
+    end
+    redirect_to :back
   end
 
   def vpn
-
   end
 
   private
