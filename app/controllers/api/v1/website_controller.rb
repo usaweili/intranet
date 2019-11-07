@@ -36,8 +36,22 @@ class Api::V1::WebsiteController < ApplicationController
   private
 
   def team_fields
-    {only: [:email], include: { public_profile: {only: [:name, :modal_name, :github_handle, :twitter_handle, :facebook_url, :linkedin_url,
-      :blog_url], methods: [:name, :image_medium_url, :modal_name]}, employee_detail: {only: [:designation, :description, :employee_id]}}}
+    {
+      only: [:email],
+      include: {
+        public_profile: {
+          only: [
+            :name, :modal_name, :github_handle, :twitter_handle,
+            :facebook_url, :linkedin_url,:blog_url
+          ],
+          methods: [:name, :image_medium_url, :modal_name]
+        },
+        employee_detail: {
+          only: [:description, :employee_id],
+          include: { designation: { only: [:name] }}
+        }
+      }
+    }
   end
 
   def project_fields

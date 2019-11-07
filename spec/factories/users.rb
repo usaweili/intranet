@@ -3,10 +3,10 @@ FactoryGirl.define do
     role { 'Employee' }
     sequence(:email) { |n| "emp#{n}@#{ORGANIZATION_DOMAIN}" }
     password { Faker::Internet.password }
-    before(:create) { |user| 
+    before(:create) do |user|
       user.public_profile = FactoryGirl.create(:public_profile, user: user)
       user.private_profile = FactoryGirl.create(:private_profile, user: user)
-    }
+    end
   end
 
   factory :super_admin, class: User, parent: :user do |u|
@@ -37,6 +37,28 @@ FactoryGirl.define do
     role { 'Manager' }
     email { "manager@#{ORGANIZATION_DOMAIN}" }
     password { Faker::Internet.password }
+  end
+
+  factory :user_with_designation, class: User do |u|
+    role { 'Employee' }
+    sequence(:email) { |n| "emp#{n}@#{ORGANIZATION_DOMAIN}" }
+    password { Faker::Internet.password }
+    before(:create) do |user|
+      user.public_profile = FactoryGirl.create(:public_profile, user: user)
+      user.private_profile = FactoryGirl.create(:private_profile, user: user)
+      user.employee_detail = FactoryGirl.create(:employee_detail, user: user)
+    end
+  end
+
+  factory :admin_with_designation, class: User do |u|
+    role { 'Admin' }
+    sequence(:email) { |n| "admin#{n}@#{ORGANIZATION_DOMAIN}" }
+    password { Faker::Internet.password }
+    before(:create) do |user|
+      user.public_profile = FactoryGirl.create(:public_profile, user: user)
+      user.private_profile = FactoryGirl.create(:private_profile, user: user)
+      user.employee_detail = FactoryGirl.create(:employee_detail, user: user)
+    end
   end
 
 end
