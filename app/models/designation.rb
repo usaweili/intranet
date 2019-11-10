@@ -4,7 +4,7 @@ class Designation
 
   field :name, type: String
 
-  has_many :users
+  belongs_to :parent_designation, class_name: 'Designation'
 
   validates :name, presence: true, uniqueness: true
 end
