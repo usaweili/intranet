@@ -108,6 +108,11 @@ class UserMailer < ActionMailer::Base
     )
   end
 
+  def vpn_certificate(email, vpn_certificate)
+    attachments["cert.ovpn"] = vpn_certificate
+    mail(to: email, subject: "VPN certificate")
+  end
+
   private
 
   def get_leave(id)

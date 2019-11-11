@@ -7,10 +7,13 @@ class VPN
             user: email,
             password: password
         }
+        Rails.logger.info("Register VPN Params #{params.to_json}")
         response = RestClient.post(register_url, params.to_json)
+        Rails.logger.info("Register VPN Response #{response.body}")
         success = response.code == 200 ? true : false
         {success: success, data: response.body}
-    rescue
+    rescue Exception => e
+        Rails.logger.info("Register VPN Exception #{e.message}")
         {success: false}
     end
 
@@ -18,11 +21,15 @@ class VPN
         params = {
             user: user
         }
+        Rails.logger.info("Revoke Params #{params.to_json}")
         response = RestClient.post(revoke_url, params.to_json)
-        success = response.code == 200 ? true : false
-        {success: success, data: response.body}
-    rescue
-        {success: false}
+        Rails.logger.info("Revoke Response #{response.body}")
+        result = JSON.parse(response.body)
+        success = (result["status"] == "Success") ? true : false
+        { success: success, data: response.body }
+    rescue Exception => e
+        Rails.logger.info("Revoke VPN Exception #{e.message}")
+        { success: false }
     end
 
     def register_url

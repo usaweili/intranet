@@ -123,11 +123,24 @@ class UsersController < ApplicationController
 
   def register_vpn
     vpn = VPN.new
-    vpn.revoke(params[:user][:email])
-    result = vpn.register(params[:user][:email], params[:user][:password])
+    email = params[:user][:email]
+    password = params[:user][:password]
+    if email !~ Devise.email_regexp
+      flash[:error] = "Invalid email address"
+      redirect_to :back
+      return
+    end
+    # result = vpn.revoke(params[:user][:email])
+    # unless result[:success]
+    #   flash[:error] = "Failed to Revoke Previous VPN Certificate"
+    #   redirect_to :back
+    #   return
+    # end
+    result = vpn.register(email, password)
     if result[:success]
-      flash[:notice] = "Successfully Register to VPN"
-      send_data result[:data], filename: "cert.ovpn", type: "application/text"
+      flash[:notice] = "Successfully Register to VPN. Certificate will be sent to #{email}"
+      UserMailer.delay.vpn_certificate(email, result[:data])
+      redirect_to :back
     else
       flash[:error] = "Failed to Register VPN"
       redirect_to :back
@@ -136,11 +149,12 @@ class UsersController < ApplicationController
 
   def revoke_vpn
     vpn = VPN.new
-    result = vpn.revoke(params[:user][:email])
+    email = params[:user][:email]
+    result = vpn.revoke()
     if result[:success]
-      flash[:notice] = "VPN Revoked for #{user.email}"
+      flash[:notice] = "VPN Revoked for #{email}"
     else
-      flash[:error] = "Failed to Revoked VPN for #{user.email}"
+      flash[:error] = "Failed to Revoked VPN for #{email}"
     end
     redirect_to :back
   end
