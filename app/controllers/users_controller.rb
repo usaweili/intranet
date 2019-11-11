@@ -150,7 +150,7 @@ class UsersController < ApplicationController
   def revoke_vpn
     vpn = VPN.new
     email = params[:user][:email]
-    result = vpn.revoke()
+    result = vpn.revoke(email)
     if result[:success]
       flash[:notice] = "VPN Revoked for #{email}"
     else

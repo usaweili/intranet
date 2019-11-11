@@ -7,9 +7,8 @@ class VPN
             user: email,
             password: password
         }
-        Rails.logger.info("Register VPN Params #{params.to_json}")
+        Rails.logger.info("Register VPN Params email: #{email}")
         response = RestClient.post(register_url, params.to_json)
-        Rails.logger.info("Register VPN Response #{response.body}")
         success = response.code == 200 ? true : false
         {success: success, data: response.body}
     rescue Exception => e
