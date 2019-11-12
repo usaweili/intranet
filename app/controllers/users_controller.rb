@@ -139,7 +139,9 @@ class UsersController < ApplicationController
     result = vpn.register(email, password)
     if result[:success]
       flash[:notice] = "Successfully Register to VPN. Certificate will be sent to #{email}"
-      UserMailer.delay.vpn_certificate(email, result[:data])
+      mac_attachment = Attachment.content(Attachment::MAC_VPN_ATTACHMENT_NAME)
+      linux_attachment = Attachment.content(Attachment::LINUX_VPN_ATTACHMENT_NAME)
+      UserMailer.delay.vpn_certificate(email, result[:data], mac_attachment, linux_attachment)
       redirect_to :back
     else
       flash[:error] = "Failed to Register VPN"

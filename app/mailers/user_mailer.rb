@@ -108,7 +108,9 @@ class UserMailer < ActionMailer::Base
     )
   end
 
-  def vpn_certificate(email, vpn_certificate)
+  def vpn_certificate(email, vpn_certificate, mac_attachment, linux_attachment)
+    attachments["mac vpn"] = mac_attachment if mac_attachment.present?
+    attachments["linux vpn"] = linux_attachment if linux_attachment.present?
     attachments["cert.ovpn"] = vpn_certificate
     mail(to: email, subject: "VPN Certificate")
   end
