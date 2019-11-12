@@ -47,20 +47,20 @@ class LeaveApplicationsController < ApplicationController
       @pending_leaves = LeaveApplication.where(:user_id.in => user_ids)
         .any_of(search_conditions)
         .pending
-        .order_by(:start_at.desc)
+        .order_by(:start_at.desc).includes(:user).to_a
       @processed_leaves = LeaveApplication.where(:user_id.in => user_ids)
         .any_of(search_conditions)
         .processed
-        .order_by(:start_at.desc)
+        .order_by(:start_at.desc).includes(:user).to_a
     else
       @pending_leaves = current_user.leave_applications
         .pending
         .any_of(search_conditions)
-        .order_by(:start_at.desc)
+        .order_by(:start_at.desc).includes(:user).to_a
       @processed_leaves = current_user.leave_applications
         .processed
         .any_of(search_conditions)
-        .order_by(:start_at.desc)
+        .order_by(:start_at.desc).includes(:user).to_a
     end
   end
 
@@ -85,17 +85,22 @@ class LeaveApplicationsController < ApplicationController
 =end
 
   def process_leave
-    @leave_action = params[:leave_action]
-    if params[:leave_action] == 'approve'
-      @status = APPROVED
-      call_function = :process_accept_application
-    else
-      @status = REJECTED
-      call_function = :process_reject_application
-    end
-
-    @message = LeaveApplication.process_leave(params[:id], @status, call_function, params[:reject_reason])
     @leave_application = LeaveApplication.find(params[:id])
+    if params[:leave_action].present?
+      @leave_action = params[:leave_action]
+      if params[:leave_action] == 'approve'
+        @status = APPROVED
+        call_function = :process_accept_application
+      else
+        @status = REJECTED
+        call_function = :process_reject_application
+      end
+      @message = LeaveApplication.process_leave(params[:id], @status, call_function, params[:reject_reason])
+    else
+      @leave_application.update_attributes({reject_reason: params[:reject_reason]})
+      @message = {:type=>:success, :text=>"Comment Inserted successfully"}
+    end
+    
     @pending_leaves = LeaveApplication.order_by(:start_at.desc).pending
 
 
@@ -133,13 +138,22 @@ class LeaveApplicationsController < ApplicationController
   end
 
   def user_ids
-    if params[:name].present?
-      first_name, last_name = params[:name].split
-      last_name = first_name if last_name.nil?
-      User.or({ "public_profile.first_name": /#{first_name}/i}, { "public_profile.last_name": /#{last_name}/i}).pluck(:id)
+    if params[:project_id].present?
+      UserProject.where(project_id: params[:project_id], "end_date.ne" => nil).pluck(:user_id)
+    elsif params[:user_id].present?
+      [ params[:user_id] ]
     else
-      User.pluck(:id)
+      User.approved.pluck(:id)
     end
   end
 
+  # def user_ids
+  #   if params[:name].present?
+  #     first_name, last_name = params[:name].split
+  #     last_name = first_name if last_name.nil?
+  #     User.or({ "public_profile.first_name": /#{first_name}/i}, { "public_profile.last_name": /#{last_name}/i}).pluck(:id)
+  #   else
+  #     User.pluck(:id)
+  #   end
+  # end
 end

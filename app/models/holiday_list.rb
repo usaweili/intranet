@@ -4,6 +4,8 @@ class HolidayList
   field :reason, type: String
 
   validates :holiday_date, :reason, presence: true
+  validates :holiday_date, uniqueness: true
+  validate  :is_weekend?
 
   def self.is_holiday?(date)
     date.strftime("%A").eql?("Saturday") or date.strftime("%A").eql?("Sunday") or
@@ -17,4 +19,14 @@ class HolidayList
     end
     date
   end
+
+  def is_weekend?
+    if holiday_date.present?
+      day = holiday_date.strftime("%A")
+      if day.eql?('Saturday') || day.eql?('Sunday')
+        errors.add(:holiday_date, 'cant create holiday on Saturday or Sunday')
+      end
+    end
+  end
+
 end

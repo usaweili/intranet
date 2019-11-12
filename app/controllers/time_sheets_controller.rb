@@ -61,8 +61,8 @@ class TimeSheetsController < ApplicationController
     @time_sheet_date = params[:time_sheet_date]
     @time_sheets = @user.time_sheets.where(date: params[:time_sheet_date].to_date)
     if(current_user.is_employee_or_intern? && @time_sheets.last.valid_date_for_update?) ||
-      current_user.is_admin_or_hr?
-      return_value, @time_sheets = TimeSheet.update_time_sheet(@time_sheets, timesheet_params)
+      current_user.is_admin_or_hr? || current_user.is_manager?
+      return_value, @time_sheets = TimeSheet.update_time_sheet(@time_sheets, current_user, timesheet_params)
       unless return_value.include?(false)
         flash[:notice] = 'Timesheet Updated Succesfully'
         redirect_to users_time_sheets_path(@user.id, from_date: @from_date, to_date: @to_date)
@@ -80,7 +80,7 @@ class TimeSheetsController < ApplicationController
     @from_date = params['user']['from_date']
     @to_date = params['user']['to_date']
     @user = User.find_by(id: params['user']['user_id'])
-    return_values, @time_sheets = TimeSheet.create_time_sheet(@user.id, timesheet_params)
+    return_values, @time_sheets = TimeSheet.create_time_sheet(@user.id, current_user, timesheet_params)
     unless return_values.include?(false)
       flash[:notice] = 'Timesheet created succesfully'
       redirect_to users_time_sheets_path(user_id: @user.id, from_date: @from_date, to_date: @to_date)

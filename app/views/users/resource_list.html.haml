@@ -19,7 +19,7 @@
           %td=user.private_profile.try(:date_of_joining)
           %td=user.private_profile.try(:previous_work_experience)
           %td=user.experience_as_of_today
-          %td=user.employee_detail.designation
+          %td=user.employee_detail.designation.try(:name)
           %td=user.employee_detail.is_billable? ? "Yes" : "No"
           %td= "#{user.public_profile.technical_skills.join(', ') if user.public_profile.technical_skills.present?}"
           %td="#{user.projects.collect(&:name).join(', ')}"

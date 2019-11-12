@@ -1,0 +1,17 @@
+%br
+%span Hi HR,
+%br
+%span Following employee(s) are about complete stipulated to probation period on #{@date}. Please initiate appropriate actions.
+%br
+%br
+%table{:border => "1"}
+  %tr
+    %th{:style=> "padding: 4px;"} Name
+    %th{:style=> "padding: 4px;"} Email    
+  - @users.each do |user|
+    %tr
+      %td{:style=> "padding: 4px;"}= user.name
+      %td{:style=> "padding: 4px;"}= user.email
+
+%br
+%span Thanks.

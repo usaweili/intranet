@@ -35,6 +35,8 @@ class Ability
     can :manage, Schedule
     can :manage, Company
     can :manage, TimeSheet
+    can :manage, HolidayList
+    can :manage, Designation
   end
 
   def intern_abilities(user_id)

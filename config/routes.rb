@@ -11,6 +11,9 @@ Rails.application.routes.draw do
   # See how all your routes lay out with "rake routes".
 
   resources :policies
+  resources :holiday_lists
+  resources :designations
+  get 'holiday_list', to: 'holiday_lists#holiday_list'
   get '/unsubscribe' => 'light/users#unsubscribe', as: 'users/unsubscribe'
   #get '/unsubscribe/:id' => 'light/users#unsubscribe', as: 'users/unsubscribe'
   match '/subscribe' => 'light/users#subscribe', as: 'users/subscribe', via: [:get, :post]
