@@ -14,28 +14,33 @@ require 'mina_extensions/sidekiq'
 env = ENV['on'] || 'production'
 nocron = ENV['nocron'] || false
 branch = ENV['branch'] || 'master'
-#bkp = ENV['bkp'] || false #Backup will be used for actual production 
+#bkp = ENV['bkp'] || false #Backup will be used for actual production
 index = ENV['index'] || false
 
 if env == 'production'
   ip = '139.59.30.77'
+  set :deploy_to, "/home/deploy/projects/intranet"
   #branch = 'develop' # Always production!!
-else
+elsif env == 'staging'
   #staging
-  ip = '74.207.241.229'
+  #ip = '74.207.241.229'
+  ip = '139.59.30.77'
+  set :deploy_to, "/home/deploy/staging/intranet"
+  nocron = true
+  branch = ENV['branch'] || 'staging'
 end
 set :term_mode, nil
 set :domain, ip
 set :user, 'deploy'
 #set :identity_file, "#{ENV['HOME']}/.ssh/id_joshsite_rsa"
-set :deploy_to, "/home/deploy/projects/intranet"
+
 set :repository, 'git@github.com:joshsoftware/intranet.git'
 set :branch, branch
 set :rails_env, env
 
 # Manually create these paths in shared/ (eg: shared/config/database.yml) in your server.
 # They will be linked in the 'deploy:link_shared_paths' step.
-set :shared_paths, ['config/mongoid.yml', 'log', 'tmp', 'public/system', 
+set :shared_paths, ['config/mongoid.yml', 'log', 'tmp', 'public/system',
 					'public/uploads', 'config/initializers/secret_token.rb', "config/initializers/smtp_gmail.rb", "db/seeds.rb",
           "config/initializers/constants.rb", "config/rnotifier.yaml", "config/environment.yml", 'config/service_account_key.p12',
           'config/initializer/rollbar.rb']
@@ -49,7 +54,7 @@ task :environment do
 
   # For those using RVM, use this to load an RVM version@gemset.
   invoke :'rvm:use[2.2.4]'
-  
+
 end
 
 # Put any custom mkdir's in here for when `mina setup` is ran.
@@ -62,7 +67,7 @@ task :setup => :environment do
   queue! %[mkdir -p "#{deploy_to}/shared/config/initializers"]
   queue! %[chmod -R g+rx,u+rwx "#{deploy_to}/shared/config"]
   queue! %[touch "#{deploy_to}/shared/config/initializers/secret_token.rb"]
-   
+
   queue! %[touch "#{deploy_to}/shared/config/initializers/smtp_gmail.rb"]
   queue! %[touch "#{deploy_to}/shared/config/initializers/constants.rb"]
 
@@ -71,7 +76,7 @@ task :setup => :environment do
 
   queue! %[touch "#{deploy_to}/shared/config/rnotifier.yaml"]
   queue! %[chmod g+rx,u+rwx "#{deploy_to}/shared/config/rnotifier.yaml"]
-  
+
   queue! %[mkdir -p "#{deploy_to}/shared/tmp"]
   queue! %[chmod g+rx,u+rwx "#{deploy_to}/shared/tmp"]
 
@@ -80,10 +85,10 @@ task :setup => :environment do
 
   queue! %[mkdir -p "#{deploy_to}/shared/public/system"]
   queue! %[chmod g+rx,u+rwx "#{deploy_to}/shared/public/system"]
-  
+
   queue! %[mkdir -p "#{deploy_to}/shared/public/uploads"]
-  queue! %[chmod g+rx,u+rwx "#{deploy_to}/shared/public/uploads"] 
- 
+  queue! %[chmod g+rx,u+rwx "#{deploy_to}/shared/public/uploads"]
+
   queue! %[mkdir -p "#{deploy_to}/shared/pids/"]
   queue! %[chmod g+rx,u+rwx "#{deploy_to}/shared/pids"]
 
@@ -110,7 +115,7 @@ task :deploy => :environment do
         queue "cd #{deploy_to}/current && bundle exec rake db:mongoid:create_indexes RAILS_ENV=#{env}"
       end
 
-      # Update whenever 
+      # Update whenever
       unless nocron
         queue "cd #{deploy_to}/current && bundle exec whenever -i intranet_whenever_tasks --update-crontab --set 'environment=#{env}'"
       end
@@ -119,4 +124,4 @@ task :deploy => :environment do
     end
   end
 end
-    
+
