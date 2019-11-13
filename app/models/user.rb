@@ -8,7 +8,7 @@ class User
 
   devise :database_authenticatable, :omniauthable,
          :recoverable, :rememberable, :trackable, :validatable, :omniauth_providers => [:google_oauth2]
-  INTERN_ROLE = "Intern"       
+  INTERN_ROLE = "Intern"
   ROLES = ['Super Admin', 'Admin', 'Manager', 'HR', 'Employee', INTERN_ROLE, 'Finance']
 
   ## Database authenticatable
@@ -16,11 +16,15 @@ class User
   field :encrypted_password,  :type => String, :default => ""
   field :role,                :type => String, :default => "Employee"
   field :uid,                 :type => String
-  field :provider,            :type => String        
+  field :provider,            :type => String
   field :status,              :type => String, :default => STATUS[0]
-  
+
   ## Rememberable
   field :remember_created_at, :type => Time
+  field :reset_password_token, type: String
+  field :reset_password_sent_at, type: String
+
+
 
   ## Trackable
   field :sign_in_count,      :type => Integer, :default => 0
@@ -52,12 +56,12 @@ class User
   validates :role, :email, presence: true
   validates_associated :employee_detail
   scope :employees, ->{all.asc("public_profile.first_name")}
-  scope :approved, ->{where(status: 'approved')} 
+  scope :approved, ->{where(status: 'approved')}
   scope :visible_on_website, -> {where(visible_on_website: true)}
   scope :interviewers, ->{where(:role.ne => 'Intern')}
   scope :get_approved_users_to_send_reminder, ->{where('$and' => ['$or' => [{ role: 'Intern' }, { role: 'Employee' }], status: STATUS[2]])}
   scope :management_team, ->{ approved.any_of({role: "HR"},{role: "Manager"},{role: "Admin"}) }
-  #Public profile will be nil when admin invite user for sign in with only email address 
+  #Public profile will be nil when admin invite user for sign in with only email address
   delegate :name, to: :public_profile, :allow_nil => true
   delegate :designation, to: :employee_detail, :allow_nil => true
   delegate :mobile_number, to: :public_profile, :allow_nil => true
@@ -65,7 +69,7 @@ class User
   delegate :date_of_joining, to: :private_profile, :allow_nil => true
   delegate :date_of_birth, to: :public_profile, :allow_nil => true
   delegate :date_of_relieving, to: :employee_detail, :allow_nil =>true
-  
+
   scope :leaders, ->{ visible_on_website.asc(:website_sequence_number).in(role: ROLE[:admin]) }
   scope :members, ->{ visible_on_website.asc(:website_sequence_number).nin(role: ROLE[:admin]) }
 
@@ -91,11 +95,11 @@ class User
   def role?(role)
     self.role == role
   end
- 
+
   def can_edit_user?(user)
-    (["HR", "Admin", "Finance", "Manager", "Super Admin"].include?(self.role)) || self == user 
+    (["HR", "Admin", "Finance", "Manager", "Super Admin"].include?(self.role)) || self == user
   end
-  
+
   def can_download_document?(user, attachment)
     user = user.nil? ? self : user
     (["Admin", "Finance", "Manager", "Super Admin"].include?(self.role)) || attachment.user_id == user.id
