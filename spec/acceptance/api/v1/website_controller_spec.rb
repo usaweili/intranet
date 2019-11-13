@@ -2,12 +2,6 @@ require 'spec_helper'
 require 'rspec_api_documentation/dsl'
 
 resource "Website Apis" do
-  let!(:users) { FactoryGirl.create_list(:user,
-      3,
-      status: 'approved',
-      visible_on_website:  true
-    )
-  }
   let!(:projects) { FactoryGirl.create_list(:project,
       3,
       visible_on_website: true
@@ -17,14 +11,33 @@ resource "Website Apis" do
   get "/api/v1/team" do
     example "Get all the team members" do
       header 'Referer', "http://#{ORGANIZATION_DOMAIN}"
-      user = FactoryGirl.create(:user, visible_on_website: false)
+      leaders = FactoryGirl.create_list(:admin_with_designation,
+        2,
+        status: 'approved',
+        visible_on_website:  true
+      )
+      members = FactoryGirl.create_list(:user_with_designation,
+        3,
+        status: 'approved',
+        visible_on_website:  true
+      )
+      user = FactoryGirl.create(:user, email: "emp0@#{ORGANIZATION_DOMAIN}", visible_on_website: false)
 
       do_request
       res = JSON.parse(response_body)
       expect(status).to eq 200
-      expect(res.count).to eq 3
-      expect(res.last.keys).to eq ["email", "public_profile", "employee_detail"]
-      expect(res.flatten).not_to include user.name
+      expect(res["leaders"].count).to eq 2
+      expect(res["leaders"].last.keys).to eq ["email", "public_profile", "employee_detail"]
+      expect(res["leaders"].last["employee_detail"]["designation"].keys).to eq ["name"]
+      expect(res["leaders"].last["employee_detail"]["designation"]["name"]).
+        to eq leaders.last.employee_detail.designation.name
+      expect(res["leaders"].flatten).not_to include user.name
+      expect(res["members"].count).to eq 3
+      expect(res["members"].last.keys).to eq ["email", "public_profile", "employee_detail"]
+      expect(res["members"].flatten).not_to include user.name
+      expect(res["members"].last["employee_detail"]["designation"].keys).to eq ["name"]
+      expect(res["members"].last["employee_detail"]["designation"]["name"]).
+        to eq members.last.employee_detail.designation.name
     end
 
     example "Must be Unauthorized for referer other than #{ORGANIZATION_DOMAIN}" do
