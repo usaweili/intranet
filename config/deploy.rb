@@ -40,7 +40,7 @@ set :rails_env, env
 
 # Manually create these paths in shared/ (eg: shared/config/database.yml) in your server.
 # They will be linked in the 'deploy:link_shared_paths' step.
-set :shared_paths, ['config/mongoid.yml', 'log', 'tmp', 'public/system',
+set :shared_paths, ['config/mongoid.yml', 'log', 'tmp', 'public/system', '.env',
 					'public/uploads', 'config/initializers/secret_token.rb', "config/initializers/smtp_gmail.rb", "db/seeds.rb",
           "config/initializers/constants.rb", "config/rnotifier.yaml", "config/environment.yml", 'config/service_account_key.p12',
           'config/initializer/rollbar.rb']
