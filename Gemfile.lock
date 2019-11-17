@@ -1291,6 +1291,7 @@ DEPENDENCIES
   rails (= 4.2.5.2)
   recaptcha (~> 3.3.0)
   redactor-rails (= 0.4.5)
+  redis-rails
   rest-client
   rmagick
   rnotifier

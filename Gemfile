@@ -36,7 +36,7 @@ gem 'twitter-typeahead-rails', :git => "git://github.com/yourabi/twitter-typeahe
 gem 'mongoid-history', github: 'aq1018/mongoid-history'
 gem 'jquery-timepicker-rails'
 
-#sinatra 
+#sinatra
 gem 'sinatra'
 
 #for exporting excel sheet
@@ -137,3 +137,4 @@ gem 'rack-proxy', '~> 0.6.4'
 gem 'rack-cors', require: 'rack/cors'
 gem 'jquery-datatables-rails', git: 'git://github.com/rweng/jquery-datatables-rails.git'
 gem 'dotenv-rails'
+gem 'redis-rails'
