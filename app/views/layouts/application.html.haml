@@ -51,9 +51,10 @@
               %li
                 = render 'layouts/user_menu'
             - else
-              %li
-                =# link_to "Sign in with Josh account", main_app.user_omniauth_authorize_path(:google_oauth2)
-              - unless Rails.env.production?
+              - if Rails.env.production?
+                %li
+                  =link_to "Sign in with Josh account", main_app.user_omniauth_authorize_path(:google_oauth2)
+              - else
                 %li
                   = link_to "Sign In", main_app.new_user_session_path
   .container
