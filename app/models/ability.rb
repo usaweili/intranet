@@ -52,6 +52,7 @@ class Ability
     end
     can :read, Policy
     can :read, Project
+    can :manage, [Project]
     cannot :manage, LeaveApplication
     can [:new, :create], LeaveApplication, user_id: user_id
     can [:edit, :update], LeaveApplication, leave_status: 'Pending', user_id: user_id
