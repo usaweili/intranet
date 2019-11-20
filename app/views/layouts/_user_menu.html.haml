@@ -47,7 +47,8 @@
             = link_to "Projects", main_app.projects_report_time_sheets_path, class: 'menu-font'
           %li
             = link_to "Export Project Report", main_app.export_project_report_time_sheets_path, class: 'menu-font'
-  %li
+  /
+    %li
     = link_to "Assessments", ENV['snowflake_url']
   %li.divider
   %li
