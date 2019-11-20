@@ -12,12 +12,13 @@
     %li
       = link_to "Invite Employee", main_app.invite_user_path
     %li
-      = link_to "Projects", main_app.projects_path
-    %li
       = link_to "Company", main_app.companies_path
   %li
     = link_to "Profile", main_app.public_profile_user_path(current_user), data: {'no-turbolink' =>  true}
-  %li
+  - if can? :manage, Project
+    %li
+      = link_to "Projects", main_app.projects_path
+  %li 
     = link_to "Documents", main_app.attachments_path, data: {'no-turbolink' =>  true}
   %li
     = link_to "Events", "https://intranet.joshsoftware.com/functions", 'target' => '_blank'
