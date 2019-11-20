@@ -4,6 +4,9 @@ class Api::V1::UsersController < ApplicationController
 
   def info
     render json: {} and return if current_user.blank?
-    render json: { id: current_user.id.to_s, email: current_user.email, name: current_user.name}
+    render json: { id: current_user.id.to_s,
+      email: current_user.email,
+      name: current_user.name
+    }
   end
 end

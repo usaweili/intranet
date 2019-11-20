@@ -1,7 +1,7 @@
 -#= image_tag current_user.public_profile.image.thumb.url, class: 'img-rounded'
 = link_to current_user.public_profile.try(:name), '#', 'data-toggle' => "dropdown", class: "dropdown-toggle user-name"
 %ul.dropdown-menu.drop
-  
+
   - if can? :manage, Schedule
     /
       %li
@@ -20,11 +20,13 @@
       = link_to "Projects", main_app.projects_path
   %li 
     = link_to "Documents", main_app.attachments_path, data: {'no-turbolink' =>  true}
-  %li 
+  %li
     = link_to "Events", "https://intranet.joshsoftware.com/functions", 'target' => '_blank'
   - if ["HR", "Admin", "Super Admin"].include?(current_user.role)
     %li
       = link_to "Newsletter", main_app.light_path
+  - if can? :manage, Designation
+    %li= link_to 'Manage Designations', main_app.designations_path
   %li
     = link_to "Leave Applications", main_app.view_leaves_path
   - if ["Admin", "Super Admin"].include?(current_user.role)
@@ -33,9 +35,9 @@
     %li
       = link_to "Manage Leave", main_app.leave_applications_path
   %li.hide
-    = link_to "Calendar", main_app.calendar_path  
+    = link_to "Calendar", main_app.calendar_path
   %li.dropdown-submenu.pull-left
-    %a.test{:href => "#", :tabindex => "-1"} 
+    %a.test{:href => "#", :tabindex => "-1"}
       Timesheets
     %ul.dropdown-menu{class: "timesheet-menu"}
       %li
@@ -45,9 +47,13 @@
             = link_to "Projects", main_app.projects_report_time_sheets_path, class: 'menu-font'
           %li
             = link_to "Export Project Report", main_app.export_project_report_time_sheets_path, class: 'menu-font'
+  /
+    %li
+    = link_to "Assessments", ENV['snowflake_url']
   %li.divider
   %li
     = link_to 'Sign out', main_app.destroy_user_session_path, method: :delete
 :css
   .img-rounded{width: 4%; position: absolute; top: 26px; z-index: 1; margin-left: 10px;height: 36px;}
   .user-name{position: relative; left: 40px;}
+

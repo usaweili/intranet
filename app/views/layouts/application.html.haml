@@ -3,11 +3,11 @@
     %title Josh Intranet
     = stylesheet_link_tag    "application", media: "all", "data-turbolinks-track" => true
     /= stylesheet_link_tag    "screamout/global", media: "all", "data-turbolinks-track" => true
-    
-    = javascript_include_tag "application", "data-turbolinks-track" => true 
+
+    = javascript_include_tag "application", "data-turbolinks-track" => true
     /= javascript_include_tag "screamout/filter", "data-turbolinks-track" => true
     /= javascript_include_tag "screamout/global", "data-turbolinks-track" => true
-    
+
     = csrf_meta_tags
     = favicon_link_tag "/images/favicon.ico"
     :css
@@ -29,7 +29,7 @@
                 = link_to "#", {:'data-toggle' => 'dropdown', class: 'dropdown-toggle'} do
                   Notifications
                   %span.badge.badge-important
-                  
+
                 %ul.dropdown-menu
                   %li
                     .media.notification-menu
@@ -49,10 +49,14 @@
                 =# render 'layouts/vendor_menu'
               // Not this menu needs to be last in nav margin issues add any menu before this
               %li
-                = render 'layouts/user_menu' 
+                = render 'layouts/user_menu'
             - else
-              %li
-                = link_to "Sign in with Josh account", main_app.user_omniauth_authorize_path(:google_oauth2)
+              - if Rails.env.production?
+                %li
+                  =link_to "Sign in with Josh account", main_app.user_omniauth_authorize_path(:google_oauth2)
+              - else
+                %li
+                  = link_to "Sign In", main_app.new_user_session_path
   .container
     - flash.each do |key, msg|
       %div{class: flash_class(key), style: "margin-top: 15px;"}
