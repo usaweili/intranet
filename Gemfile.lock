@@ -1284,6 +1284,7 @@ DEPENDENCIES
   mongoid_rateable!
   mongoid_slug
   nested_form
+  nokogiri
   omniauth-google-oauth2
   quiet_assets
   rack-cors

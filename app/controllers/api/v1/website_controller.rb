@@ -9,6 +9,12 @@ class Api::V1::WebsiteController < ApplicationController
     render json: { leaders: User.leaders.as_json(team_fields), members: User.members.as_json(team_fields) }
   end
 
+  def news
+    render json: {
+      news: News.all.order(date: :desc).group_by { |n| n.date.year }.as_json(methods: [:formatted_date])
+    }
+  end
+
   def portfolio
     render :json => Project.visible_on_website.sort_by_position.as_json(project_fields)
   end
@@ -27,9 +33,9 @@ class Api::V1::WebsiteController < ApplicationController
   def career
     @career = Career.new(career_params)
     if @career.save
-      render json: { text: ' '}, status: :created
+      render json: { text: ' ' }, status: :created
     else
-      render json: { text: ' '}, status: :unprocessable_entity
+      render json: { text: ' ' }, status: :unprocessable_entity
     end
   end
 
