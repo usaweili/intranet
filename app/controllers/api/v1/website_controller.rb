@@ -2,6 +2,7 @@ class Api::V1::WebsiteController < ApplicationController
 
   before_filter :restrict_access
   caches_action :team, cache_path: "website/team"
+  caches_action :news, cache_path: "website/news"
   caches_action :portfolio, cache_path: "website/portfolio"
   skip_before_filter :verify_authenticity_token
 
