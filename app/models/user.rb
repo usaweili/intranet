@@ -71,7 +71,7 @@ class User
   delegate :date_of_relieving, to: :employee_detail, :allow_nil =>true
 
   scope :leaders, ->{ visible_on_website.asc(:website_sequence_number).in(role: ROLE[:admin]) }
-  scope :members, ->{ visible_on_website.asc(:website_sequence_number).nin(role: ROLE[:admin]) }
+  scope :members, ->{ visible_on_website.nin(role: ROLE[:admin]).asc(['public_profile.first_name']) }
 
 
   before_create do
