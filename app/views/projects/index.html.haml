@@ -13,37 +13,29 @@
         %th Manager Name
         %th Project Benchmark
         %th Active
-        %th Allocated Employees
-        %th No of Employees
-        %th Is Free
+        %th Current Team Size
+        - if can? :manage, Project
+          %th Action
     %tbody
-      - @projects.each_with_index do |p, i|
-        %tr.item{"data-item-id" => p.id}
+      - @projects.each_with_index do |project, i|
+        %tr.item{"data-item-id" => project.id}
           %td= i+1
-          %td=link_to p.name, project_path(p)
-          - if p.managers.present?
-            - manager_name = ''
-            - p.managers.each do |manager|
-              - manager_name += manager.name + ' '
-            %td= manager_name
+          %td=link_to project.name, project_path(project)
+          - if project.managers.present?
+            %td= project.managers.collect(&:name).join(', ')
           - else
             %td= "NA"
           %td
-            =raw p.code_climate_snippet
-            =raw p.code_climate_coverage_snippet
-          %th
-            - status_class = p.is_active ? 'label-success' : 'label-warning'
+            =raw project.code_climate_snippet
+            =raw project.code_climate_coverage_snippet
+          %td
+            - status_class = project.is_active ? 'label-success' : 'label-warning'
             .label{class: status_class}
-              = p.is_active
-          %td= p.users.count
-          %td= p.number_of_employees
-          - if p.is_free == false
-            %td= 'No'
-          -else
-            %td= 'Yes'
+              = project.is_active
+          %td= project.users.count
           %td
             - if can? :manage, Project
-              =link_to '', edit_project_path(p), class: "icon-edit", data: {'no-turbolink' =>  true}
+              =link_to '', edit_project_path(project), class: "icon-edit", data: {'no-turbolink' =>  true}
               |
-              =link_to '', project_path(p), method: :delete, "data-confirm" => "Are you sure? If you are deleting project, it's associated timesheets will be deleted.", class: "icon-trash"
+              =link_to '', project_path(project), method: :delete, "data-confirm" => "Are you sure? If you are deleting project, it's associated timesheets will be deleted.", class: "icon-trash"
 
