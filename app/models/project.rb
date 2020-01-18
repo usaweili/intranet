@@ -8,6 +8,9 @@ class Project
   mount_uploader :case_study, FileUploader
   mount_uploader :logo, FileUploader
 
+  BILLING_FREQUENCY_TYPES = ['Monthly', 'Bi-weekly', 'Adhoc']
+  TYPE_OF_PROJECTS = ['T&M', 'Fixbid', 'Free', 'Investment']
+
   field :name
   field :code_climate_id
   field :code_climate_snippet
@@ -46,6 +49,9 @@ class Project
   field :display_name
   field :is_free, type: Boolean, default: false
   field :timesheet_mandatory, type: Boolean, default: true
+  field :billing_frequency
+  field :type_of_project
+  field :is_activity, type: Boolean, default: false
   slug :name
 
   has_many :time_sheets, dependent: :destroy
@@ -64,6 +70,9 @@ class Project
 
   MANERIAL_ROLE = ['Admin', 'Manager']
   validates :display_name, format: { with: /\A[ ]*[\S]*[ ]*\Z/, message: "Name should not contain white space" }
+  validates :start_date, presence: true
+  validates :billing_frequency, inclusion: { in: BILLING_FREQUENCY_TYPES, allow_nil: true }
+  validates :type_of_project, inclusion: { in: TYPE_OF_PROJECTS, allow_nil: true }
   before_save do
     if name_changed? && display_name.blank?
       self.display_name = name.split.join('_')

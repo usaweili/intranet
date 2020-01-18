@@ -10,7 +10,23 @@ $(document).ready ->
     readURL this, '#project-logo'
     return
 
+  $('#toggle-projects-btn').bind 'ajax:beforeSend', ->
+    alert("Started")
+    return
+
+  $('#toggle-projects-btn').bind 'ajax:complete', ->
+    alert("completed")
+    return
+
+  $('body').on 'click', (e) ->
+    $('[data-toggle="popover"]').each ->
+      if !$(this).is(e.target) and $(this).has(e.target).length == 0 and $('.popover').has(e.target).length == 0
+        $(this).popover 'hide'
+      return
+    return
+
   if $('#sortable').length > 0
+    $('#sortable').dataTable({ "aaSorting": [] });
     table_width = $('#sortable').width()
     cells = $('.table').find('tr')[0].cells.length
     desired_width = table_width / cells + 'px'

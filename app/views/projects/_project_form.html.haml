@@ -10,14 +10,16 @@
         = f.input :display_name, required: false
         = f.input :description, as: :text, input_html: {class: "text-description"}
         = f.input :url
+        = f.input :billing_frequency, collection: Project::BILLING_FREQUENCY_TYPES, include_blank: false, label: 'Billing Frequency'
+        = f.input :type_of_project, collection: Project::TYPE_OF_PROJECTS, include_blank: false, label: 'Type Of Project'
         %div
           = f.label "Is Active"
           .make-switch{"data-on" => "success", "data-off" => "warning", "data-on-label" => "True", "data-off-label" => "False"}
             = f.check_box :is_active, {}, 'true', 'false'
         %div
-          = f.label "Is Free"
+          = f.label "Is Activity"
           .make-switch{"data-on" => "success", "data-off" => "warning", "data-on-label" => "True", "data-off-label" => "False"}
-            = f.check_box :is_free, {}, 'true', 'false'
+            = f.check_box :is_activity, {}, 'true', 'false'
         %div
           =f.label 'Timesheet Mandatory'
           .make-switch{"data-on" => "success", "data-off" => "warning", "data-on-label" => "True", "data-off-label" => "False"}

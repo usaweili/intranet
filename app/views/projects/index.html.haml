@@ -3,39 +3,7 @@
     .span3
       Projects
     .offset8{style: "float: right;"}
+      = link_to 'All Projects', projects_path(all: true), class: 'btn btn-primary mb-5', id: 'toggle-projects-btn', remote: true
       = render partial: "layouts/project_menu"
-.form-horizontal
-  %table.table.table-hover#sortable
-    %thead
-      %tr
-        %th #
-        %th Project Name
-        %th Manager Name
-        %th Project Benchmark
-        %th Active
-        %th Current Team Size
-        - if can? :manage, Project
-          %th Action
-    %tbody
-      - @projects.each_with_index do |project, i|
-        %tr.item{"data-item-id" => project.id}
-          %td= i+1
-          %td=link_to project.name, project_path(project)
-          - if project.managers.present?
-            %td= project.managers.collect(&:name).join(', ')
-          - else
-            %td= "NA"
-          %td
-            =raw project.code_climate_snippet
-            =raw project.code_climate_coverage_snippet
-          %td
-            - status_class = project.is_active ? 'label-success' : 'label-warning'
-            .label{class: status_class}
-              = project.is_active
-          %td= project.users.count
-          %td
-            - if can? :manage, Project
-              =link_to '', edit_project_path(project), class: "icon-edit", data: {'no-turbolink' =>  true}
-              |
-              =link_to '', project_path(project), method: :delete, "data-confirm" => "Are you sure? If you are deleting project, it's associated timesheets will be deleted.", class: "icon-trash"
-
+.form-horizontal#projects_list
+  = render 'list'

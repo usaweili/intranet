@@ -1,0 +1,42 @@
+%table.table.table-hover#sortable
+  %thead
+    %tr
+      %th #
+      %th Project Name
+      %th Manager Name
+      %th Project Benchmark
+      %th Active
+      %th Current Team Size
+      %th Billing Frequency
+      %th Project Type
+      - if can? :manage, Project
+        %th Action
+  %tbody
+    - @projects.each_with_index do |project, i|
+      - users = project.users
+      %tr.item{"data-item-id" => project.id}
+        %td= i+1
+        %td=link_to project.name, project_path(project)
+        - if project.managers.present?
+          %td= project.managers.collect(&:name).join(', ')
+        - else
+          %td= "NA"
+        %td
+          =raw project.code_climate_snippet
+          =raw project.code_climate_coverage_snippet
+        %td
+          - status_class = project.is_active ? 'label-success' : 'label-warning'
+          .label{class: status_class}
+            = project.is_active
+        %td= link_to users.count, 'javascript:void(0)', 'data-toggle' => "popover", 'title' => "Team Members",
+          "data-html" => "true", "data-content" => "#{users.collect(&:name).join(', ')}", class: "usersList", "tabindex"=>"0"
+        %td= project.billing_frequency
+        %td= project.type_of_project
+        %td
+          - if can? :manage, Project
+            =link_to '', edit_project_path(project), class: "icon-edit", data: {'no-turbolink' =>  true}
+            |
+            =link_to '', project_path(project), method: :delete, "data-confirm" => "Are you sure? If you are deleting project, it's associated timesheets will be deleted.", class: "icon-trash"
+
+:javascript
+  $('.usersList').popover()
