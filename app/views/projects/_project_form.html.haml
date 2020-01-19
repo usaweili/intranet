@@ -62,7 +62,8 @@
         = image_tag f.object.image, size: "200x200", id: 'project-image'
         = f.file_field :image, required: true, id: 'image-upload'
   = f.hidden_field :update_project, value: "update_project"
-  = f.submit :Save, class: 'btn controls btn-info'
+  - if @project.persisted? && @project.is_active
+    = f.submit :Save, class: 'btn controls btn-info'
 
 :javascript
   $(".members").select2();

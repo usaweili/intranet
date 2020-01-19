@@ -8,8 +8,8 @@ class Project
   mount_uploader :case_study, FileUploader
   mount_uploader :logo, FileUploader
 
-  BILLING_FREQUENCY_TYPES = ['Monthly', 'Bi-weekly', 'Adhoc']
-  TYPE_OF_PROJECTS = ['T&M', 'Fixbid', 'Free', 'Investment']
+  BILLING_FREQUENCY_TYPES = ['Monthly', 'Bi-weekly', 'Adhoc'].freeze
+  TYPE_OF_PROJECTS = ['T&M', 'Fixbid', 'Free', 'Investment'].freeze
 
   field :name
   field :code_climate_id
@@ -71,6 +71,7 @@ class Project
   MANERIAL_ROLE = ['Admin', 'Manager']
   validates :display_name, format: { with: /\A[ ]*[\S]*[ ]*\Z/, message: "Name should not contain white space" }
   validates :start_date, presence: true
+  validates_presence_of :end_date, unless: -> { is_active? }
   validates :billing_frequency, inclusion: { in: BILLING_FREQUENCY_TYPES, allow_nil: true }
   validates :type_of_project, inclusion: { in: TYPE_OF_PROJECTS, allow_nil: true }
   before_save do
@@ -81,6 +82,7 @@ class Project
     end
   end
 
+  after_save :update_corresponding_user_projects, unless: -> { is_active? }
 
   after_update do
     Rails.cache.delete('views/website/portfolio.json') if updated_at_changed?
@@ -275,5 +277,11 @@ class Project
       }
     ]).pluck(:user_id).uniq
     User.in(id: user_ids).where(status: STATUS[2])
+  end
+
+  private
+
+  def update_corresponding_user_projects
+    user_projects.each { |user_project| user_project.update_attributes(end_date: end_date) }
   end
 end
