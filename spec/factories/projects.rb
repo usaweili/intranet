@@ -9,5 +9,6 @@ FactoryGirl.define do
     database { "MongoDB" }
     other_details { Faker::App.author }
     company
+    start_date { Date.today }
   end
 end

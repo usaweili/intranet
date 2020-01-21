@@ -1,7 +1,10 @@
 require 'spec_helper'
 
 describe Project do
-  it {should validate_presence_of(:name)}
+  context 'Validations' do
+    it { is_expected.to validate_presence_of(:name) }
+    it { is_expected.to validate_presence_of(:start_date) }
+  end
   # it {should accept_nested_attributes_for(:users)}
 
   it 'must return all the tags' do
@@ -366,6 +369,29 @@ describe Project do
         user_projects = project.get_user_projects_from_project(from_date, to_date)
         expect(user_projects.count).to eq(0)
         expect(user_projects.present?).to eq(false)
+      end
+    end
+  end
+
+  context 'check presence of end_date' do
+    it 'when project set to inactive' do
+      project = create(:project)
+      project.is_active = false
+      expect(project.valid?).to eq false
+    end
+  end
+
+  describe '#update_corresponding_user_projects' do
+    context 'when project set to inactive' do
+      let!(:project) { create(:project) }
+      let!(:user_project) { create_list(:user_project, 2, project: project) }
+
+      it 'set end date for each developer assigned to that project ' do
+        project.update_attributes(is_active: false, end_date: Time.zone.today)
+
+        project.reload
+        expect(project.user_projects.collect(&:end_date)).not_to be_nil
+        expect(project.user_projects.collect(&:end_date).uniq).to match_array([Time.zone.today])
       end
     end
   end
