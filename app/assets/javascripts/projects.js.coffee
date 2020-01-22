@@ -11,11 +11,11 @@ $(document).ready ->
     return
 
   $('#toggle-projects-btn').bind 'ajax:beforeSend', ->
-    alert("Started")
+    showSpinner();
     return
 
   $('#toggle-projects-btn').bind 'ajax:complete', ->
-    alert("completed")
+    hideSpinner();
     return
 
   $('body').on 'click', (e) ->
@@ -26,7 +26,6 @@ $(document).ready ->
     return
 
   if $('#sortable').length > 0
-    $('#sortable').dataTable({ "aaSorting": [] });
     table_width = $('#sortable').width()
     cells = $('.table').find('tr')[0].cells.length
     desired_width = table_width / cells + 'px'

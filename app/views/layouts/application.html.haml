@@ -58,6 +58,8 @@
                 %li
                   = link_to "Sign In", main_app.new_user_session_path
   .container
+    #spinner-wrapper
+      #spinnerDiv
     - flash.each do |key, msg|
       %div{class: flash_class(key), style: "margin-top: 15px;"}
         = msg

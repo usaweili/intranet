@@ -67,3 +67,11 @@ generate_code = function() {
     $('#project_code').val(response.code);
   });
 };
+
+showSpinner = function() {
+  $('#spinner-wrapper').css("display", "flex")
+};
+
+hideSpinner = function() {
+  $('#spinner-wrapper').css("display", "none")
+}
