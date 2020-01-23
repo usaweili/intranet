@@ -47,7 +47,6 @@ class Project
   field :invoice_date, type: Date
 
   field :display_name
-  field :is_free, type: Boolean, default: false
   field :timesheet_mandatory, type: Boolean, default: true
   field :billing_frequency
   field :type_of_project
@@ -119,11 +118,15 @@ class Project
   end
 
   def self.to_csv(options = {})
-    column_names = ['name', 'code_climate_id', 'code_climate_snippet', 'code_climate_coverage_snippet', 'is_active', 'is_free', 'start_date', 'end_date', 'manager_name', 'number_of_employees', 'allocated_employees', 'employee_names', 'ruby_version', 'rails_version', 'database', 'database_version', 'deployment_server', 'deployment_script', 'web_server', 'app_server', 'payment_gateway', 'image_store', 'index_server', 'background_jobs', 'sms_gateway', 'other_frameworks', 'other_details']
+    column_names = ['name', 'code_climate_id', 'code_climate_snippet',
+      'code_climate_coverage_snippet','is_active', 'start_date', 'end_date',
+      'manager_name', 'number_of_employees', 'allocated_employees', 'employee_names',
+      'ruby_version', 'rails_version', 'database', 'database_version', 'deployment_server',
+      'deployment_script', 'web_server', 'app_server', 'payment_gateway', 'image_store',
+      'index_server', 'background_jobs', 'sms_gateway', 'other_frameworks', 'other_details']
     CSV.generate(options) do |csv|
       csv << column_names.collect(&:titleize)
       all.each do |project|
-        project[:is_free] = project[:is_free] == false ? 'No' : 'Yes'
         project[:allocated_employees] = project.users.count
         project[:manager_name] = manager_names(project)
         project[:employee_names] = employee_names(project)

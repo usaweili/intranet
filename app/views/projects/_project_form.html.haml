@@ -62,7 +62,7 @@
         = image_tag f.object.image, size: "200x200", id: 'project-image'
         = f.file_field :image, required: true, id: 'image-upload'
   = f.hidden_field :update_project, value: "update_project"
-  - if @project.persisted? && @project.is_active
+  - if (@project.persisted? && @project.is_active) || @project.new_record?
     = f.submit :Save, class: 'btn controls btn-info'
 
 :javascript
