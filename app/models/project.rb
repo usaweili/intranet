@@ -82,7 +82,7 @@ class Project
     end
   end
 
-  after_save :update_corresponding_user_projects, unless: -> { is_active? }
+  after_save :update_user_projects, unless: -> { is_active? }
 
   after_update do
     Rails.cache.delete('views/website/portfolio.json') if updated_at_changed?
@@ -281,7 +281,7 @@ class Project
 
   private
 
-  def update_corresponding_user_projects
+  def update_user_projects
     user_projects.each { |user_project| user_project.update_attributes(end_date: end_date) }
   end
 end
