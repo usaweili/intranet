@@ -160,38 +160,26 @@ class Project
     end
   end
 
-  def add_or_remove_team_member(params)
-    return_value_of_add_team_member = return_value_of_remove_team_member = true
-    existing_user_ids = UserProject.where(project_id: id, end_date: nil).pluck(:user_id)
-    existing_user_ids.map!(&:to_s)
-    ids_for_add_members = params['project']['user_ids'].present? ? params['project']['user_ids'] - existing_user_ids : []
-    ids_for_remove_members = params['project']['user_ids'].present? ? existing_user_ids - params['project']['user_ids'] : existing_user_ids
-    return_value_of_add_team_member = add_team_member(ids_for_add_members) if ids_for_add_members.present?
-    return_value_of_remove_team_member = remove_team_member(ids_for_remove_members) if ids_for_remove_members.present?
-    return return_value_of_add_team_member, return_value_of_remove_team_member
+  def add_or_remove_team_members(user_ids)
+    user_ids = user_ids.presence ? user_ids.collect!(&:to_s) : []
+    existing_member_ids = user_projects.where(end_date: nil).pluck(:user_id).collect(&:to_s)
+    new_member_ids = user_ids.present? ? user_ids - existing_member_ids : []
+    removed_member_ids = user_ids.present? ? existing_member_ids - user_ids : []
+    add_team_members(new_member_ids) if new_member_ids.present?
+    remove_team_members(removed_member_ids) if removed_member_ids.present?
   end
 
-  def add_team_member(user_ids)
-    return_value = true
+  def add_team_members(user_ids)
     user_ids.each do |user_id|
-      return_value = UserProject.create!(user_id: user_id, project_id: id, start_date: DateTime.now, end_date: nil) rescue false  
-      if return_value == false
-        break
-      end
+      user_projects.create!(user_id: user_id, start_date: DateTime.now, end_date: nil)
     end
-    return_value
   end
 
-  def remove_team_member(user_ids)
-    return_value = true
+  def remove_team_members(user_ids)
     user_ids.each do |user_id|
-      user_project = UserProject.where(user_id: user_id, project_id: id, end_date: nil).first
-      return_value = user_project.update_attributes(end_date: DateTime.now) rescue false
-      if return_value == false
-        break
-      end
+      user_project = user_projects.where(user_id: user_id, end_date: nil).first
+      user_project.update_attributes(end_date: DateTime.now) if user_project
     end
-    return_value
   end
 
   def self.get_approved_project_between_range(from_date, to_date)

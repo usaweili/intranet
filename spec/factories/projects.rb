@@ -8,7 +8,8 @@ FactoryGirl.define do
     ruby_version { Faker::App.semantic_version }
     database { "MongoDB" }
     other_details { Faker::App.author }
-    company
     start_date { Date.today }
+
+    association :company
   end
 end

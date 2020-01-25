@@ -23,6 +23,7 @@ class ProjectsController < ApplicationController
   def create
     @project = Project.new(safe_params)
     if @project.save
+      @project.add_or_remove_team_members(params[:project][:user_ids] || [])
       flash[:success] = "Project created Succesfully"
       redirect_to projects_path
     else
@@ -31,10 +32,8 @@ class ProjectsController < ApplicationController
   end
 
   def update
-    return_value_of_add_team_member = return_value_of_remove_team_member = true
-    return_value_of_add_team_member, return_value_of_remove_team_member = @project.add_or_remove_team_member(params) if params['project']['update_project'].present?
-    if return_value_of_add_team_member && return_value_of_remove_team_member
-      update_obj(@project, safe_params, projects_path)
+    if update_obj(@project, safe_params, projects_path)
+      @project.add_or_remove_team_members(params[:project][:user_ids] || [])
     else
       flash[:error] = "Error unable to add or remove team member"
       render 'edit'

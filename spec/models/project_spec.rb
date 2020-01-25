@@ -84,74 +84,6 @@ describe Project do
     end
   end
 
-  context 'add or remove team member' do
-    let!(:user) { FactoryGirl.create(:user) }
-    let!(:project) { FactoryGirl.build(:project) }
-
-    it 'Should add team member' do
-      user_ids = []
-      user_ids << user.id
-      project.save
-      params = { "project" => { "user_ids" => user_ids } }
-      project.add_or_remove_team_member(params)
-      user_project = UserProject.find_by(
-        user_id: user.id,
-        project_id: project.id
-      )
-      expect(user_project.start_date).to eq(Date.today)
-    end
-
-    describe 'Should remove team member' do
-      it 'member count greater than two' do
-        user_ids = []
-        first_team_member = FactoryGirl.create(:user)
-        second_team_member = FactoryGirl.create(:user)
-        FactoryGirl.create(:user_project,
-          user: first_team_member,
-          project: project
-        )
-        FactoryGirl.create(:user_project,
-          user: second_team_member,
-          project: project
-        )
-        user_project = FactoryGirl.create(:user_project,
-          user: user,
-          project: project
-        )
-        user_ids << first_team_member.id
-        user_ids << second_team_member.id
-
-        params = { "project" => { "user_ids" => user_ids } }
-        project.add_or_remove_team_member(params)
-        expect(user_project.reload.end_date).to eq(Date.today)
-      end
-
-      it 'Member count is one' do
-        user_project = FactoryGirl.create(:user_project,
-          user: user,
-          project: project
-        )
-        params = { "project" => { "user_ids" => [] } }
-        project.add_or_remove_team_member(params)
-        expect(user_project.reload.end_date).to eq(Date.today)
-      end
-    end
-
-    it 'Add team member : should return false because user id nil' do
-      user_ids = []
-      user_ids << nil
-      return_value = project.add_team_member(user_ids)
-      expect(return_value).to eq(false)
-    end
-
-    it 'Remove team member : should return false because user id nil' do
-      user_ids = []
-      user_ids << nil
-      return_value = project.remove_team_member(user_ids)
-      expect(return_value).to eq(false)
-    end
-  end
-
   context 'Users' do
     let!(:user) { FactoryGirl.create(:user) }
     let!(:project) { FactoryGirl.create(:project) }
@@ -397,4 +329,67 @@ describe Project do
       end
     end
   end
+
+  context '#add_team_members' do
+    it 'create new team members associated with project' do
+      project = create(:project)
+      employee_ids = create_list(:employee, 2)
+      project.add_team_members(employee_ids.collect(&:id))
+      expect(project.user_projects.count).to eq 2
+      expect(project.user_projects.pluck(:user_id)).to match_array(employee_ids.collect(&:id))
+      expect(project.user_projects.pluck(:end_date).uniq).to eq([nil])
+    end
+  end
+
+  context '#remove_team_members' do
+    it 'set end date for removed team members of project' do
+      project = create(:project)
+      employee = create(:employee)
+      project.user_projects.create!(user_id: employee.id, start_date: Time.zone.now)
+      project.remove_team_members([employee.id.to_s])
+      project.reload
+
+      expect(project.user_projects.count).to eq 1
+      expect(project.user_projects.first.user_id).to eq(employee.id)
+      expect(project.user_projects.first.end_date).not_to be_nil
+    end
+  end
+
+  context '#add_or_remove_team_members' do
+    it 'create new members for project' do
+      project = create(:project)
+      employee_ids = create_list(:employee, 2)
+      project.add_or_remove_team_members(employee_ids.collect(&:id))
+      expect(project.user_projects.count).to eq 2
+      expect(project.user_projects.pluck(:user_id)).to match_array(employee_ids.collect(&:id))
+      expect(project.user_projects.pluck(:end_date).uniq).to eq([nil])
+    end
+
+    it 'create new team members with existing team members for project' do
+      project = create(:project)
+      existing_team_members = create_list(:employee, 2)
+      existing_team_members.each do |user|
+        project.user_projects.create!(user_id: user.id, start_date: '1/1/2001'.to_date)
+      end
+      expect(project.user_projects.count).to eq 2
+      expect(project.user_projects.first.start_date).to eq('1/1/2001'.to_date)
+      employee = create(:employee)
+      project.add_or_remove_team_members([employee.id])
+      expect(project.user_projects.count).to eq 3
+    end
+
+    it 'remove team members for project' do
+      project = create(:project)
+      existing_team_members = create_list(:employee, 2)
+      existing_team_members.each do |user|
+        project.user_projects.create!(user_id: user.id, start_date: '1/1/2001'.to_date)
+      end
+      expect(project.user_projects.count).to eq 2
+      employee = project.users.first.id.to_s
+      project.add_or_remove_team_members([employee])
+      expect(project.user_projects.count).to eq 2
+      expect(project.user_projects.where(user_id: employee).first).not_to be_nil
+    end
+  end
+
 end

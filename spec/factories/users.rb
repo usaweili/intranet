@@ -29,13 +29,13 @@ FactoryGirl.define do
 
   factory :employee, class: User do
     role { 'Employee' }
-    email { "employee@#{ORGANIZATION_DOMAIN}" }
+    sequence(:email) { |i | Faker::Name.first_name + i.to_s + "@#{ORGANIZATION_DOMAIN}" }
     password { Faker::Internet.password }
   end
 
   factory :manager, class: User do
     role { 'Manager' }
-    email { "manager@#{ORGANIZATION_DOMAIN}" }
+    sequence(:email) { |n| "manager#{n}@#{ORGANIZATION_DOMAIN}" }
     password { Faker::Internet.password }
   end
 
