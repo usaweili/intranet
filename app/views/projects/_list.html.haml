@@ -28,7 +28,7 @@
           - status_class = project.is_active ? 'label-success' : 'label-warning'
           .label{class: status_class}
             = project.is_active
-        %td= link_to users.count, 'javascript:void(0)', 'data-toggle' => "popover", 'title' => "Team Members",
+        %td= link_to users.count, 'javascript:void(0)', 'data-toggle' => "popover", 'title' => "Team Members", "data-placement" => "top",
           "data-html" => "true", "data-content" => "#{users.collect(&:name).sort.join(', ')}", class: "usersList", "tabindex"=>"0"
         %td= project.billing_frequency
         %td= project.type_of_project

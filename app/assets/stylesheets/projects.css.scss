@@ -63,3 +63,9 @@
   justify-content: center;
   z-index: 10000000;
 }
+
+#sortable {
+  .popover {
+    max-width: 95% !important;
+  }
+}
