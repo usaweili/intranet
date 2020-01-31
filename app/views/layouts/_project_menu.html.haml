@@ -1,5 +1,7 @@
 - if can? :manage, Project
   .remove_underline
+    - if params[:action] == 'index'
+      = link_to 'All Projects', projects_path(all: true), class: 'btn btn-primary mb-5', id: 'toggle-projects-btn', remote: true
     = link_to '', new_project_path, data: {'no-turbolink' =>  true}, "data-toggle" => "tooltip", title: "Add Project",
                  class: "icon-plus" unless (params[:action] == "new" || params[:action] == "show")
     = link_to '', edit_project_path, data: {'no-turbolink' =>  true}, "data-toggle" => "tooltip", title: "Edit Project",

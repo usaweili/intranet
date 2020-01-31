@@ -3,7 +3,6 @@
     .span3
       Projects
     .offset8{style: "float: right;"}
-      = link_to 'All Projects', projects_path(all: true), class: 'btn btn-primary mb-5', id: 'toggle-projects-btn', remote: true
       = render partial: "layouts/project_menu"
 .form-horizontal#projects_list
   = render 'list'
