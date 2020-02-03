@@ -1,16 +1,14 @@
-= simple_form_for @project, :html => {class: "form-horizontal"} do |f|
+= simple_nested_form_for @project, :html => {class: "form-horizontal"} do |f|
   = hidden_field_tag :tech_details, true
   .row
-    .span5
-      = f.input :ruby_version
-      = f.input :rails_version
+    .span4
       = f.input :database, placeholder: "mongo, mysql, postgres, etc."
       = f.input :database_version 
       = f.input :deployment_server, placeholder: "AWS, digital ocean, heroku etc."
       = f.input :deployment_script, placeholder: "ey, mina, etc." 
       = f.input :web_server, placeholder: "nginx, apache etc."
       = f.input :app_server, placeholder: "thin, passanger, etc" 
-    .span5
+    .span4
       = f.input :payment_gateway
       = f.input :image_store, placeholder: "S3, cloudinary etc."
       = f.input :index_server, placeholder: "redis, elastic search, etc." 
@@ -19,5 +17,22 @@
       = f.input :other_frameworks, placeholder: "angular.js, node.js, etc." 
       = f.input :other_details, as: :text
   .row
+    %hr
+    %h4 Technology Details
+    = f.simple_fields_for :technology_details do|t|
+      .row
+        .span4.off-set2
+          = t.input :name, collection: (LANGUAGE+FRAMEWORK).sort, input_html: {"data-placeholder" => "Add Technology",class:'technology',}, label: "Technology/Framework", include_blank: true, include_hidden: false
+        .span4.off-set2
+          = t.input :version
+        .span2.off-set2
+          = t.link_to_remove 'Remove', class: 'btn btn-danger'
+    = f.link_to_add 'Add More', :technology_details, class: 'btn btn-success ml'
+  .row
     .span8.pull-right= f.submit :save, class: 'btn controls'
 
+:javascript
+  $(".technology").select2({width:'100%'})
+  $(document).on('nested:fieldAdded', function() {
+      $('select.technology').select2({ width : '100%' });
+    });
