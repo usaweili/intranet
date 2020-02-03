@@ -55,7 +55,7 @@ class Project
   slug :name
 
   has_many :technology_details
-  accepts_nested_attributes_for :technology_details,  allow_destroy: true
+  accepts_nested_attributes_for :technology_details, allow_destroy: true
   has_many :time_sheets, dependent: :destroy
   has_many :user_projects, dependent: :destroy
   accepts_nested_attributes_for :user_projects

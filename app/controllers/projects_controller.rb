@@ -31,7 +31,6 @@ class ProjectsController < ApplicationController
     @company = Company.find(params[:company_id]) if params[:company_id]
     @project = Project.new(company: @company)
     @project.technology_details.build
-
   end
 
   def create

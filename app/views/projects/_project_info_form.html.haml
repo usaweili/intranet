@@ -22,7 +22,7 @@
     = f.simple_fields_for :technology_details do|t|
       .row
         .span4.off-set2
-          = t.input :name, collection: (LANGUAGE+FRAMEWORK).sort, input_html: {"data-placeholder" => "Add Technology",class:'technology',}, label: "Technology/Framework", include_blank: true, include_hidden: false
+          = t.input :name, collection: (LANGUAGE + FRAMEWORK).sort, input_html: {"data-placeholder" => "Add Technology",class:'technology'}, label: "Technology/Framework", include_blank: true, include_hidden: false
         .span4.off-set2
           = t.input :version
         .span2.off-set2
@@ -34,5 +34,5 @@
 :javascript
   $(".technology").select2({width:'100%'})
   $(document).on('nested:fieldAdded', function() {
-      $('select.technology').select2({ width : '100%' });
-    });
+    $('select.technology').select2({ width : '100%' });
+  });
