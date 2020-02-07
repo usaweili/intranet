@@ -3,7 +3,9 @@ require 'rails_helper'
 RSpec.describe HolidayListsController, type: :controller do
   context '#create' do
     it 'create holiday' do
-      params = FactoryGirl.attributes_for(:holiday)
+      date = Date.today
+      date = date - 2.days if date.saturday? || date.sunday?
+      params = FactoryGirl.attributes_for(:holiday, holiday_date: date)
       post :create, {:holiday_list => params}
       expect(flash[:success]).to eq('Holiday Created Succesfully')
     end

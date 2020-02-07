@@ -8,7 +8,7 @@ class Project
   mount_uploader :case_study, FileUploader
   mount_uploader :logo, FileUploader
 
-  BILLING_FREQUENCY_TYPES = ['Monthly', 'Bi-weekly', 'Adhoc'].freeze
+  BILLING_FREQUENCY_TYPES = ['Monthly', 'Bi-weekly', 'Adhoc', 'NA'].freeze
   TYPE_OF_PROJECTS = ['T&M', 'Fixbid', 'Free', 'Investment'].freeze
 
   field :name
@@ -51,6 +51,7 @@ class Project
   field :billing_frequency
   field :type_of_project
   field :is_activity, type: Boolean, default: false
+  field :domains, type: Array, default: []
   slug :name
 
   has_many :time_sheets, dependent: :destroy
@@ -69,7 +70,7 @@ class Project
 
   MANERIAL_ROLE = ['Admin', 'Manager']
   validates :display_name, format: { with: /\A[ ]*[\S]*[ ]*\Z/, message: "Name should not contain white space" }
-  validates :start_date, presence: true
+  validates :start_date, :billing_frequency, :type_of_project, presence: true
   validates_presence_of :end_date, unless: -> { is_active? }
   validates :billing_frequency, inclusion: { in: BILLING_FREQUENCY_TYPES, allow_nil: true }
   validates :type_of_project, inclusion: { in: TYPE_OF_PROJECTS, allow_nil: true }

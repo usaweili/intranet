@@ -9,6 +9,8 @@ FactoryGirl.define do
     database { "MongoDB" }
     other_details { Faker::App.author }
     start_date { Date.today }
+    billing_frequency "Monthly"
+    type_of_project "T&M"
 
     association :company
   end

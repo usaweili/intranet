@@ -4,6 +4,8 @@ describe Project do
   context 'Validations' do
     it { is_expected.to validate_presence_of(:name) }
     it { is_expected.to validate_presence_of(:start_date) }
+    it { is_expected.to validate_presence_of(:billing_frequency) }
+    it { is_expected.to validate_presence_of(:type_of_project) }
     it { is_expected.to validate_inclusion_of(:billing_frequency).to_allow(Project::BILLING_FREQUENCY_TYPES) }
     it { is_expected.to validate_inclusion_of(:type_of_project).to_allow(Project::TYPE_OF_PROJECTS) }
   end
