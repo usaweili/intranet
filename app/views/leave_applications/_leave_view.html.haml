@@ -9,6 +9,7 @@
         %th Reason
         %th.date Applied On
         %th Status
+        %th Type
         - if (leave_data.present? and !leave_data.first.pending?) or can? :manage, LeaveApplication
           %th Note
         - if (leave_data.present? and leave_data.first.pending?) or can? :manage, LeaveApplication
@@ -25,6 +26,7 @@
           %td= appr_leave.reason
           %td= appr_leave.created_at.try(:strftime, "%d-%m-%Y")
           %td.status= appr_leave.leave_status
+          %td= appr_leave.leave_type
           - if (!pending_leave) or can? :manage, LeaveApplication
             %td
               %a.reason{class: 'reason_'+ leave_id, id: "#{leave_id}"}

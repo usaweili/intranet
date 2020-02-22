@@ -66,7 +66,7 @@ class LeaveApplicationsController < ApplicationController
 
   def strong_params
     safe_params = [
-                   :user_id, :start_at,
+                   :user_id, :start_at, :leave_type,
                    :end_at, :contact_number, :number_of_days,
                    :reason, :reject_reason, :leave_status
                   ]

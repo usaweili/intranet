@@ -6,12 +6,18 @@ class LeaveApplication
   belongs_to :user
   #has_one :address
 
+  LEAVE = 'LEAVE'
+  WFH = 'WFH'
+
+  LEAVE_TYPES = [LEAVE, WFH]
+
   field :start_at,        type: Date
   field :end_at,          type: Date
   field :contact_number,  type: Integer
   field :number_of_days,  type: Integer
   #field :approved_by,     type: Integer
   field :reason,          type: String
+  field :leave_type,      type: String
 
   # We were accepting reason only on rejection so field named as reject_reason
   # but now we accept reason 1) For rejection and 2) For approval after rejection
@@ -23,7 +29,8 @@ class LeaveApplication
   field :leave_status,    type: String, default: PENDING
   track_history
 
-  validates :start_at, :end_at, :contact_number, :reason, :number_of_days, :user_id , presence: true 
+  validates :start_at, :end_at, :contact_number, :reason, :number_of_days, :user_id, :leave_type, presence: true
+  validates :leave_type, inclusion: { in: LEAVE_TYPES }
   validates :contact_number, numericality: {only_integer: true}, length: {is: 10}
   validate :validate_available_leaves, on: [:create, :update]
   validate :end_date_less_than_start_date, if: 'start_at.present?'
@@ -35,6 +42,10 @@ class LeaveApplication
   scope :pending, ->{where(leave_status: PENDING)}
   scope :processed, ->{where(:leave_status.ne => PENDING)}
   scope :unrejected, -> { where(:leave_status.ne => REJECTED )}
+
+  def leave_request?
+    leave_type == LEAVE
+  end
 
   def process_after_update(status)
     send("process_#{status}") 
@@ -55,8 +66,10 @@ class LeaveApplication
   end
 
   def process_reject_application
-    user = self.user
-    user.employee_detail.add_rejected_leave(number_of_days)    
+    if leave_request?
+      user = self.user
+      user.employee_detail.add_rejected_leave(number_of_days)
+    end
     UserMailer.delay.reject_leave(self.id)
   end
 
@@ -78,7 +91,7 @@ class LeaveApplication
         return {type: :error, text: leave_application.errors.full_messages.join(" ")}
       end
     else
-      return {type: :error, text: "Leave is already #{leave_status}"}
+      return {type: :error, text: "#{leave_application.leave_type} is already #{leave_status}"}
     end
   end
 
@@ -112,16 +125,18 @@ class LeaveApplication
     # Deduct on creation and changed from 'Rejected' to 'Approved'
     if (pending? and self.leave_status_was.nil?) or (approved? and self.leave_status_was == REJECTED)
       user = self.user
-      user.employee_detail.deduct_available_leaves(number_of_days)
+      user.employee_detail.deduct_available_leaves(number_of_days) if leave_request?
       user.sent_mail_for_approval(self.id) 
     end
   end
 
   def update_available_leave_send_mail
     user = self.user
-    prev_days, changed_days = number_of_days_change ? number_of_days_change : number_of_days
-    user.employee_detail.add_rejected_leave(prev_days)
-    user.employee_detail.deduct_available_leaves(changed_days||prev_days)
+    if leave_request?
+      prev_days, changed_days = number_of_days_change ? number_of_days_change : number_of_days
+      user.employee_detail.add_rejected_leave(prev_days)
+      user.employee_detail.deduct_available_leaves(changed_days||prev_days)
+    end
     user.sent_mail_for_approval(self.id) 
   end
 
@@ -145,7 +160,7 @@ class LeaveApplication
       # While updating leave application do not consider self.. 
       leave_applications = self.user.leave_applications.unrejected.ne(id: self.id)
       leave_applications.each do |leave_application|
-        errors.add(:base, "Already applied for leave on same date") and return if self.start_at.between?(leave_application.start_at, leave_application.end_at) or
+        errors.add(:base, "Already applied for LEAVE/WFH on same date") and return if self.start_at.between?(leave_application.start_at, leave_application.end_at) or
           self.end_at.between?(leave_application.start_at, leave_application.end_at) or
           leave_application.start_at.between?(self.start_at, self.end_at) or
           leave_application.end_at.between?(self.start_at, self.end_at)

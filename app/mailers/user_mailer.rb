@@ -20,17 +20,17 @@ class UserMailer < ActionMailer::Base
     @user = User.find_by(email: sender_email)
     @receivers = receivers
     @leave_application = LeaveApplication.where(id: leave_application_id).first
-    mail(from: @user.email, to: receivers, subject: "#{@user.name} has applied for leave")
+    mail(from: @user.email, to: receivers, subject: "#{@user.name} has applied for #{@leave_application.leave_type}")
   end
 
   def reject_leave(leave_application_id)
     get_leave(leave_application_id)
-    mail(to: @user.email, subject: "Leave Request got rejected")
+    mail(to: @notification_emails, subject: "#{@leave_application.leave_type} Request got rejected")
   end
 
   def accept_leave(leave_application_id)
     get_leave(leave_application_id)
-    mail(to: @user.email, subject: "Congrats! Leave Request got accepted")
+    mail(to: @notification_emails, subject: "Congrats! #{@leave_application.leave_type} Request got accepted")
   end
 
   def download_notification(downloader_id, document_name)
@@ -113,5 +113,6 @@ class UserMailer < ActionMailer::Base
   def get_leave(id)
     @leave_application = LeaveApplication.where(id: id).first
     @user = @leave_application.user
+    @notification_emails = [@user.email, @user.notification_emails].flatten.compact.uniq.join(', ')
   end
 end
