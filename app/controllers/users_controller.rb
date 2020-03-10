@@ -129,7 +129,7 @@ class UsersController < ApplicationController
   def user_params
     safe_params = []
     if params[:user][:employee_detail_attributes].present?
-      safe_params = [ employee_detail_attributes: [:id, :employee_id, :date_of_relieving, :designation, :description, :is_billable, :notification_emails => [] ] ]
+      safe_params = [ employee_detail_attributes: [:id, :employee_id, :date_of_relieving, :designation, :description, :is_billable, :designation_track, :notification_emails => [] ] ]
     elsif params[:user][:attachments_attributes].present?
       safe_params = [attachments_attributes: [:id, :name, :document, :_destroy]]
     else
@@ -191,15 +191,15 @@ class UsersController < ApplicationController
 
     xml_feed = Feedjira::Feed.fetch_raw "https://github.com/#{handle}.atom"
 
-    if xml_feed.eql?(404) 
+    if xml_feed.eql?(404)
       @github_message = "The server has not found anything matching the URI given!!"
       return nil
     end
 
     github_feed = Feedjira::Feed.parse xml_feed
-    
+
     return nil if github_feed.try(:entries).try(:blank?)
-    
+
     if github_feed != 200
       github_commits = []
       github_feed.entries.each do |entry|
@@ -216,22 +216,22 @@ class UsersController < ApplicationController
   def get_blog_feed
     blog_url = @user.public_profile.blog_url
     @blog_message = "#{@user.name} has not entered blog url yet!!" if blog_url.blank?
-   
+
     return if blog_url.blank?
 
     xml_feed = Feedjira::Feed.fetch_raw "#{blog_url}/feed"
-    if xml_feed.eql?(0) 
+    if xml_feed.eql?(0)
       @blog_message = "The server has not found anything matching the URI given!!"
       return nil
     end
-    
+
     blog_feed = Feedjira::Feed.parse xml_feed
 
     return nil if blog_feed.try(:entries).try(:blank?)
     if blog_feed != 0
       blog_feed.entries[0..9]
     else
-      @blog_message = "No blog entries found for #{@user.name}!!" 
+      @blog_message = "No blog entries found for #{@user.name}!!"
       nil
     end
   end

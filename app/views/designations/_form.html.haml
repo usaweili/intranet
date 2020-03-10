@@ -3,11 +3,23 @@
     .row
       .col-md-6
         = f.input :name, required: false, class: 'pull-left'
+    .row
+      .col-md-6
         .control-group
           = label_tag "Parent/Senior Level Designation", nil, class: 'control-label'
           .controls
-            = select_tag :parent_designation_id, options_for_select(Designation.pluck(:name, :id), f.object.try(:designation).try(:id)), {:prompt => "-- Select Designation --", class: "list", name: "designation[parent_designation_id]", style: "width: 340px"}
-    = f.submit :Save, class: 'btn controls btn-info'
+            = select_tag :parent_designation_id, options_for_select(Designation.pluck(:name, :id), f.object.try(:designation).try(:id)), {:prompt => "-- Select Designation --", class: "list", name: "designation[parent_designation_id]", style: "width: 340px", selected: f.object.try(:parent_designation_id)}
+
+    .row= f.submit :Save, class: 'btn controls btn-info'
+    - unless f.object.new_record?
+      .row{style: 'margin-top: 5%;'}
+        .col-md-6
+          .control-group
+            = label_tag "Employees with this Designation", nil, class: 'control-label'
+            .controls
+              = User.approved.where("employee_detail.designation_id" => f.object.id).pluck(:email).sort.join(', ')
+
 
 :javascript
+  $('.list').val("#{@designation.try(:parent_designation_id)}");
   $(".list").select2();

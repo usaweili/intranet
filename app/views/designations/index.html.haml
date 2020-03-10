@@ -11,12 +11,14 @@
       %tr
         %th Name
         %th Parent/Senior Level Designation
+        %th Employees Count
         %th Actions
     %tbody
       - @designations.each do |designation|
         %tr
           %td= designation.name
           %td= designation.parent_designation.try(:name)
+          %td= User.approved.where("employee_detail.designation_id" => designation.id).count
           %td
             = link_to " ", "/designations/#{designation.id}/edit", data: { "no-turbolink": true }, class: "icon-edit"
             = link_to " ", "/designations/#{designation.id}", data: { "no-turbolink": true, method: "delete", confirm: "Are you sure?" }, class: "icon-trash"

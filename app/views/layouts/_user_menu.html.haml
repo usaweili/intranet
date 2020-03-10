@@ -17,7 +17,7 @@
       = link_to "Company", main_app.companies_path
   %li
     = link_to "Profile", main_app.public_profile_user_path(current_user), data: {'no-turbolink' =>  true}
-  %li 
+  %li
     = link_to "Documents", main_app.attachments_path, data: {'no-turbolink' =>  true}
   %li
     = link_to "Events", "https://intranet.joshsoftware.com/functions", 'target' => '_blank'
@@ -47,7 +47,7 @@
           %li
             = link_to "Export Project Report", main_app.export_project_report_time_sheets_path, class: 'menu-font'
   /
-    %li
+  %li
     = link_to "Assessments", ENV['snowflake_url']
   %li.divider
   %li

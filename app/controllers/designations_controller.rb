@@ -5,7 +5,7 @@ class DesignationsController < ApplicationController
   skip_load_and_authorize_resource :only => :create
 
   def index
-    @designations = Designation.all
+    @designations = Designation.all.order_by([:name, :asc])
   end
 
   def new
