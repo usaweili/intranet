@@ -55,7 +55,7 @@ class Project
   slug :name
 
   has_many :technology_details
-  accepts_nested_attributes_for :technology_details, allow_destroy: true
+  accepts_nested_attributes_for :technology_details, allow_destroy: true, reject_if: :technology_details_record_is_blank?
   has_many :time_sheets, dependent: :destroy
   has_many :user_projects, dependent: :destroy
   accepts_nested_attributes_for :user_projects
@@ -320,5 +320,9 @@ class Project
 
   def update_user_projects
     user_projects.each { |user_project| user_project.update_attributes(end_date: end_date) }
+  end
+
+  def technology_details_record_is_blank?(attributes)
+    attributes[:name].blank?  and attributes[:version].blank?
   end
 end

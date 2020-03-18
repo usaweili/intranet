@@ -4,5 +4,6 @@ class TechnologyDetail
   field :name
   field :version
   belongs_to :project
+  validates_presence_of :name, message: "Name can't be blank", if: 'version.present?'
   validates_presence_of :version, message: "Version can't be blank", if: 'name.present?'
 end
