@@ -74,10 +74,14 @@
                                                       Hello #{@user.name},
                                                       %br/
                                                     %p
-                                                      #{@leave_application.leave_type} has been rejected from #{@leave_application.start_at.to_s} to #{@leave_application.end_at.to_s}
+                                                      Your #{@leave_application.leave_type} has been rejected from #{@leave_application.start_at.to_s} to #{@leave_application.end_at.to_s}
                                                       - if @leave_application.reject_reason
+                                                        %br
                                                         Reason:
                                                         = @leave_application.reject_reason
+                                                      %br
+                                                      By:
+                                                      = @processed_by.name
                                                     %p{:style => "margin:0;padding-bottom:0"}
                                                       Regards,
                                                       %br/
