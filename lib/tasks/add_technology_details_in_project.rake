@@ -1,6 +1,6 @@
 namespace :adding_technology_details_in_project do
 
-  desc 'Adding Rails version in in Project tech deatails'
+  desc 'Adding Rails version in Project technology details'
   task :adding_rails_version => [:environment] do
     @projects = Project.where(:rails_version.ne => nil)
     @projects.each do|project|
@@ -10,7 +10,7 @@ namespace :adding_technology_details_in_project do
     end
   end
 
-  desc 'Adding Ruby version in in Project tech deatails'
+  desc 'Adding Ruby version in Project technology details'
   task :adding_ruby_version => [:environment] do
     @project = Project.where(:ruby_version.ne => nil)
     @project.each do|project|
