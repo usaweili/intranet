@@ -6,15 +6,19 @@
     /
       %li
         = link_to "Schedules", main_app.schedules_path
+  - if can? :resource_list, User
     %li
       = link_to 'Resource List', main_app.resource_list_path
-  - if can? :invite_user, User
-    %li
-      = link_to "Invite Employee", main_app.invite_user_path
+
+  - if can? :manage, Project
     %li
       = link_to "Projects", main_app.projects_path
+
+  - if can? :invite_user, User
     %li
       = link_to "Company", main_app.companies_path
+    %li
+      = link_to "Invite Employee", main_app.invite_user_path
   %li
     = link_to "Profile", main_app.public_profile_user_path(current_user), data: {'no-turbolink' =>  true}
   %li
@@ -47,7 +51,7 @@
           %li
             = link_to "Export Project Report", main_app.export_project_report_time_sheets_path, class: 'menu-font'
   /
-  %li
+    %li
     = link_to "Assessments", ENV['snowflake_url']
   %li.divider
   %li

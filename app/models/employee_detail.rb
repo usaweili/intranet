@@ -11,7 +11,7 @@ class EmployeeDetail
   field :available_leaves, type: Integer, default: 0
   field :description
   field :is_billable, type: Boolean, default: false
-  field :designation_track, type: String, default: DESIGNATION_TRACKS.last
+  field :designation_track, type: String, default: DESIGNATION_TRACKS.first
 
   belongs_to :designation
 

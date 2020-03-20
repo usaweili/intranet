@@ -19,6 +19,10 @@ class Ability
       can [:public_profile, :private_profile, :apply_leave], User
       can :manage, TimeSheet
       can :manage, LeaveApplication
+      can :resource_list, User
+
+      # TODO remove later after snowflake changes
+      can :manage, Designation
     elsif user.role? 'Employee'
       employee_abilities(user.id)
     elsif user.role? 'Intern'
