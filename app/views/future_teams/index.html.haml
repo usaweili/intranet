@@ -1,0 +1,14 @@
+.form-heading
+  %h2.row
+    Future Requirements
+    .align.align-right.row
+      - if can? :new, FutureTeam
+        = link_to '', new_future_team_path, data: {'no-turbolink' =>  true}, "data-toggle" => "tooltip", title: "Add Project",
+                     class: "icon-plus"
+        |
+      = link_to "", future_teams_path(format: "csv"), class: 'icon-download-alt'
+.form-horizontal#requirements_list
+  = render 'requirements_list', future_teams: @future_teams
+
+:css
+  .table td{ vertical-align: middle; }
