@@ -11,7 +11,13 @@ class ProjectsController < ApplicationController
     respond_to do |format|
       format.js
       format.html
-      format.csv { send_data @projects.to_csv }
+      format.csv do
+        if params[:team_reports].present?
+          send_data Project.team_data_to_csv, filename: 'user_project_data_#{Date.today.strftime("%d%b%y")}.csv'
+        else
+          send_data @projects.to_csv, filename: 'projects_data_#{Date.today.strftime("%d%b%y")}.csv'
+        end
+      end
     end
   end
 

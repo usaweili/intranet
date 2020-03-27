@@ -136,6 +136,43 @@ class Project
     end
   end
 
+  def self.team_data_to_csv
+    unwanted_project_names = ['Interview',  'Other']
+    unwanted_projects = Project.where(:name.in => unwanted_project_names)
+    projects = Project.where(:id.nin => unwanted_projects.pluck(:id)).all_active.order_by(name: :asc)
+
+    file = CSV.generate do |csv|
+      csv << [
+        'Project',
+        'Project Start Date',
+        'Project End Date',
+        'Employee Name',
+        'Employee Tech Skills',
+        'Employee Total Exp in Months',
+        'Employee Started On Project At',
+        'Days on Project'
+      ]
+      projects.each do |project|
+        end_date = project.end_date.blank? ? (Date.today + 6.months).end_of_month : project.end_date
+        user_ids = UserProject.where(project_id: project.id, :end_date => nil).pluck(:user_id).uniq
+        users = User.approved.order_by("public_profile.first_name" => :asc)
+        users.each do |user|
+          up = UserProject.where(project_id: project.id, user_id: user.id, :end_date => nil).first
+          csv << [
+            project.name,
+            project.start_date,
+            end_date,
+            user.name,
+            [user.public_profile.try(:technical_skills)].flatten.compact.uniq.sort.reject(&:blank?).join(', ').delete("\n").gsub("\r", ' '),
+            user.experience_as_of_today,
+            up.start_date,
+            (Date.today - up.start_date).to_i
+          ] if up
+        end
+      end
+    end
+  end
+
   def self.manager_names(project)
     manager_names = []
     project.managers.each do |manager|
@@ -195,7 +232,7 @@ class Project
     user_id = user_projects.where(end_date: nil).pluck(:user_id)
     User.in(id: user_id)
   end
-  
+
   def get_user_projects_from_project(from_date, to_date)
     user_ids = user_projects.where("$or"=>[
       {
