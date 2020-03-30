@@ -20,7 +20,7 @@
 }
 
 .form-horizontal .bullet{
-  font-family: "Times New Roman", Times, serif;  
+  font-family: "Times New Roman", Times, serif;
   font-size-adjust: 0.58;
 }
 
@@ -48,8 +48,8 @@
   min-width: 40%;
   max-height: 60%;
   min-height: 50%;
-  padding: 30px 30px; 
-  background-color: white; 
+  padding: 30px 30px;
+  background-color: white;
   box-shadow: 2px 2px 23px 0px;
   border-radius: 10px;
 }
@@ -57,29 +57,29 @@
 /*  position: absolute; top: 4%;left: 30%;margin-top: 3%;*/
 }
 .projects{
-  position: absolute;  
-  max-width: 20%;  
-  min-width: 20%;  
+  position: absolute;
+  max-width: 20%;
+  min-width: 20%;
   max-height: 68%;
   overflow-y: auto;
-  top: 36%;  
+  top: 36%;
   left: 28%;
- /* background-color: white; 
+ /* background-color: white;
   box-shadow: 2px 2px 23px 0px;
   border-radius: 10px;*/
 }
 
 .active-projects{
-  position: absolute;  
-  max-width: 30%; 
-  min-width: 30%; 
+  position: absolute;
+  max-width: 30%;
+  min-width: 30%;
   max-height: 68%;
   min-height: 68%;
   overflow-y: auto;
   overflow-x: auto;
   left: 34%;
   padding: 0px 10px;
-  background-color: white; 
+  background-color: white;
   box-shadow: 2px 2px 23px 0px;
   border-radius: 3%;
 }
@@ -164,4 +164,8 @@
 }
 #engg_name{
   width: 110px;
+}
+.photoText {
+  font-size: 14px;
+  font-style: italic;
 }

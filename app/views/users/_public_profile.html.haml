@@ -10,7 +10,10 @@
         = image_tag(pub.object.image.medium.url, class: 'controls profile-image', size: '100x100')
         %br
         %br
-        = pub.input :image, label: 'Photo', id: 'upload-photo'
+        - if current_user.is_admin_or_hr?
+          = pub.input :image, label: 'Photo', id: 'upload-photo'
+        - else
+          .offset1.photoText Kindly contact HR to update your profile photo.
 
   = pub.input :blood_group, collection: BLOOD_GROUPS, prompt: 'Select'
   = pub.input :date_of_birth, input_html: {class: 'datepicker', 'data-behaviour' => 'datepicker', value: @public_profile.date_of_birth.try(:strftime, "%d-%m-%Y")}
