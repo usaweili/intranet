@@ -68,6 +68,7 @@ Rails.application.routes.draw do
       post 'add_team_member', as: "add_team_member"
       delete 'remove_team_member/:user_id' => "projects#remove_team_member", as: :remove_team_member
     end
+    get 'export_project_report', as: :export_report, on: :collection
     get 'generate_code', as: :generate_code, on: :collection
   end
 

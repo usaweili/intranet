@@ -99,7 +99,7 @@ describe Project do
       expect(users.present?).to eq(true)
     end
   end
-  
+
   context 'Get user project from project' do
     before {
               @users = []
@@ -391,6 +391,24 @@ describe Project do
       project.add_or_remove_team_members([employee])
       expect(project.user_projects.count).to eq 2
       expect(project.user_projects.where(user_id: employee).first).not_to be_nil
+    end
+  end
+
+  context '#team_data_to_csv' do
+    let!(:user) { FactoryGirl.create(:user, status: 'approved') }
+    let!(:project) { FactoryGirl.create(:project) }
+
+    it 'Should return valid csv' do
+      end_date = project.end_date.blank? ? (Date.today + 6.months).end_of_month : project.end_date
+      up = FactoryGirl.create(:user_project, user: user, project: project)
+      csv = Project.team_data_to_csv
+      expected_csv = "Project,Project Start Date,Project End Date,Employee Name,Employee Tech Skills,Employee Total Exp in Months,Employee Started On Project At,Days on Project\n"
+      skills = [user.public_profile.try(:technical_skills)].flatten.compact.uniq.sort.reject(&:blank?).join(', ').delete("\n").gsub("\r", ' ')
+      if skills == ''
+        skills = "\"\""
+      end
+      expected_csv << "#{project.name},#{project.start_date},#{end_date},#{user.name},#{skills},#{user.experience_as_of_today},#{up.start_date},#{(Date.today - up.start_date).to_i}\n"
+      expect(csv).to eq(expected_csv)
     end
   end
 

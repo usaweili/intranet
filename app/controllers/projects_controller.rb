@@ -2,7 +2,7 @@ class ProjectsController < ApplicationController
   load_and_authorize_resource
   skip_load_and_authorize_resource :only => :create
   before_action :authenticate_user!
-  before_action :load_project, except: [:index, :new, :create, :remove_team_member, :add_team_member, :generate_code]
+  before_action :load_project, except: [:index, :new, :create, :remove_team_member, :add_team_member, :generate_code, :export_project_report]
 
   include RestfulAction
 
@@ -12,13 +12,17 @@ class ProjectsController < ApplicationController
       format.js
       format.html
       format.csv do
-        if params[:team_reports].present?
-          send_data Project.team_data_to_csv, filename: "user_project_data_#{Date.today.strftime("%d%b%y")}.csv"
-        else
-          send_data @projects.to_csv, filename: "projects_data_#{Date.today.strftime("%d%b%y")}.csv"
-        end
+        send_data @projects.to_csv, filename: "projects_data_#{Date.today.strftime("%d%b%y")}.csv"
       end
     end
+  end
+
+  def export_project_report
+    username = current_user.name
+    user_email = current_user.email
+    flash[:success] = "You will receive project team data report to your mail shortly."
+    ProjectMailer.delay.send_project_team_report(username, user_email)
+    redirect_to projects_path
   end
 
   def new
