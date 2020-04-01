@@ -103,7 +103,7 @@ describe LeaveApplication do
         @user = FactoryGirl.create(:user)
         @user = FactoryGirl.create(:user)
         @available_leaves = @user.employee_detail.available_leaves
-        @number_of_days = 2
+        @number_of_days = HolidayList.number_of_working_days(Date.today + 2, Date.today + 3)
       end
 
       it 'should add leaves back if status changed from approved to rejected' do
@@ -226,6 +226,44 @@ describe LeaveApplication do
 
           expect(@message).
             to eq({type: :error, text: "#{leave_application.leave_type} is already Approved"})
+        end
+      end
+
+      context 'Deduction of leaves' do
+        it 'should deduct leaves of going year only' do
+          start_at = Date.today.end_of_year - 5
+          end_at = Date.today.end_of_year + 2
+          number_of_days = HolidayList.number_of_working_days(start_at, end_at)
+          previous_available_leaves = @user.employee_detail.available_leaves
+
+          number_of_days_to_be_deducted = HolidayList.number_of_working_days(start_at, start_at.end_of_year)
+
+          leave_application = FactoryGirl.create(:leave_application,
+            user: @user,
+            start_at: start_at,
+            end_at: end_at,
+            number_of_days: number_of_days
+          )
+          @user.reload
+          available_leaves = @user.employee_detail.available_leaves
+          expect(available_leaves).to eq(previous_available_leaves - number_of_days_to_be_deducted)
+        end
+
+        it 'should not deduct leaves for next year' do
+          start_at = Date.today.end_of_year + 2
+          end_at = Date.today.end_of_year + 6
+          number_of_days = HolidayList.number_of_working_days(start_at, end_at)
+          previous_available_leaves = @user.employee_detail.available_leaves
+
+          leave_application = FactoryGirl.create(:leave_application,
+            user: @user,
+            start_at: start_at,
+            end_at: end_at,
+            number_of_days: number_of_days
+          )
+          @user.reload
+          available_leaves = @user.employee_detail.available_leaves
+          expect(available_leaves).to eq(previous_available_leaves)
         end
       end
 
