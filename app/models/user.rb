@@ -70,6 +70,7 @@ class User
   delegate :date_of_joining, to: :private_profile, :allow_nil => true
   delegate :date_of_birth, to: :public_profile, :allow_nil => true
   delegate :date_of_relieving, to: :employee_detail, :allow_nil =>true
+  delegate :location, to: :employee_detail, :allow_nil => true
 
   scope :leaders, ->{ visible_on_website.asc(:website_sequence_number).in(role: ROLE[:admin]) }
   scope :members, ->{ visible_on_website.nin(role: ROLE[:admin]).asc(['public_profile.first_name']) }
@@ -233,8 +234,16 @@ class User
 
   def calculate_next_employee_id
     employee_id_array = User.distinct("employee_detail.employee_id")
-    emp_id = employee_id_array.empty? ?  0 : employee_id_array.map(&:to_i).max
-    emp_id = emp_id + 1
+    employee_id_array.map!(&:to_i)
+    if self.employee_detail.try(:location) == "Plano"
+      max_id = employee_id_array.select{|id| id > 9000}.max
+      emp_id = employee_id_array.empty? ?  9000 : max_id
+      emp_id = emp_id + 1
+    else
+      max_id =  employee_id_array.select {|id| id <= 9000}.max
+      emp_id = employee_id_array.empty? ?  0 : max_id
+      emp_id = emp_id + 1
+    end
   end
 
   def associate_employee_id
