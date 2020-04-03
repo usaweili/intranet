@@ -235,11 +235,14 @@ class User
   def calculate_next_employee_id
     employee_id_array = User.distinct("employee_detail.employee_id")
     employee_id_array.map!(&:to_i)
+    usa_employee_ids = employee_id_array.select{|id| id > 9000}
+    pune_employee_ids = employee_id_array.select {|id| id <= 9000}
+
     if self.employee_detail.try(:location) == "Plano"
-      emp_id = employee_id_array.empty? ?  9000 : employee_id_array.select{|id| id > 9000}.max
+      emp_id =  usa_employee_ids.empty? ?  9000 : usa_employee_ids.max
       emp_id = emp_id + 1
     else
-      emp_id = employee_id_array.empty? ?  0 : employee_id_array.select {|id| id <= 9000}.max
+      emp_id = pune_employee_ids.empty? ?  0 : pune_employee_ids.max
       emp_id = emp_id + 1
     end
   end
