@@ -236,12 +236,12 @@ class User
     employee_id_array = User.distinct("employee_detail.employee_id")
     employee_id_array.map!(&:to_i)
     if self.employee_detail.try(:location) == "Plano"
-      max_id = employee_id_array.select{|id| id > 9000}.max
-      emp_id = employee_id_array.empty? ?  9000 : max_id
+      max_id = employee_id_array.select{|id| id > 9000}.try(:max)
+      emp_id = max_id.nil? ?  9000 : max_id.to_i
       emp_id = emp_id + 1
     else
-      max_id =  employee_id_array.select {|id| id <= 9000}.max
-      emp_id = employee_id_array.empty? ?  0 : max_id
+      max_id =  employee_id_array.select {|id| id <= 9000}.try(:max)
+      emp_id = max_id.nil? ?  0 : max_id.to_i
       emp_id = emp_id + 1
     end
   end

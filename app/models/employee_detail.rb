@@ -17,7 +17,7 @@ class EmployeeDetail
   belongs_to :designation
 
   validates :employee_id, uniqueness: true
-  validates :employee_id, numericality: {greater_than_or_equal_to: 9000}, if: :usa_employee?
+  #validates :employee_id, numericality: {greater_than_or_equal_to: 9000}, if: :usa_employee?
   #validates :designation_track, presence: true
   validates :available_leaves, numericality: {greater_than_or_equal_to: 0}
   after_update :delete_team_cache, if: Proc.new{ updated_at_changed? }
