@@ -1,7 +1,9 @@
-= simple_form_for @user, url: invite_user_path,:html => {class: "form-horizontal"} do |f|
+= simple_nested_form_for @user, url: invite_user_path,:html => {class: "form-horizontal"} do |f|
   .form-heading
     %h2= 'Invite Employee'
   .control-group
     = f.input :email
     = f.input :role, collection: User::ROLES, prompt: 'Select Role'
+    = f.fields_for :employee_detail, wrapper: false do |e|
+      = e.input :location, as: :select, collection: [["Pune","Pune"],["Plano", "Plano"]], label: "Employee Location", prompt: 'Select Location'
     = f.submit 'Send Invitation', class: 'btn controls'

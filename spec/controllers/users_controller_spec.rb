@@ -6,6 +6,7 @@ describe UsersController do
     before(:each) do
       @admin = FactoryGirl.create(:admin)
       sign_in @admin
+      # Problem: Employee ID not getting assigned to admin
     end
 
     it 'In order to invite user' do
@@ -17,6 +18,33 @@ describe UsersController do
     it 'should not invite user without email and role' do
       post :invite_user, { user: {email: "", role: ""} }
       should render_template(:invite_user)
+    end
+
+    it 'should not invite user without location' do
+      post :invite_user, {user: {employee_detail_attributes: {location: ""}}}
+      should render_template(:invite_user)
+    end
+
+    it 'should assign employee id > 9000 if location is Plano' do
+      post :invite_user, {user: {
+        email: "someone@joshsoftware.com",
+        role: "Employee",
+        employee_detail_attributes: {location: "Plano"}}}
+      flash.notice.should eql("Invitation sent Succesfully")
+      User.count.should == 2
+      employee = User.where(email: "someone@joshsoftware.com").first
+      expect(employee.employee_detail.employee_id.to_i).to eq(9001)
+    end
+
+    it 'should assign employee id < 9000 if location is Pune' do
+      post :invite_user, {user: {
+        email: "someone@joshsoftware.com",
+        role: "Employee",
+        employee_detail_attributes: {location: "Pune"}}}
+      flash.notice.should eql("Invitation sent Succesfully")
+      User.count.should == 2
+      employee = User.where(email: "someone@joshsoftware.com").first
+      expect(employee.employee_detail.employee_id.to_i).to eq(2) # Admin will get emp_id = 1
     end
 
     it 'invitee should have joshsoftware account' do

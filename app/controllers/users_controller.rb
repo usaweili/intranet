@@ -74,8 +74,9 @@ class UsersController < ApplicationController
   def invite_user
     if request.get?
       @user = User.new
+      @user.employee_detail = EmployeeDetail.new
     else
-      @user = User.new(params[:user].permit(:email, :role))
+      @user = User.new(params[:user].permit(:email, :role, employee_detail_attributes: [:location] ))
       @user.password = Devise.friendly_token[0,20]
       if @user.save
         flash.notice = 'Invitation sent Succesfully'

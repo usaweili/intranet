@@ -52,6 +52,7 @@ class User
 
   accepts_nested_attributes_for :attachments, reject_if: :all_blank, :allow_destroy => true
   accepts_nested_attributes_for :time_sheets, :allow_destroy => true
+  accepts_nested_attributes_for :employee_detail
   validates :email, format: {with: /\A.+@#{ORGANIZATION_DOMAIN}/, message: "Only #{ORGANIZATION_NAME} email-id is allowed."}
   validates :role, :email, presence: true
   validates_associated :employee_detail
@@ -159,7 +160,8 @@ class User
     error_msg = []
     error_msg.push(errors.full_messages,
                    public_profile.errors.full_messages,
-                   private_profile.errors.full_messages)
+                   private_profile.errors.full_messages,
+                  employee_detail.try(:errors).try(:full_messages))
     error_msg.join(' ')
   end
 
@@ -239,18 +241,22 @@ class User
     pune_employee_ids = employee_id_array.select {|id| id <= 9000}
 
     if self.employee_detail.try(:location) == "Plano"
-      emp_id =  usa_employee_ids.empty? ?  9000 : usa_employee_ids.max
-      emp_id = emp_id + 1
+      emp_id = usa_employee_ids.empty? ? 9000 : usa_employee_ids.max  
     else
-      emp_id = pune_employee_ids.empty? ?  0 : pune_employee_ids.max
-      emp_id = emp_id + 1
+      emp_id = pune_employee_ids.empty? ? 0 : pune_employee_ids.max
     end
+    emp_id = emp_id + 1
   end
 
   def associate_employee_id
     return if is_intern?(role)
     emp_id = calculate_next_employee_id
-    self.employee_detail.present? ?  self.employee_detail.employee_id = emp_id : self.employee_detail = EmployeeDetail.new(employee_id: emp_id)
+
+    if self.employee_detail.present?
+      self.employee_detail.employee_id = emp_id
+    else
+      self.employee_detail = EmployeeDetail.new(employee_id: emp_id)
+    end
   end
 
   def associate_employee_id_if_role_changed
