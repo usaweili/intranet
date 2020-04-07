@@ -26,7 +26,7 @@ class PublicProfile
 
   #validates_attachment :photo, :content_type => { :content_type => "image/jpg" }
   TECHNICAL_SKILLS = ["Android", "Angular", "Delivery Management", "Design", "DevOps",
-    "Go", "iOS", "Ionic", "NodeJs", "PHP", "Python", "QA-Automation", "QA-Manual", "ROR",
+    "Go", "iOS", "Ionic", "Java", "NodeJs", "PHP", "Python", "QA-Automation", "QA-Manual", "ROR",
     "React", "UI", "UX"]
 
 
