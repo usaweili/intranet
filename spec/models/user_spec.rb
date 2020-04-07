@@ -492,6 +492,19 @@ describe User do
       expect(user1.reload.employee_detail.try(:location)).to eq('Pune')
     end
 
+    it "should generate ID > 9000 if location is Plano" do
+      user = FactoryGirl.build(:user, employee_detail: FactoryGirl.build(:employee_detail))
+      user.employee_detail.location = "Plano"
+      user.save
+      expect(user.reload.employee_detail.try(:employee_id).to_i).to eq(9001)
+    end
+
+    it "should generate ID < 9000 if location is Pune" do
+      user2 = FactoryGirl.build(:user)
+      user2.save!
+      expect(user2.reload.employee_detail.try(:employee_id).to_i).to eq(2)
+    end
+
     it "should not generate ID if user role is Intern" do
       intern = FactoryGirl.create(:user, role: 'Intern')
       expect(intern.employee_detail.employee_id).to eq(nil)

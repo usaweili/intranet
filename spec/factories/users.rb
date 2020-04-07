@@ -7,6 +7,7 @@ FactoryGirl.define do
     before(:create) do |user|
       user.public_profile = FactoryGirl.create(:public_profile, user: user)
       user.private_profile = FactoryGirl.create(:private_profile, user: user)
+      user.employee_detail = FactoryGirl.create(:employee_detail, user: user)
     end
   end
 
