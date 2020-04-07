@@ -39,6 +39,8 @@ class EmployeeDetail
   end
 
   def usa_employee?
-    employee_id.nil? and location == "Plano" ? true : false 
+    # For Sachin's record we are keeping his employee ID as it is
+    # For all other USA employees ID must be above 9000
+    employee_id.nil? and location == "Plano" ? true : false
   end
 end
