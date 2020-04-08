@@ -402,12 +402,10 @@ describe Project do
       end_date = project.end_date.blank? ? (Date.today + 6.months).end_of_month : project.end_date
       up = FactoryGirl.create(:user_project, user: user, project: project)
       csv = Project.team_data_to_csv
-      expected_csv = "Project,Project Start Date,Project End Date,Employee Name,Employee Tech Skills,Employee Total Exp in Months,Employee Started On Project At,Days on Project\n"
+      expected_csv = "Project,Project Start Date,Project End Date,Employee Name,Employee Tech Skills,Employee Other Skills,Employee Total Exp in Months,Employee Started On Project At,Days on Project\n"
       skills = [user.public_profile.try(:technical_skills)].flatten.compact.uniq.sort.reject(&:blank?).join(', ').delete("\n").gsub("\r", ' ')
-      if skills == ''
-        skills = "\"\""
-      end
-      expected_csv << "#{project.name},#{project.start_date},#{end_date},#{user.name},#{skills},#{user.experience_as_of_today},#{up.start_date},#{(Date.today - up.start_date).to_i}\n"
+      other_skills = user.try(:public_profile).try(:skills).split(',').flatten.compact.uniq.sort.reject(&:blank?).join(', ').delete("\n").gsub("\r", '')
+      expected_csv << "#{project.name},#{project.start_date},#{end_date},#{user.name},\"#{skills}\",\"#{other_skills}\",#{user.experience_as_of_today},#{up.start_date},#{(Date.today - up.start_date).to_i}\n"
       expect(csv).to eq(expected_csv)
     end
   end

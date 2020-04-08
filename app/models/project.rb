@@ -148,6 +148,7 @@ class Project
         'Project End Date',
         'Employee Name',
         'Employee Tech Skills',
+        'Employee Other Skills',
         'Employee Total Exp in Months',
         'Employee Started On Project At',
         'Days on Project'
@@ -164,6 +165,7 @@ class Project
             end_date,
             user.name,
             [user.public_profile.try(:technical_skills)].flatten.compact.uniq.sort.reject(&:blank?).join(', ').delete("\n").gsub("\r", ' '),
+            user.try(:public_profile).try(:skills).split(',').flatten.compact.uniq.sort.reject(&:blank?).join(', ').delete("\n").gsub("\r", ''),
             user.experience_as_of_today,
             up.start_date,
             (Date.today - up.start_date).to_i
