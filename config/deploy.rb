@@ -120,7 +120,11 @@ task :deploy => :environment do
         queue "cd #{deploy_to}/current && bundle exec whenever -i intranet_whenever_tasks --update-crontab --set 'environment=#{env}'"
       end
       queue "touch #{deploy_to}/#{current_path}/tmp/restart.txt"
-      queue "sudo monit restart sidekiq"
+      if env == 'production'
+        queue "sudo monit restart sidekiq"
+      elsif env == 'staging'
+        queue "sudo monit restart sidekiq_staging"
+      end
     end
   end
 end
