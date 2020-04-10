@@ -10,6 +10,8 @@ describe LeaveApplication do
     it { should validate_presence_of(:reason) }
     it { should validate_presence_of(:contact_number) }
     it { should validate_numericality_of(:contact_number) }
+    it { should validate_presence_of(:leave_type) }
+    it { is_expected.to validate_inclusion_of(:leave_type).to_allow(LeaveApplication::LEAVE_TYPES) }
   end
 
   context 'Validate date - Cross date validation - ' do
@@ -198,7 +200,7 @@ describe LeaveApplication do
           expect(@user.employee_detail.available_leaves).to eq(available_leaves)
 
           expect(@message).
-            to eq({type: :error, text: "Leave is already Approved"})
+            to eq({type: :error, text: "#{leave_application.leave_type} is already Approved"})
         end
       end
 
@@ -230,6 +232,69 @@ describe LeaveApplication do
           LeaveApplication.pending_leaves_reminder
           expect(ActionMailer::Base.deliveries.count).to eq(0)
         end
+      end
+    end
+  end
+
+  describe '#deduct_available_leave_send_mail' do
+    let!(:user) { create(:user) }
+
+    context 'when request is for LEAVE' do
+      it 'deduct leave from available leave' do
+        employee_detail = user.employee_detail
+        available_leaves = employee_detail.available_leaves
+        leave_application = create(:leave_application, user: user, number_of_days: 1)
+        expect(employee_detail.available_leaves).to eq(available_leaves - 1)
+      end
+    end
+
+    context 'when request is for WFH' do
+      it 'should not deduct leave from available leave' do
+        employee_detail = user.employee_detail
+        available_leaves = employee_detail.available_leaves
+        leave_application = create(:leave_application, user: user, number_of_days: 1, leave_type: LeaveApplication::WFH)
+        expect(employee_detail.available_leaves).to eq(available_leaves)
+      end
+    end
+  end
+
+  describe '#update_available_leave_send_mail' do
+    let!(:user) { create(:user) }
+
+    context 'when request is for LEAVE' do
+      it 'should update available leaves with new leaves changes' do
+        employee_detail = user.employee_detail
+        available_leaves = employee_detail.available_leaves
+        leave_application = create(:leave_application, user: user, number_of_days: 1, leave_type: LeaveApplication::LEAVE)
+        leave_application.number_of_days = 2
+        leave_application.save
+        expect(employee_detail.available_leaves).to eq(available_leaves - leave_application.number_of_days)
+      end
+    end
+  end
+
+  describe '#process_reject_application' do
+    let!(:user) { create(:user) }
+
+    context 'when request is for LEAVE' do
+      it 'rejected leave should be added to available leaves' do
+        employee_detail = user.employee_detail
+        available_leaves = employee_detail.available_leaves
+        leave_application = create(:leave_application, user: user, number_of_days: 2, leave_type: LeaveApplication::LEAVE)
+        expect(employee_detail.available_leaves).to eq(available_leaves - leave_application.number_of_days)
+        leave_application.process_reject_application
+        expect(employee_detail.available_leaves).to eq(available_leaves)
+      end
+    end
+
+    context 'when request is for WFH' do
+      it 'rejected leave should not be added to available leaves' do
+        employee_detail = user.employee_detail
+        available_leaves = employee_detail.available_leaves
+        wfh_application = create(:leave_application, user: user, number_of_days: 2, leave_type: LeaveApplication::WFH)
+        expect(employee_detail.available_leaves).to eq(available_leaves)
+        wfh_application.process_reject_application
+        expect(employee_detail.available_leaves).to eq(available_leaves)
       end
     end
   end

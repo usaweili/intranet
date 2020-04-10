@@ -1,7 +1,7 @@
 class UserMailer < ActionMailer::Base
   default :from => 'intranet@joshsoftware.com',
           :reply_to => 'hr@joshsoftware.com'
- 
+
   def invitation(sender_id, receiver_id)
     @sender = User.where(id: sender_id).first
     @receiver = User.where(id: receiver_id).first
@@ -15,22 +15,22 @@ class UserMailer < ActionMailer::Base
     receiver_emails = [admin_emails, hr.email].flatten.join(',')
     mail(to: receiver_emails , subject: "#{@updated_user.public_profile.name} Profile has been updated")
   end
-  
+
   def leave_application(sender_email, receivers, leave_application_id)
     @user = User.find_by(email: sender_email)
     @receivers = receivers
     @leave_application = LeaveApplication.where(id: leave_application_id).first
-    mail(from: @user.email, to: receivers, subject: "#{@user.name} has applied for leave")
+    mail(from: @user.email, to: receivers, subject: "#{@user.name} has applied for #{@leave_application.leave_type}")
   end
 
   def reject_leave(leave_application_id)
     get_leave(leave_application_id)
-    mail(to: @user.email, subject: "Leave Request got rejected")
+    mail(to: @notification_emails, subject: "#{@leave_application.leave_type} Request got rejected")
   end
 
   def accept_leave(leave_application_id)
     get_leave(leave_application_id)
-    mail(to: @user.email, subject: "Congrats! Leave Request got accepted")
+    mail(to: @notification_emails, subject: "Congrats! #{@leave_application.leave_type} Request got accepted")
   end
 
   def download_notification(downloader_id, document_name)
@@ -39,7 +39,7 @@ class UserMailer < ActionMailer::Base
     hr = User.approved.where(role: 'HR').try(:first).try(:email) || 'hr@joshsoftware.com'
     mail(to: hr, subject: "Intranet: #{@downloader.name} has downloaded #{document_name}")
   end
-  
+
   def birthday_wish(user_id)
     @birthday_user = User.find(user_id)
     url = @birthday_user.public_profile.image.medium.path || "#{Rails.root}/app/assets/images/default_photo.gif"
@@ -49,7 +49,7 @@ class UserMailer < ActionMailer::Base
 
   def year_of_completion_wish(user_hash)
     @user_hash = user_hash
-    mail(to: "all@joshsoftware.com", subject: "Congratulations #{@user_hash.collect{|k, v| v }.flatten.join(", ")}") 
+    mail(to: "all@joshsoftware.com", subject: "Congratulations #{@user_hash.collect{|k, v| v }.flatten.join(", ")}")
   end
 
   def leaves_reminder(leaves)
@@ -113,5 +113,7 @@ class UserMailer < ActionMailer::Base
   def get_leave(id)
     @leave_application = LeaveApplication.where(id: id).first
     @user = @leave_application.user
+    @processed_by = User.find(@leave_application.processed_by)
+    @notification_emails = [@user.email, @user.notification_emails].flatten.compact.uniq.join(', ')
   end
 end

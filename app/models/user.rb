@@ -85,11 +85,15 @@ class User
     [record.id.to_s, record.authenticatable_salt]
   end
 
+  def notification_emails
+    [
+      User.approved.where(role: 'HR').pluck(:email), User.approved.where(role: 'Admin').first.try(:email),
+      self.employee_detail.try(:notification_emails).try(:split, ','), self.get_managers_emails
+    ].flatten.compact.uniq
+  end
+
   def sent_mail_for_approval(leave_application_id)
-    notified_users = [
-                      User.approved.where(role: 'HR').pluck(:email), User.approved.where(role: 'Admin').first.try(:email),
-                      self.employee_detail.try(:notification_emails).try(:split, ','), self.get_managers_emails
-                     ].flatten.compact.uniq
+    notified_users = notification_emails
     UserMailer.delay.leave_application(self.email, notified_users, leave_application_id)
   end
   def role?(role)

@@ -1,4 +1,6 @@
 = f.hidden_field :user_id
+= f.input :leave_type, as: :radio_buttons, collection: [LeaveApplication::LEAVE, LeaveApplication::WFH], :item_wrapper_class => 'inline',
+  checked: @leave_application.leave_type || LeaveApplication::LEAVE
 = f.input :start_at, label: 'Start Date', input_html: {class: 'datepicker', data: {'behaviour' => 'datepicker', 'validation-required-message' => 'You must select start date'}, required: true, value: f.object.start_at.try(:strftime, '%d-%m-%Y')}
 = f.input :end_at, label: 'End Date', input_html: {class: 'datepicker', data: {'behaviour' => 'datepicker', 'validation-required-message' => 'You must select end date'}, required: true, value: f.object.end_at.try(:strftime, '%d-%m-%Y')}
 = f.input :number_of_days, as: :decimal, label: 'Days', input_html: {step: 1}, input_html: { required: true, :'data-validation-required-message' => 'Enter the number of days', min: "1", :'data-validation-min-message' => "Number of day can't be zero or negative"}, readonly: true
@@ -15,6 +17,9 @@
   $("input,select,textarea").not("[type=submit]").jqBootstrapValidation();
 
   $(document).ready(function(){
+    lastDayOfYear = new Date(new Date().getFullYear(), 11, 31);
+    $('#leave_application_end_at').data('datepicker').setEndDate(lastDayOfYear);
+
     $('[data-behaviour="datepicker"]').datepicker({
       format: "dd-mm-yyyy",
       autoclose: true
@@ -36,3 +41,8 @@
     });
 
   });
+
+:css
+  #leave_application_leave_type_leave, #leave_application_leave_type_wfh {
+    height: auto;
+  }

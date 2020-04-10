@@ -66,7 +66,7 @@ class LeaveApplicationsController < ApplicationController
 
   def strong_params
     safe_params = [
-                   :user_id, :start_at,
+                   :user_id, :start_at, :leave_type,
                    :end_at, :contact_number, :number_of_days,
                    :reason, :reject_reason, :leave_status
                   ]
@@ -95,12 +95,12 @@ class LeaveApplicationsController < ApplicationController
         @status = REJECTED
         call_function = :process_reject_application
       end
-      @message = LeaveApplication.process_leave(params[:id], @status, call_function, params[:reject_reason])
+      @message = LeaveApplication.process_leave(params[:id], @status, call_function, params[:reject_reason], current_user.id)
     else
       @leave_application.update_attributes({reject_reason: params[:reject_reason]})
       @message = {:type=>:success, :text=>"Comment Inserted successfully"}
     end
-    
+
     @pending_leaves = LeaveApplication.order_by(:start_at.desc).pending
 
 
@@ -125,7 +125,7 @@ class LeaveApplicationsController < ApplicationController
     today = Date.today
     beginning_of_year = today.beginning_of_year.strftime("%d-%m-%Y")
     end_of_year = today.end_of_year.strftime("%d-%m-%Y")
-    if params[:from].present? 
+    if params[:from].present?
       to = params[:to].empty? ? today.strftime("%d-%m-%Y") : params[:to]
       start_at =  { start_at: params[:from]..to  }
       end_at = { end_at: params[:from]..to }
