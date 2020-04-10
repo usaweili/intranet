@@ -127,12 +127,12 @@ class Project
       'index_server', 'background_jobs', 'sms_gateway', 'other_frameworks', 'other_details']
     CSV.generate(options) do |csv|
       csv << column_names.collect(&:titleize)
-      all.each do |project|
-        project[:allocated_employees] = project.users.count
-        project[:manager_name] = manager_names(project)
-        project[:employee_names] = employee_names(project)
+      all.map do |project|
+        project.allocated_employees = project.users.count
+        project.manager_name        = manager_names(project)
+        project.employee_names      = employee_names(project)
         csv << project.attributes.values_at(*column_names)
-      end
+      end;nil
     end
   end
 
