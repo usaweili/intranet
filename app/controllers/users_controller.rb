@@ -129,7 +129,8 @@ class UsersController < ApplicationController
   def user_params
     safe_params = []
     if params[:user][:employee_detail_attributes].present?
-      safe_params = [ employee_detail_attributes: [:id, :employee_id, :date_of_relieving, :designation, :description, :is_billable, :designation_track, :notification_emails => [] ] ]
+      safe_params = [:status, :role, :website_sequence_number, :visible_on_website,
+         employee_detail_attributes: [:id, :employee_id, :date_of_relieving, :reason_of_resignation, :designation, :description, :is_billable, :designation_track, :notification_emails => [] ] ]
     elsif params[:user][:attachments_attributes].present?
       safe_params = [attachments_attributes: [:id, :name, :document, :_destroy]]
     else
