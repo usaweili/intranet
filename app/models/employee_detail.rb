@@ -7,6 +7,7 @@ class EmployeeDetail
 
   field :employee_id, type: String
   field :date_of_relieving, :type => Date
+  field :reason_of_resignation
   field :notification_emails, type: Array
   field :available_leaves, type: Integer, default: 0
   field :description
