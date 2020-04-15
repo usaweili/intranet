@@ -712,7 +712,7 @@ RSpec.describe TimeSheet, type: :model do
         expect(allocated_hours).to eq("13 Days (104h)")
       end
 
-      it 'if there is one haliday' do
+      it 'if there is one holiday' do
         FactoryGirl.create(:user_project,
           user: user,
           project: project,
@@ -986,7 +986,9 @@ RSpec.describe TimeSheet, type: :model do
         from_time: "#{Date.today - 1} 19:00",
         to_time: "#{Date.today - 1} 20:00"
       )
-      FactoryGirl.create(:holiday, holiday_date: Date.today - 4)
+      date = Date.today - 4
+      date = date - 2.days if date.saturday? || date.sunday?
+      FactoryGirl.create(:holiday, holiday_date: date)
       FactoryGirl.create(:leave_application,
         user: user,
         start_at: Date.today - 2,
@@ -1937,7 +1939,7 @@ RSpec.describe TimeSheet, type: :model do
     let!(:user) { FactoryGirl.create(:user, status: STATUS[2]) }
     let!(:project) { FactoryGirl.create(:project, start_date: Date.today - 5) }
     it 'should send mail if user is not assinged on project and filled timesheet' do
-      time_sheet = FactoryGirl.create(:time_sheet, user: user, project: project, date: Date.today - 1)
+      time_sheet = FactoryGirl.create(:time_sheet, user: user, project: project, created_at: Date.today - 1)
       TimeSheet.get_users_and_timesheet_who_have_filled_timesheet_for_diffrent_project
       expect(ActionMailer::Base.deliveries.count).to eq(1)
     end

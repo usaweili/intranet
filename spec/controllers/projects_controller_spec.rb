@@ -46,7 +46,7 @@ describe ProjectsController do
   describe "GET create" do
     it "should create new project" do
       post :create, { project: FactoryGirl.attributes_for(:project) }
-      flash[:success].should eql("Project created Succesfully")
+      expect(flash[:success]).to eq("Project created Succesfully")
       should redirect_to projects_path
     end
 
@@ -134,7 +134,7 @@ describe ProjectsController do
   describe "GET generate_code" do
     it "should respond with json" do
       get :generate_code, {format: :json}
-      response.header['Content-Type'].should include 'application/json'
+      expect(response.header['Content-Type']).to include 'application/json'
     end
 
     it "should generate 6 digit aplphanuric code" do

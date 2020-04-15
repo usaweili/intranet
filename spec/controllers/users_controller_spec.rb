@@ -21,8 +21,8 @@ describe UsersController do
 
     it 'invitee should have joshsoftware account' do
       post :invite_user, { user: FactoryGirl.attributes_for(:user) }
-      flash.notice.should eql("Invitation sent Succesfully")
-      User.count.should == 2
+      expect(flash.notice).to eq("Invitation sent Succesfully")
+      expect(User.count).to eq(2)
     end
   end
 
@@ -40,7 +40,7 @@ describe UsersController do
         id: user.id
       }
       put :public_profile, params
-      user.errors.full_messages.should eq([])
+      expect(user.errors.full_messages).to eq([])
     end
 
     it "should fail in case of public profile if required field missing" do
@@ -49,7 +49,7 @@ describe UsersController do
         id: user.id
       }
       put :public_profile, params
-      user.errors.full_messages.should_not eq(nil)
+      expect(user.errors.full_messages).to eq([])
     end
 
     it "private profile successfully " do
@@ -58,7 +58,7 @@ describe UsersController do
         id: user.id
       }
       put :private_profile, params
-      user.errors.full_messages.should eq([])
+      expect(user.errors.full_messages).to eq([])
     end
 
     it "should fail if required data not sent" do
@@ -67,7 +67,7 @@ describe UsersController do
         id: user.id
       }
       put :private_profile, params
-      user.errors.full_messages.should eq([])
+      expect(user.errors.full_messages).to eq([])
     end
 
     it 'Should add project' do
