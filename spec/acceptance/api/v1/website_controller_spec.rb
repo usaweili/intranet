@@ -25,6 +25,8 @@ resource "Website Apis" do
 
       do_request
       res = JSON.parse(response_body)
+      res["leaders"] = res["leaders"].sort_by { |user| user["email"] }
+      res["members"] = res["members"].sort_by { |user| user["email"] }
       expect(status).to eq 200
       expect(res["leaders"].count).to eq 2
       expect(res["leaders"].last.keys).to eq ["email", "public_profile", "employee_detail"]

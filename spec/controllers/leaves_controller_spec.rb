@@ -272,13 +272,13 @@ describe LeaveApplicationsController do
     end
   end
 
-  context "Canceling leaves" do
+  context "Cancelling leaves," do
     it "Should be credited in corresponding account"
-    it "Admin should be canceled after accepting or rejecting"
+    it "Admin should be cancelled after accepting or rejecting"
     it "Employee should be able to cancel when leaves are not accepted/rejected"
-    it "After accepting leaves, employee should not be canceled"
+    it "After accepting leaves, employee should not be able to cancel"
     it "If employee cancel leaves then admin should be notified"
-    it "Admin cancel leaves then employee should be notified"
+    it "If Admin cancel leaves then employee should be notified"
   end
 
   context 'If user is not Admin should not able to ' do

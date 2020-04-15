@@ -28,10 +28,35 @@ describe LeaveApplication do
         to eq(["Already applied for LEAVE/WFH on same date"])
     end
 
-    it 'start date should not exists in the range of applied leaves'
-    it 'end date should not exists in the range of applied leaves'
-    it 'no start date of any existing leave should come in the range of leave appling'
-    it 'no end date of any existing leave should come in '
+    it 'start date should not exists in the range of applied leaves' do
+      FactoryGirl.create(:leave_application, start_at: Date.today, end_at: Date.today + 2, user: @user)
+      leave_application = FactoryGirl.build(:leave_application, start_at: Date.today + 1, end_at: Date.today + 3, user: @user)
+      leave_application.save
+      expect(leave_application.errors[:base]).to eq(["Already applied for LEAVE/WFH on same date"])
+    end
+
+    it 'end date should not exists in the range of applied leaves' do
+      FactoryGirl.create(:leave_application, start_at: Date.today, end_at: Date.today + 2, user: @user)
+      leave_application = FactoryGirl.build(:leave_application, start_at: Date.today - 1, end_at: Date.today + 1, user: @user)
+      leave_application.save
+      expect(leave_application.errors[:base]).to eq(["Already applied for LEAVE/WFH on same date"])
+    end
+
+    it 'no start date of any existing leave should come in the range of leave appling' do
+      FactoryGirl.create(:leave_application, start_at: Date.today, end_at: Date.today + 2, user: @user)
+      FactoryGirl.create(:leave_application, start_at: Date.today - 3, end_at: Date.today - 1, user: @user)
+      leave_application = FactoryGirl.build(:leave_application, start_at: Date.today + 1, end_at: Date.today + 3, user: @user)
+      leave_application.save
+      expect(leave_application.errors[:base]).to eq(["Already applied for LEAVE/WFH on same date"])
+    end
+
+    it 'no end date of any existing leave should come in' do
+      FactoryGirl.create(:leave_application, start_at: Date.today, end_at: Date.today + 2, user: @user)
+      FactoryGirl.create(:leave_application, start_at: Date.today - 3, end_at: Date.today - 1, user: @user)
+      leave_application = FactoryGirl.build(:leave_application, start_at: Date.today - 6, end_at: Date.today - 1, user: @user)
+      leave_application.save
+      expect(leave_application.errors[:base]).to eq(["Already applied for LEAVE/WFH on same date"])
+    end
 
   end
 
