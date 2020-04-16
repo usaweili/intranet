@@ -470,4 +470,45 @@ describe LeaveApplicationsController do
       #expect(employee.reload.employee_detail.available_leaves).to eq(10 - days)
     end
   end
+
+  context "Leave history search querying user_ids" do
+    before(:each) do
+      @employee_one = FactoryGirl.create(:user, status: STATUS[2])
+      @employee_two = FactoryGirl.create(:user, status: STATUS[2])
+      @leave_app_one_one = FactoryGirl.create(:leave_application, user: @employee_one, start_at: Date.today + 1, end_at: Date.today + 4)
+      @leave_app_one_two = FactoryGirl.create(:leave_application, user: @employee_one, start_at: Date.today + 5, end_at: Date.today + 8)
+      @leave_app_two_one = FactoryGirl.create(:leave_application, user: @employee_two, start_at: Date.today + 9, end_at: Date.today + 12)
+      @leave_app_two_one = FactoryGirl.create(:leave_application, user: @employee_two, start_at: Date.today + 13, end_at: Date.today + 16)
+      @project = FactoryGirl.create(:project)
+      @user_project_one = FactoryGirl.create(:user_project, user: @employee_one, project: @project)
+      @user_project_two = FactoryGirl.create(:user_project, user: @employee_two, project: @project)  
+    end
+
+    it "should query only active user_projects when NO filter/default" do
+      @user_ids = UserProject.where(project: @project).pluck(:user_id)
+      @user_ids_active = (@user_ids - [@employee_two.id]) # Removing one team member
+      @project.add_or_remove_team_members(@user_ids_active)
+      @project.save
+      controller.params = ActionController::Parameters.new({project_id: @project.id}) # No filter param
+      expect(controller.send(:user_ids).map {|id| id.to_s}).to eq(@user_ids_active)
+    end
+    
+    it "should query only active user_projects when active filter selected in params" do
+      @user_ids = UserProject.where(project: @project).pluck(:user_id)
+      @user_ids_active = (@user_ids - [@employee_two.id]) # Removing one team member
+      @project.add_or_remove_team_members(@user_ids_active)
+      @project.save
+      controller.params = ActionController::Parameters.new({active_or_all_flag: "active", project_id: @project.id})
+      expect(controller.send(:user_ids).map {|id| id.to_s}).to eq(@user_ids_active)
+    end
+
+    it "should query all user_projects when all filter selected in params" do
+      @user_ids = UserProject.where(project: @project).pluck(:user_id)
+      @user_ids_active = (@user_ids - [@employee_two.id]) # Removing one team member
+      @project.add_or_remove_team_members(@user_ids_active)
+      @project.save
+      controller.params = ActionController::Parameters.new({active_or_all_flag: "all", project_id: @project.id})
+      expect(controller.send(:user_ids)).to eq(@user_ids)
+    end
+  end
 end

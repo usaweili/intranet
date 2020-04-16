@@ -2,7 +2,9 @@ class ProjectsController < ApplicationController
   load_and_authorize_resource
   skip_load_and_authorize_resource :only => :create
   before_action :authenticate_user!
+
   before_action :load_project, except: [:index, :new, :create, :remove_team_member, :add_team_member, :generate_code, :export_project_report]
+  before_action :load_users, only: [:edit, :update]
 
   include RestfulAction
 
@@ -33,7 +35,6 @@ class ProjectsController < ApplicationController
   def create
     @project = Project.new(safe_params)
     if @project.save
-      @project.add_or_remove_team_members(params[:project][:user_ids] || [])
       flash[:success] = "Project created Succesfully"
       redirect_to projects_path
     else
@@ -43,7 +44,7 @@ class ProjectsController < ApplicationController
 
   def update
     if update_obj(@project, safe_params, projects_path)
-      @project.add_or_remove_team_members(params[:project][:user_ids] || [])
+      @project.add_manager_as_team_member(params[:project][:manager_ids] || [])
     else
       flash[:error] = "Error unable to add or remove team member"
       render 'edit'
@@ -51,8 +52,8 @@ class ProjectsController < ApplicationController
   end
 
   def show
-    @users = @project.users
     @managers = @project.managers
+    @team_members = @project.users - @managers
   end
 
   def destroy
@@ -103,10 +104,15 @@ class ProjectsController < ApplicationController
     :code_climate_coverage_snippet, :is_active, :timesheet_mandatory, :ruby_version, :rails_version, :database, :database_version, :deployment_server,
     :deployment_script, :web_server, :app_server, :payment_gateway, :image_store, :index_server, :background_jobs, :sms_gateway,
     :other_frameworks,:other_details, :image, :url, :description, :case_study,:logo, :visible_on_website, :website_sequence_number,
-    :code, :number_of_employees, :invoice_date, :company_id, :billing_frequency, :type_of_project, :is_activity, :manager_ids => [])
+    :code, :number_of_employees, :invoice_date, :company_id, :billing_frequency, :type_of_project, :is_activity, :manager_ids => [],
+    user_projects_attributes: [:start_date, :end_date, :time_sheet, :allocation, :active, :id, :user_id])
   end
 
   def load_project
     @project = Project.find(params[:id])
+  end
+
+  def load_users
+    @users = User.project_engineers
   end
 end

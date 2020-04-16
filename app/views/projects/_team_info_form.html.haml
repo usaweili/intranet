@@ -1,0 +1,82 @@
+
+= simple_nested_form_for @project, :html => {class: "form-horizontal teamForm"} do |f|
+  %h3 Current Team Members of #{@project.name}
+  .row.span12.headers
+    .span2.width12 Active?
+    .span2.width18 Name
+    .span2.width15 Start Date
+    .span2.width15 End Date
+    .span2.width10 Timesheet Required?
+    .span2.width10 Allocation Percentage
+  #team-members
+    = f.fields_for :user_projects do |project_user_form|
+      - if project_user_form.object.user.blank? || (project_user_form.object.user && project_user_form.object.user.is_approved? && (project_user_form.object.active || project_user_form.object.end_date.nil?))
+        .row.span12
+          .span2.width12
+            .make-switch{"data-on" => "success", "data-off" => "danger", "data-on-label" => "Yes", "data-off-label" => "No"}
+              = project_user_form.check_box :active, {class: "active-check-box"}, 'true', 'false'
+          .span2.width18
+            = project_user_form.input :user_id, collection: users, input_html: {class: "user_select"}, label: false
+          .span2.width15
+            = project_user_form.input :start_date, input_html: {class: :datepicker, style: "height: 32px"}, label: false
+          .span2.width15
+            = project_user_form.input :end_date, input_html: {class: :datepicker, style: "height: 32px", id: "end-date"},  label: false
+          .span2.width10
+            .make-switch{"data-on" => "success", "data-off" => "warning", "data-on-label" => "REQ", "data-off-label" => "NREQ"}
+              = project_user_form.check_box :time_sheet
+          .span2.width10
+            = project_user_form.input :allocation, {min: 0, max: 100, step: 1, style: "height: 32px;", label: false, class: 'allotment'}
+  .offset3
+    = f.link_to_add "Add team member", :user_projects, data: {target: '#team-members'}, class: "btn btn-success", id: "add-team-members-button"
+    = f.submit :Save, class: 'btn controls btn-info'
+
+
+- if @project.user_projects.ex_users.count > 0 || @project.user_projects.inactive_users.count > 0
+  %h3 Previous team members of #{@project.name}
+  %table.table.table-bordered.table-responsive#sortable
+    %thead
+      %tr
+        %th.span4 Name
+        %th.span2 Employment Status
+        %th.span2 Start Date
+        %th.span2 End Date
+        %th Timesheet Required?
+        %th Allocation Percentage
+    %tbody
+      - @project.user_projects.inactive_users.sort_by{|i| i.user.name }.each do |project_user_form|
+        %tr
+          %td.span4= project_user_form.user.name
+          %td.span2= project_user_form.user.status
+          %td.span2= project_user_form.start_date
+          %td.span2= project_user_form.end_date
+          %td= project_user_form.time_sheet ? 'Yes' : 'No'
+          %td= project_user_form.allocation
+
+      - @project.user_projects.ex_users.sort_by{|i| i.user.name }.each do |project_user_form|
+        %tr
+          %td.span4= project_user_form.user.name
+          %td.span2= project_user_form.user.status
+          %td.span2= project_user_form.start_date
+          %td.span2= project_user_form.end_date
+          %td= project_user_form.time_sheet ? 'Yes' : 'No'
+          %td= project_user_form.allocation
+
+:javascript
+  $(".active-check-box").each(function(key2,checkBox){
+    var endDate = $(checkBox).parent().parent().parent().find("#end-date").val()
+    if(!checkBox.checked &&  endDate != ""){
+        $(checkBox).parent().parent().parent().find("input").prop("disabled", "true")
+        $(checkBox).parent().parent().parent().find("select").prop("disabled", "true")
+    }
+  })
+
+  $(document).ready(function(){
+    $(".user_select").select2()
+  })
+
+  $(document).on('nested:fieldAdded', function(event){
+    var checkBoxes = $(".make-switch")
+    checkBoxes.bootstrapSwitch()
+    var selectField = event.field.find(".user_select")
+    selectField.select2()
+  })

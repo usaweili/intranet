@@ -56,6 +56,7 @@ class Project
 
   has_many :time_sheets, dependent: :destroy
   has_many :user_projects, dependent: :destroy
+  accepts_nested_attributes_for :user_projects
   belongs_to :company
   has_and_belongs_to_many :managers, class_name: 'User', foreign_key: 'manager_ids', inverse_of: :managed_projects
   validates_presence_of :name
@@ -209,6 +210,11 @@ class Project
     remove_team_members(removed_member_ids) if removed_member_ids.present?
   end
 
+  def add_manager_as_team_member(manager_ids_params)
+    new_manager_ids = manager_ids_params.presence ? manager_ids_params.collect!(&:to_s) : []
+    add_or_remove_team_members(manager_ids_params) if new_manager_ids.present?
+  end
+
   def add_team_members(user_ids)
     user_ids.each do |user_id|
       user_projects.create!(user_id: user_id, start_date: DateTime.now, end_date: nil)
@@ -218,7 +224,7 @@ class Project
   def remove_team_members(user_ids)
     user_ids.each do |user_id|
       user_project = user_projects.where(user_id: user_id, end_date: nil).first
-      user_project.update_attributes(end_date: DateTime.now) if user_project
+      user_project.update_attributes(end_date: DateTime.now, active: false) if user_project
     end
   end
 
