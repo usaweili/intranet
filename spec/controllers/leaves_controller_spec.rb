@@ -491,7 +491,7 @@ describe LeaveApplicationsController do
       @leave_app_two_one = FactoryGirl.create(:leave_application, user: @employee_two, start_at: Date.today + 13, end_at: Date.today + 16)
       @project = FactoryGirl.create(:project)
       @user_project_one = FactoryGirl.create(:user_project, user: @employee_one, project: @project)
-      @user_project_two = FactoryGirl.create(:user_project, user: @employee_two, project: @project)  
+      @user_project_two = FactoryGirl.create(:user_project, user: @employee_two, project: @project)
     end
 
     it "should query only active user_projects when NO filter/default" do
@@ -501,7 +501,7 @@ describe LeaveApplicationsController do
       controller.params = ActionController::Parameters.new({project_id: @project.id}) # No filter param
       expect(controller.send(:user_ids)).to eq(@user_ids_active)
     end
-    
+
     it "should query only active user_projects when active filter selected in params" do
       @user_ids = UserProject.where(project: @project).pluck(:user_id)
       @user_ids_active = (@user_ids - [@employee_two.id]) # Removing one team member
