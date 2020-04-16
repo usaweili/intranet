@@ -6,5 +6,11 @@
         = select_tag "user_id", options_for_select(User.approved.employees.collect{ |u| [u.name, u.id]}, params[:user_id]), prompt: 'Select User'
       = text_field_tag :from, params[:from], class: "form-control datepicker", placeholder: "From Date" 
       = text_field_tag :to, params[:to], class: "form-control datepicker", placeholder: "To date"
+      = select_tag :active_or_all_flag, options_for_select([["Show Active Users", "active"], ["Show All Users", "all"]], params[:active_or_all_flag]), id: "active_or_all"
       = submit_tag "Search", class: "btn btn-success", id: 'submit_btn'
       = button_tag  'Reset', type: 'reset', class: 'btn btn-info', id: "reset_filter"
+
+:javascript
+  $(".datepicker").css("height", "30px")
+  $(".datepicker").css("width", "140px")
+  $("#active_or_all").css("width", "160px")
