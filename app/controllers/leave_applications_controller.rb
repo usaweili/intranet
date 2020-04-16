@@ -138,8 +138,8 @@ class LeaveApplicationsController < ApplicationController
   end
 
   def user_ids
-     active_or_all_flag = params[:active_or_all_flag]
-     active_or_all_flag ||= "active" # show active users by default
+    active_or_all_flag = params[:active_or_all_flag]
+    active_or_all_flag ||= "active" # show active users by default
     if params[:project_id].present? and active_or_all_flag == "active"
       UserProject.where(project_id: params[:project_id]).where(:end_date => nil).pluck(:user_id)
     elsif params[:project_id].present? and active_or_all_flag == "all"
