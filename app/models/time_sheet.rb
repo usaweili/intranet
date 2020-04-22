@@ -992,7 +992,8 @@ class TimeSheet
           project_name: time_sheet.project.name,
           date:         time_sheet.date,
           from_time:    time_sheet.from_time,
-          to_time:      time_sheet.to_time
+          to_time:      time_sheet.to_time,
+          description:  time_sheet.description
         }
         user_timesheet << time_sheet_data
       end
