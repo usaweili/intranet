@@ -64,7 +64,7 @@ class TimeSheet
 
   def valid_date_format?(date, params)
     split_date = date.include?('/')? date.split('/') : date.split('-')
-    
+
     if split_date.length < DATE_FORMAT_LENGTH
       text = "\`Error :: Invalid date format. Format should be dd/mm/yyyy\`"
       SlackApiService.new.post_message_to_slack(params['channel_id'], text)
@@ -83,7 +83,7 @@ class TimeSheet
     return true if params['command'] == '/daily_status'
     return true
   end
-  
+
   # def timesheet_date_greater_than_project_start_date
   #   if timesheet_date_greater_than_assign_project_date
   #     text = "Not allowed to fill timesheet for this date. As you were not assigned on project for this date"
@@ -118,8 +118,8 @@ class TimeSheet
     return false if errors.full_messages.present?
     if date.blank?
       errors.add(:date, 'Invalid time')
-      return false 
-    end 
+      return false
+    end
     if date < Date.today - DAYS_FOR_CREATE
       text = "Not allowed to fill timesheet for this date. If you want to fill the timesheet, meet your manager."
       errors.add(:date, text)
@@ -145,7 +145,7 @@ class TimeSheet
     if to_time > Time.now
       text = "Can't fill the timesheet for future time."
       errors.add(:to_time, text)
-      return false      
+      return false
     end
     return false
   end
@@ -166,7 +166,7 @@ class TimeSheet
     return false unless to_time
     return true
   end
-  
+
   def valid_time?(date, time, params, attribute)
     time_format = check_time_format(time)
     if time_format
@@ -420,7 +420,7 @@ class TimeSheet
       report_details['leaves'] = leaves_count
       time_sheet_log << report_details
       individual_project_report["#{user.name}"] = time_sheet_log
-      total_minutes = 0      
+      total_minutes = 0
     end
     project_report = get_total_work_and_leaves_for_project_report(project, params, total_minutes_worked_on_projects, convert_hrs)
     return individual_project_report, project_report
@@ -442,7 +442,7 @@ class TimeSheet
           leaves_count = total_leaves_count(user, user_projects, from_date, to_date)
           holidays_count = get_holiday_count(from_date, to_date)
           if total_minutes != 0
-            time_sheet_log.push(user.name, project.name, total_days_work, leaves_count, holidays_count) 
+            time_sheet_log.push(user.name, project.name, total_days_work, leaves_count, holidays_count)
             weekly_report << time_sheet_log
           end
           total_minutes = 0
@@ -458,7 +458,7 @@ class TimeSheet
     user_projects = user.get_user_projects_from_user(project.id, from_date.to_date, to_date.to_date)
     leaves_count = total_leaves_count(user, user_projects, from_date, to_date)
     time_sheets = get_time_sheet_between_range(user, project.id, from_date, to_date)
-    if !time_sheets.present? && !project.timesheet_mandatory == false && 
+    if !time_sheets.present? && !project.timesheet_mandatory == false &&
        (user.role == ROLE[:employee] || user.role == ROLE[:intern])
          users_without_timesheet.push(user.name, project.name, leaves_count)
     end
@@ -651,7 +651,7 @@ class TimeSheet
     end
     total_allocated_hours
   end
-  
+
   def self.total_leaves_count(user, user_projects, from_date, to_date)
     total_leaves_count = 0
     user_projects.each do |user_project|
@@ -676,7 +676,7 @@ class TimeSheet
 
   def self.generate_weekly_report_in_csv_format(weekly_report)
     headers = ['Employee name', 'Project name', 'No of days worked', 'Leaves', 'Holidays']
-    weekly_report_in_csv = 
+    weekly_report_in_csv =
       CSV.generate(headers: true) do |csv|
         csv << headers
         weekly_report.each do |report|
@@ -699,7 +699,7 @@ class TimeSheet
   end
 
   def self.sort_on_user_name_and_project_name(timesheet_reports)
-    sort_on_user_name = 
+    sort_on_user_name =
       timesheet_reports.sort{|previous_record, next_record| previous_record['user_name'] <=> next_record['user_name']}
 
     sort_on_project_name =
@@ -801,7 +801,7 @@ class TimeSheet
   def self.get_holiday_count(from_date, to_date)
     HolidayList.where(holiday_date: {"$gte" => from_date, "$lte" => to_date}).count
   end
-  
+
   def self.time_sheet_present_for_reminder?(user)
     unless user.time_sheets.present?
       slack_uuid = user.public_profile.slack_handle
@@ -945,10 +945,10 @@ class TimeSheet
   def self.approved_leaves_count(user, from_date, to_date)
     leaves_count = 0
     leave_applications = user.leave_applications.where(
-      "$and" => [{start_at: {"$gte" => from_date, "$lte" => to_date}}, 
+      "$and" => [{start_at: {"$gte" => from_date, "$lte" => to_date}},
                 {leave_status: LEAVE_STATUS[1]}]
     )
-    leave_applications.sum(:number_of_days)  
+    leave_applications.sum(:number_of_days)
   end
 
   def self.get_time_sheet_between_range(user, project_id, from_date, to_date)
@@ -970,16 +970,20 @@ class TimeSheet
   def self.load_user_with_id(user_id)
     User.find_by(id: user_id)
   end
-  
+
   def self.load_project_with_id(project_id)
     Project.find_by(id: project_id)
   end
 
   def self.get_users_and_timesheet_who_have_filled_timesheet_for_diffrent_project
+    activity_ids = Project.where(is_activity: true).pluck(:id)
     User.approved.each do | user |
       user_timesheet = []
-      date = Date.yesterday
-      time_sheets    =  user.time_sheets.where(:created_at => date.beginning_of_day..date.end_of_day)
+      date           = Date.yesterday
+      time_sheets    = user.time_sheets.where(
+        :created_at => date.beginning_of_day..date.end_of_day,
+        :project_id.nin => activity_ids
+      )
       next if time_sheets.empty?
       time_sheets.each do|time_sheet|
         time_sheet_data = {}
@@ -1142,7 +1146,7 @@ class TimeSheet
     projects_summary = create_all_projects_summary(from_date, to_date)
     employee_summary = create_all_employee_summary(from_date, to_date)
     subject          = "Timesheet summary report from #{from_date} to #{to_date}"
-    options          = { 
+    options          = {
       project_employee: project_employee,
       projects_summary: projects_summary,
       employee_summary: employee_summary,
@@ -1157,12 +1161,12 @@ class TimeSheet
   def self.generate_project_report(from_date, to_date, project, params, current_user)
     report  = create_project_timesheet_report(project, from_date.to_date, to_date.to_date)
     subject = "Timesheet report - #{project.name} from #{from_date} to #{to_date}"
-    options = { 
-      report:       report, 
+    options = {
+      report:       report,
       project_name: project.name,
-      params:       params, 
+      params:       params,
       user_email:   current_user.email,
-      user_name:    current_user.name, 
+      user_name:    current_user.name,
       from_date:    from_date,
       to_date:      to_date,
       subject:      subject
