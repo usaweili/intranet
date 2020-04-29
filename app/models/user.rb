@@ -283,6 +283,16 @@ class User
     end
   end
 
+  def country
+    if self.employee_detail.try(:location) == "Plano"
+      "USA"
+    elsif self.employee_detail.try(:location) == "Pune"
+      "India"
+    else
+      "India"
+    end
+  end
+
    def get_user_projects_from_user(project_id, from_date, to_date)
     user_projects.where("$and"=>[
         {
