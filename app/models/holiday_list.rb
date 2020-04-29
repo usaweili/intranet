@@ -2,19 +2,22 @@ class HolidayList
   include Mongoid::Document
   field :holiday_date, type: Date
   field :reason, type: String
+  field :country, type: String
 
-  validates :holiday_date, :reason, presence: true
-  validates :holiday_date, uniqueness: true
+  validates :holiday_date, :reason, :country, presence: true
   validate  :is_weekend?
+  validate 'is_duplicate?("India")',  if: "country == 'India'"
+  validate 'is_duplicate?("USA")',  if: "country == 'USA'"
 
-  def self.is_holiday?(date)
-    date.strftime("%A").eql?("Saturday") or date.strftime("%A").eql?("Sunday") or
-      HolidayList.all.collect(&:holiday_date).include?(date)
+  def self.is_holiday?(date, country_name)
+    date.strftime("%A").eql?("Saturday") or
+    date.strftime("%A").eql?("Sunday") or
+    HolidayList.where(country: country_name).collect(&:holiday_date).include?(date)
   end
 
-  def self.next_working_day(date)
+  def self.next_working_day(date, country_name)
     date = date + 1
-    while HolidayList.is_holiday?(date)
+    while HolidayList.is_holiday?(date, country_name)
       date = date.next
     end
     date
@@ -29,4 +32,11 @@ class HolidayList
     end
   end
 
+  def is_duplicate?(country_name)
+    if holiday_date.present?
+      if HolidayList.where(country: country_name).collect(&:holiday_date).include?(holiday_date)
+        errors.add(:country, "Can't create duplicate holiday for #{country_name}")
+      end
+    end
+  end
 end
