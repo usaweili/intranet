@@ -78,6 +78,9 @@ class User
     self.website_sequence_number = (User.max(:website_sequence_number) || 0) + 1
   end
 
+  after_update do
+    self.reject_future_leaves if self.status == 'resigned'
+  end
 
   slug :name
   # Hack for Devise as specified in https://github.com/plataformatec/devise/issues/2949#issuecomment-40520236
@@ -155,6 +158,13 @@ class User
                    public_profile.errors.full_messages,
                    private_profile.errors.full_messages)
     error_msg.join(' ')
+  end
+
+  def reject_future_leaves
+    return if self.status == 'approved'
+    LeaveApplication.where(:start_at.gte => Date.today, user: self).each do |leave_application|
+      leave_application.update(leave_status: 'Rejected')
+    end
   end
 
   def add_or_remove_projects(params)

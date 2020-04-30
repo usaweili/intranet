@@ -58,6 +58,17 @@ describe User do
     expect(user.employee_detail.available_leaves).to eq(PER_MONTH_LEAVE*12)
   end
 
+  context '#reject_future_leaves' do
+    it 'should reject future leaves if employee resigns' do
+      user = FactoryGirl.create(:user, status: 'approved')
+      leave_application1 = FactoryGirl.create(:leave_application, user: user)
+      leave_application2 = FactoryGirl.create(:leave_application, user: user, start_at: Date.today + 4, end_at: Date.today + 7)
+      user.update(status: 'resigned')
+      expect(leave_application1.reload.leave_status).to eq('Rejected')
+      expect(leave_application2.reload.leave_status).to eq('Rejected')
+    end
+  end
+
   context "sent mail for approval" do
 
     before (:each) do
