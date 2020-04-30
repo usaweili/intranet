@@ -89,6 +89,8 @@ class User
     assign_leave('Role Updated') if self.role_changed? &&
                                     self.role_was == INTERN_ROLE &&
                                     self.role == 'Employee'
+  after_update do
+    self.reject_future_leaves if self.status == 'resigned'
   end
 
   slug :name

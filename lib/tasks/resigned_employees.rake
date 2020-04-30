@@ -16,4 +16,12 @@ namespace :resigned_employees do
       p user.email
     end
   end
+
+  desc "Change status of resigned employees from pending to resigned"
+  task change_status_of_resigned_employees: :environment do
+    email_ids = []
+    User.where(:email.in => email_ids).each do |user|
+      user.update(status: 'resigned')
+    end
+  end
 end
