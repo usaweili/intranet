@@ -338,13 +338,13 @@ class TimeSheet
       next if last_filled_time_sheet_date.nil?
       date_difference = calculate_date_difference(last_filled_time_sheet_date)
       if date_difference < 2 && last_filled_time_sheet_date < Date.today
-        next if HolidayList.is_holiday?(last_filled_time_sheet_date)
+        next if HolidayList.is_holiday?(last_filled_time_sheet_date, user.country)
         unless user_on_leave?(user, last_filled_time_sheet_date)
           unfilled_timesheet = last_filled_time_sheet_date unless time_sheet_filled?(user, last_filled_time_sheet_date)
         end
       else
         while(last_filled_time_sheet_date < Date.today)
-          next last_filled_time_sheet_date += 1 if HolidayList.is_holiday?(last_filled_time_sheet_date)
+          next last_filled_time_sheet_date += 1 if HolidayList.is_holiday?(last_filled_time_sheet_date, user.country)
           unless user_on_leave?(user, last_filled_time_sheet_date)
             unfilled_timesheet = last_filled_time_sheet_date unless time_sheet_filled?(user, last_filled_time_sheet_date)
             break
@@ -890,7 +890,7 @@ class TimeSheet
       unless timesheet_data.empty?
         (from_date..to_date).each do |date|
           date_wise = []
-          next if HolidayList.is_holiday?(date)
+          next if HolidayList.is_holiday?(date, user.country)
           next if user_on_leave?(user, date)
           next if time_sheet_filled?(user, date)
           date_wise.push(user.employee_detail.employee_id, user.name, user.email, date)

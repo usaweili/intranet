@@ -121,12 +121,12 @@ class LeaveApplication
     ).order_by(:start_at.asc)
   end
 
-  def self.pending_leaves_reminder
+  def self.pending_leaves_reminder(country)
     count = 0
     date  = Date.today
     while count < 2
       date  += 1
-      count += 1 unless HolidayList.is_holiday?(date)
+      count += 1 unless HolidayList.is_holiday?(date, country)
       #checking count for 2 days - sending mail only for 1 and 2 day remaining leaves.
       if count == 1 || 2
         leave_applications = LeaveApplication.where(start_at: date, leave_status: PENDING)

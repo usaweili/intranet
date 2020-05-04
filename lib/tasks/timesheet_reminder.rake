@@ -2,9 +2,14 @@ require 'time_difference'
 namespace :timesheet_reminder do
   desc "Reminds to employee to fill timesheet"
   task :ts_reminders => :environment do
-    unless HolidayList.is_holiday?(Date.today)
+    unless HolidayList.is_holiday?(Date.today, "India")
       @time_sheet = TimeSheet.new
-      users = User.get_approved_users_to_send_reminder
+      users = User.get_approved_users_to_send_reminder.indian
+      TimeSheet.search_user_and_send_reminder(users)
+    end
+    unless HolidayList.is_holiday?(Date.today, "USA")
+      @time_sheet = TimeSheet.new
+      users = User.get_approved_users_to_send_reminder.american
       TimeSheet.search_user_and_send_reminder(users)
     end
   end
