@@ -57,6 +57,8 @@ class User
   validates :role, :email, presence: true
   validates_associated :employee_detail
   scope :project_engineers, ->{where(:role.nin => ['HR','Finance'], :status => STATUS[2]).asc("public_profile.first_name")}
+  scope :american, ->{where({"employee_detail.location"=>"Plano"})}
+  scope :indian, ->{where({"employee_detail.location" => "Pune"})}
   scope :employees, ->{all.asc("public_profile.first_name")}
   scope :approved, ->{where(status: 'approved')}
   scope :visible_on_website, -> {where(visible_on_website: true)}

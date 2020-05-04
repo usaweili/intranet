@@ -305,7 +305,7 @@ RSpec.describe TimeSheet, type: :model do
           from_time: "#{date} 9:00",
           to_time: "#{date} 10:00"
         )
-        expect(HolidayList.is_holiday?(user.time_sheets[0].date + 1)).
+        expect(HolidayList.is_holiday?(user.time_sheets[0].date + 1, user.country)).
           to eq(false)
         expect(TimeSheet.time_sheet_present_for_reminder?(user)).to eq(true)
         expect(TimeSheet.user_on_leave?(user, user.time_sheets[0].date + 1)).
