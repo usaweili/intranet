@@ -6,10 +6,10 @@
 = f.input :number_of_days, as: :decimal, label: 'Days', input_html: {step: 1}, input_html: { required: true, :'data-validation-required-message' => 'Enter the number of days', min: "1", :'data-validation-min-message' => "Number of day can't be zero or negative"}, readonly: true
 = f.input :contact_number, as: :decimal, label: 'Emergency Contact No.', input_html: {required: true, :'data-validation-required-message' => 'You need to enter your emergency number', type: 'text', maxlength: 10}
 = f.input :reason, as: :text, label: 'Reason', input_html: {required: true, :'data-validation-required-message' => 'You have to specify valid reason for leave'}
+- @location = current_user.location
 %center
   = f.submit (params[:action] == "new" ? 'Apply' : 'Save Changes'), class: 'btn'
 :javascript
-
   DPGlobal = $.fn.datepicker.DPGlobal;
   date_format = 'dd-mm-yyyy';
 
@@ -17,6 +17,8 @@
   $("input,select,textarea").not("[type=submit]").jqBootstrapValidation();
 
   $(document).ready(function(){
+    var location = "#{@location}"
+    set_number_of_days(location)
     lastDayOfYear = new Date(new Date().getFullYear(), 11, 31);
     $('#leave_application_end_at').data('datepicker').setEndDate(lastDayOfYear);
 

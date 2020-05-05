@@ -10,6 +10,11 @@ class User
          :recoverable, :rememberable, :trackable, :validatable, :omniauth_providers => [:google_oauth2]
   INTERN_ROLE = "Intern"
   ROLES = ['Super Admin', 'Admin', 'Manager', 'HR', 'Employee', INTERN_ROLE, 'Finance']
+  CityCountryMapping = [
+    { city: 'Bengaluru', country: 'India'},
+    { city: 'Pune', country: 'India'},
+    { city: 'Plano', country: 'USA'}
+  ]
 
   ## Database authenticatable
   field :email,               :type => String, :default => ""
@@ -141,6 +146,15 @@ class User
 
   def call_monitor_service
     CodeMonitoringWorker.perform_async({ event_type: 'User Resigned', user_id: id.to_s })
+  end
+
+  def get_country
+    CityCountryMapping.each do |city_country|
+      if city_country[:city] == self.location
+        country = city_country[:country]
+      end
+    end
+    country
   end
 
   def sent_mail_for_approval(leave_application_id)

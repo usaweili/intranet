@@ -44,7 +44,12 @@ class HolidayListsController < ApplicationController
 
   def holiday_list
     date    = Date.today.at_beginning_of_year
-    holiday = HolidayList.where(:holiday_date.gte => date)
+    if params['location'].nil?
+      holiday = HolidayList.where(:holiday_date.gte => date)
+    else
+      country = current_user.get_country
+      holiday = HolidayList.where(:holiday_date.gte => date, country: country)
+    end
     render json: holiday
   end
 
