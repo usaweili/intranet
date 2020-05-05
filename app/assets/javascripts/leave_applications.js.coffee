@@ -7,8 +7,8 @@ CalculateWeekendDays = (fromDate, toDate) ->
   $("#leave_application_number_of_days").val(weekDayCount)
 
 
-@set_number_of_days = ->
-  getHolidayList()
+@set_number_of_days = (location) ->
+  getHolidayList(location)
   $("#leave_application_start_at").on "change", ->
     CalculateWeekendDays($("#leave_application_start_at").
       datepicker('getDate'), $("#leave_application_end_at").
@@ -22,11 +22,12 @@ CalculateWeekendDays = (fromDate, toDate) ->
 $(document).ready ->
   $('.leave_table').dataTable 'ordering' : false
 
-getHolidayList = ->
+getHolidayList = (location) ->
   $.ajax
     dataType: 'json'
     type: 'GET'
     url: '/holiday_list'
+    data: {location: location}
     success: (response) ->
       localStorage.setItem 'items', JSON.stringify(response)
 

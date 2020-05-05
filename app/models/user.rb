@@ -10,6 +10,7 @@ class User
          :recoverable, :rememberable, :trackable, :validatable, :omniauth_providers => [:google_oauth2]
   INTERN_ROLE = "Intern"
   ROLES = ['Super Admin', 'Admin', 'Manager', 'HR', 'Employee', INTERN_ROLE, 'Finance']
+  CityCountryMapping = [{city: "Pune",  country: 'India'}, {city: "Plano", country: "USA"}]
 
   ## Database authenticatable
   field :email,               :type => String, :default => ""
@@ -95,6 +96,15 @@ class User
       User.approved.where(role: 'HR').pluck(:email), User.approved.where(role: 'Admin').first.try(:email),
       self.employee_detail.try(:notification_emails).try(:split, ','), self.get_managers_emails
     ].flatten.compact.uniq
+  end
+
+  def get_country
+    CityCountryMapping.each do |city_country|
+      if city_country[:city] == self.location
+        country = city_country[:country]
+      end
+    end
+    country
   end
 
   def sent_mail_for_approval(leave_application_id)
