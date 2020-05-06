@@ -98,15 +98,6 @@ class User
     ].flatten.compact.uniq
   end
 
-  def get_country
-    CityCountryMapping.each do |city_country|
-      if city_country[:city] == self.location
-        country = city_country[:country]
-      end
-    end
-    country
-  end
-
   def sent_mail_for_approval(leave_application_id)
     notified_users = notification_emails
     UserMailer.delay.leave_application(self.email, notified_users, leave_application_id)
@@ -296,13 +287,13 @@ class User
   end
 
   def country
-    if self.employee_detail.try(:location) == "Plano"
-      "USA"
-    elsif self.employee_detail.try(:location) == "Pune"
-      "India"
-    else
-      "India"
+    user_country = "India"
+    CityCountryMapping.each do |city_country|
+      if self.employee_detail.try(:location) == city_country[:city]
+        user_country = city_country[:country]
+      end
     end
+    user_country
   end
 
    def get_user_projects_from_user(project_id, from_date, to_date)
