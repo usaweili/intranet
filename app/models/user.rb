@@ -90,7 +90,7 @@ class User
                                     self.role_was == INTERN_ROLE &&
                                     self.role == 'Employee'
   after_update do
-    self.reject_future_leaves if self.status == 'resigned'
+    reject_future_leaves if (status_changed? && status == 'resigned')
   end
 
   slug :name
