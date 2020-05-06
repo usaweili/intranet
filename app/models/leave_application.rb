@@ -43,6 +43,8 @@ class LeaveApplication
   scope :processed, ->{where(:leave_status.ne => PENDING)}
   scope :unrejected, -> { where(:leave_status.ne => REJECTED )}
 
+  attr_accessor :sanctioning_manager
+
   def leave_request?
     leave_type == LEAVE
   end

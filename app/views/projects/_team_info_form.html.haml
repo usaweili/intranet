@@ -1,13 +1,21 @@
 
 = simple_nested_form_for @project, :html => {class: "form-horizontal teamForm"} do |f|
+<<<<<<< HEAD
   %h2 Team Members for #{@project.name}
+=======
+  %h3 Current Team Members of #{@project.name}
+>>>>>>> 3a5602ec7ca46b7104d3936b4b2eea8e30d56605
   .row.span12.headers
     .span2.width12 Active?
     .span2.width18 Name
     .span2.width15 Start Date
     .span2.width15 End Date
     .span2.width10 Timesheet Required?
+<<<<<<< HEAD
     .span2.width10 Allocation Percent
+=======
+    .span2.width10 Allocation Percentage
+>>>>>>> 3a5602ec7ca46b7104d3936b4b2eea8e30d56605
   #team-members
     = f.fields_for :user_projects do |project_user_form|
       - if project_user_form.object.user.blank? || (project_user_form.object.user && project_user_form.object.user.is_approved? && (project_user_form.object.active || project_user_form.object.end_date.nil?))
@@ -32,7 +40,11 @@
 
 
 - if @project.user_projects.ex_users.count > 0 || @project.user_projects.inactive_users.count > 0
+<<<<<<< HEAD
   %h3 Previous team members for #{@project.name}
+=======
+  %h3 Previous team members of #{@project.name}
+>>>>>>> 3a5602ec7ca46b7104d3936b4b2eea8e30d56605
   %table.table.table-bordered.table-responsive#sortable
     %thead
       %tr
@@ -41,7 +53,11 @@
         %th.span2 Start Date
         %th.span2 End Date
         %th Timesheet Required?
+<<<<<<< HEAD
         %th Allocation Percent
+=======
+        %th Allocation Percentage
+>>>>>>> 3a5602ec7ca46b7104d3936b4b2eea8e30d56605
     %tbody
       - @project.user_projects.inactive_users.sort_by{|i| i.user.name }.each do |project_user_form|
         %tr

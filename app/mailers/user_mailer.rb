@@ -56,8 +56,11 @@ class UserMailer < ActionMailer::Base
     hr_emails = User.approved.where(role: 'HR').collect(&:email)
     admin_emails = User.approved.where(role: 'Admin').all.map(&:email)
     @receiver_emails = [admin_emails, hr_emails].flatten.join(',')
+    leaves.map do |leave|
+      leave.sanctioning_manager = User.find(leave.processed_by).name
+    end
     @leaves = leaves
-    mail(to: @receiver_emails, subject: "Employees on leave tomorrow.") if @leaves.present?
+    mail(to: @receiver_emails, subject: "Employees on leave tomorrow.") if leaves.present?
   end
 
   def new_blog_notification(params)

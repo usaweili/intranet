@@ -54,6 +54,8 @@ class Project
   field :domains, type: Array, default: []
   slug :name
 
+  has_many :technology_details
+  accepts_nested_attributes_for :technology_details, allow_destroy: true, reject_if: :technology_details_record_is_blank?
   has_many :time_sheets, dependent: :destroy
   has_many :user_projects, dependent: :destroy
   accepts_nested_attributes_for :user_projects
@@ -61,11 +63,9 @@ class Project
   has_and_belongs_to_many :managers, class_name: 'User', foreign_key: 'manager_ids', inverse_of: :managed_projects
   validates_presence_of :name
   validate :project_code
-
   scope :all_active, ->{where(is_active: true).asc(:name)}
   scope :visible_on_website, -> {where(visible_on_website: true)}
   scope :sort_by_position, -> { asc(:position)}
-
   attr_accessor :allocated_employees, :manager_name, :employee_names
   # validates_uniqueness_of :code, allow_blank: true, allow_nil: true
 
@@ -320,5 +320,9 @@ class Project
 
   def update_user_projects
     user_projects.each { |user_project| user_project.update_attributes(end_date: end_date) }
+  end
+
+  def technology_details_record_is_blank?(attributes)
+    attributes[:name].blank?  and attributes[:version].blank?
   end
 end
