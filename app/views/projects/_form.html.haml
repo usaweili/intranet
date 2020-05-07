@@ -1,15 +1,10 @@
 - new_project = !@project.persisted?
-<<<<<<< HEAD
-- team_detail_error = @project.errors.full_messages.first == "User projects is invalid"
-%ul.nav.nav-tabs
-  %li{:class => ("active" unless team_detail_error)}
-=======
 - tech_detail_error = @project.errors.full_messages.first == "Technology details is invalid"
 - team_detail_error = @project.errors.full_messages.first == "User projects is invalid"
+- repository_detail_error = @project.errors.full_messages.first == "Repository is invalid"
 
 %ul.nav.nav-tabs
   %li{:class => ("active" if !(team_detail_error || tech_detail_error))}
->>>>>>> 3a5602ec7ca46b7104d3936b4b2eea8e30d56605
     %a{data:{toggle: 'tab'}, href: '#project_form'}
       #{new_project ? 'Create' : 'Update'} Project
   %li{:class => ("active" if tech_detail_error)}
@@ -17,20 +12,19 @@
   - unless @project.is_activity
     %li{:class => ("active" if team_detail_error)}
       = link_to 'Team Details', '#team_info', data:{toggle: ('tab' unless new_project)}, class: :team_details
-
+  %li{:class => ("active" if repository_detail_error)}
+    = link_to 'Repository Details', '#repository_info', data:{toggle: ('tab' unless new_project)}, class: :repository_details
 
 .project_tab_content.tab-content
-<<<<<<< HEAD
-  #project_form.tab-pane.fade{:class => ("in active" unless team_detail_error)}
-=======
   #project_form.tab-pane.fade{:class => ("in active" if !(team_detail_error || tech_detail_error))}
->>>>>>> 3a5602ec7ca46b7104d3936b4b2eea8e30d56605
     = render 'projects/project_form'
   #project_info.tab-pane.fade{:class => ("in active" if tech_detail_error)}
     = render 'projects/project_info_form'
   - unless @project.is_activity
     #team_info.tab-pane.fade{:class => ("in active" if team_detail_error)}
       = render 'projects/team_info_form', users: users
+  #repository_info.tab-pane.fade{:class => ("in active" if repository_detail_error)}
+    = render 'projects/repository_form'
 
 :javascript
   $('.tech_details').click(function(){
@@ -45,4 +39,8 @@
     }
   })
 
-
+  $('.repository_details').click(function(){
+    if(#{new_project}){
+      alert('Please first create project to fill Repository Details.')
+    }
+  })
