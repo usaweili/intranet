@@ -110,6 +110,7 @@ class ProjectsController < ApplicationController
   end
 
   def load_users
-    @users = User.project_engineers
+    # @users = User.project_engineers
+    @users = User.approved.where(:role.nin => ['Admin', 'Manager'])
   end
 end
