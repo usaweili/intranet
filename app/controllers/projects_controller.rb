@@ -44,7 +44,7 @@ class ProjectsController < ApplicationController
   end
 
   def update
-    if update_obj(@project, safe_params, projects_path)
+    if update_obj(@project, safe_params, edit_project_path)
       @project.add_manager_as_team_member(params[:project][:manager_ids] || [])
     else
       flash[:error] = "Error unable to add or remove team member"
@@ -115,6 +115,7 @@ class ProjectsController < ApplicationController
   end
 
   def load_users
-    @users = User.project_engineers
+    # @users = User.project_engineers
+    @users = User.approved.where(:role.nin => ['Admin', 'Manager'])
   end
 end
