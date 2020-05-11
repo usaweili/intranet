@@ -44,12 +44,7 @@ class ProjectsController < ApplicationController
   end
 
   def update
-    if update_obj(@project, safe_params, projects_path)
-      @project.add_manager_as_team_member(params[:project][:manager_ids] || [])
-    else
-      flash[:error] = "Error unable to add or remove team member"
-      render 'edit'
-    end
+    update_obj(@project, safe_params, projects_path)
   end
 
   def show
