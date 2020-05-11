@@ -110,7 +110,12 @@ class ProjectsController < ApplicationController
   end
 
   def load_users
-    # @users = User.project_engineers
-    @users = User.approved.where(:role.nin => ['Admin', 'Manager'])
+    designations = ['UI/UX Lead', 'UI/UX Designer', 'Senior UI/UX Designer', 'Software Engineer', 'Senior Software Engineer', 'Team Lead', 'QA Engineer', 'Senior QA Engineer', 'QA Lead', 'Intern']
+    designation_ids = Designation.where(:name.in => designations).pluck(:id)
+    @users = User.project_engineers.select do |user|
+      if user.employee_detail.designation_id.present?
+        designation_ids.include?(user.employee_detail.designation_id)
+      end
+    end
   end
 end
