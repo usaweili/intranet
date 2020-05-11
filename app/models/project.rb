@@ -201,27 +201,28 @@ class Project
     end
   end
 
-  def add_or_remove_team_members(user_ids)
-    user_ids = user_ids.presence ? user_ids.collect!(&:to_s) : []
-    existing_member_ids = user_projects.where(end_date: nil).pluck(:user_id).collect(&:to_s)
-    new_member_ids = user_ids.present? ? user_ids - existing_member_ids : []
-    removed_member_ids = user_ids.present? ? existing_member_ids - user_ids : []
-    add_team_members(new_member_ids) if new_member_ids.present?
-    remove_team_members(removed_member_ids) if removed_member_ids.present?
-  end
-
-  def add_team_members(user_ids)
-    user_ids.each do |user_id|
-      user_projects.create!(user_id: user_id, start_date: DateTime.now, end_date: nil)
-    end
-  end
-
-  def remove_team_members(user_ids)
-    user_ids.each do |user_id|
-      user_project = user_projects.where(user_id: user_id, end_date: nil).first
-      user_project.update_attributes(end_date: DateTime.now, active: false) if user_project
-    end
-  end
+  # these methods were used to add managers as team members but it had a bug
+  # def add_or_remove_team_members(user_ids)
+  #   user_ids = user_ids.presence ? user_ids.collect!(&:to_s) : []
+  #   existing_member_ids = user_projects.where(end_date: nil).pluck(:user_id).collect(&:to_s)
+  #   new_member_ids = user_ids.present? ? user_ids - existing_member_ids : []
+  #   removed_member_ids = user_ids.present? ? existing_member_ids - user_ids : []
+  #   add_team_members(new_member_ids) if new_member_ids.present?
+  #   remove_team_members(removed_member_ids) if removed_member_ids.present?
+  # end
+  #
+  # def add_team_members(user_ids)
+  #   user_ids.each do |user_id|
+  #     user_projects.create!(user_id: user_id, start_date: DateTime.now, end_date: nil)
+  #   end
+  # end
+  #
+  # def remove_team_members(user_ids)
+  #   user_ids.each do |user_id|
+  #     user_project = user_projects.where(user_id: user_id, end_date: nil).first
+  #     user_project.update_attributes(end_date: DateTime.now, active: false) if user_project
+  #   end
+  # end
 
   def self.get_approved_project_between_range(from_date, to_date)
     Project.all_active.where("$or" => [{end_date: nil}, {end_date: {"$gte" => from_date, "$lte" => to_date}}]).pluck(:name, :id)

@@ -44,7 +44,7 @@ class ProjectsController < ApplicationController
   end
 
   def update
-    update_obj(@project, safe_params, projects_path)
+    update_obj(@project, safe_params, edit_project_path)
   end
 
   def show
