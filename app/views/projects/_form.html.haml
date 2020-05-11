@@ -1,10 +1,10 @@
 - new_project = !@project.persisted?
 - tech_detail_error = @project.errors.full_messages.first == "Technology details is invalid"
 - team_detail_error = @project.errors.full_messages.first == "User projects is invalid"
-- repository_detail_error = @project.errors.full_messages.first == "Repository is invalid"
+- repository_detail_error = @project.errors.full_messages.first == "Repositories is invalid"
 
 %ul.nav.nav-tabs
-  %li{:class => ("active" if !(team_detail_error || tech_detail_error))}
+  %li{:class => ("active" if !(team_detail_error || tech_detail_error || repository_detail_error))}
     %a{data:{toggle: 'tab'}, href: '#project_form'}
       #{new_project ? 'Create' : 'Update'} Project
   %li{:class => ("active" if tech_detail_error)}
@@ -16,7 +16,7 @@
     = link_to 'Repository Details', '#repository_info', data:{toggle: ('tab' unless new_project)}, class: :repository_details
 
 .project_tab_content.tab-content
-  #project_form.tab-pane.fade{:class => ("in active" if !(team_detail_error || tech_detail_error))}
+  #project_form.tab-pane.fade{:class => ("in active" if !(team_detail_error || tech_detail_error || repository_detail_error))}
     = render 'projects/project_form'
   #project_info.tab-pane.fade{:class => ("in active" if tech_detail_error)}
     = render 'projects/project_info_form'

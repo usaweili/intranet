@@ -92,3 +92,11 @@ end
 every :day, :at => '10:00am' do
   rake "probation_notification:probation_end"
 end
+
+every :monday :at => '07:00am' do
+  rake "weekly_codeclimate_statistics"
+end
+
+every :monday :at => '09:00am' do
+  rake "weekly_project_summary"
+end

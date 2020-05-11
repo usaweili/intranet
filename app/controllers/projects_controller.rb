@@ -103,7 +103,7 @@ class ProjectsController < ApplicationController
     :code, :number_of_employees, :invoice_date, :company_id, :billing_frequency, :type_of_project, :is_activity,
     :manager_ids => [], technology_details_attributes: %i[id name version _destroy],
     user_projects_attributes: [:start_date, :end_date, :time_sheet, :allocation, :active, :id, :user_id],
-    repositories_attributes: %i[name host url code_climate_id maintainability_badge test_coverage_badge _destroy])
+    repositories_attributes: %i[id name host url code_climate_id maintainability_badge test_coverage_badge _destroy])
   end
 
   def load_project
