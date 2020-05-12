@@ -5,7 +5,7 @@ task :weekly_codeclimate_statistics => :environment do
   to = Date.today.strftime('%Y-%m-%d')
   query_string = "filter[from]=#{from}&filter[to]=#{to}"
   Repository.each do |repo|
-    if repo.code_climate_id && !repo.code_climate_id.empty?
+    if repo.code_climate_id.present?
       url = "https://api.codeclimate.com/v1/repos/#{repo.code_climate_id}/metrics?#{query_string}"
       headers = { "Accept" => "application/vnd.api+json", "Authorization" => "Token token=#{ENV['CODE_CLIMATE_TOKEN']}" }
       begin
@@ -18,7 +18,7 @@ task :weekly_codeclimate_statistics => :environment do
       stats = { "repository_id": repo.id }
       stats["loc"] = {}
       stats["ratings"] = {}
-      if response_body && response_body["data"] && response_body["data"].length > 0
+      if response_body && response_body["data"]
         response_body["data"].each do |d|
           metric = d["attributes"]["name"]
           metric_split = d["attributes"]["name"].split(".")
