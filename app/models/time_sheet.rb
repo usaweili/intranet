@@ -835,11 +835,12 @@ class TimeSheet
     if unfilled_timesheet.present?
       slack_handle = user.public_profile.slack_handle
       message1 = "You haven't filled the timesheet from"
+      unfilled_timesheet_date = [unfilled_timesheet.to_date, "2020-05-01".to_date].max
       message2 = "Go ahead and fill it now. You can fill timesheet for past 7 days. If it exceeds 7 days then contact your manager."
-      text_for_slack = "*#{message1} #{unfilled_timesheet.to_date}. #{message2}*"
-      text_for_email = "#{message1} #{unfilled_timesheet.to_date}. #{message2}"
+      text_for_slack = "*#{message1} #{unfilled_timesheet_date}. #{message2}*"
+      text_for_email = "#{message1} #{unfilled_timesheet_date}. #{message2}"
       TimesheetRemainderMailer.send_timesheet_reminder_mail(user, slack_handle, text_for_email).deliver!
-      send_reminder(slack_handle, text_for_slack) unless slack_handle.blank?
+      send_reminder(slack_handle, text_for_slack) unless slack_handle.blank? rescue "Error in sending reminder to slack"
       return true
     end
     return false
