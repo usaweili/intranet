@@ -29,4 +29,13 @@ describe Repository do
     expect(repository).to be_invalid
     expect(repository.errors.full_messages).to eq(["Host is not included in the list"])
   end
+
+  it 'on delete repository, its associated code_climate_statistics should get deleted' do
+    project = create(:project)
+    repository = create(:repository, project: project)
+    code_climate_statistic = create(:code_climate_statistic, repository: repository)
+    expect(repository.code_climate_statistics.count).to eq(1)
+    repository.destroy
+    expect(repository.code_climate_statistics.count).to eq(0)
+  end
 end

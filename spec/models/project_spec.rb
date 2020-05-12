@@ -309,6 +309,17 @@ describe Project do
     end
   end
 
+  context 'on delete project, its linked repositories should get deleted' do
+    it 'validates repo count on delete project' do
+      project = create(:project)
+      repository = create(:repository, project: project)
+      expect(project.repositories.count).to eq(1)
+      expect(Repository.count).to eq(1)
+      project.destroy
+      expect(Repository.count).to eq(0)
+    end
+  end
+
   context 'check presence of end_date' do
     it 'when project set to inactive' do
       project = create(:project)

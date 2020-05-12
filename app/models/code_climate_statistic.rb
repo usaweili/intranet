@@ -11,5 +11,5 @@ class CodeClimateStatistic
   field :diff_coverage
   field :ratings, default: {} # File types from A to F 
   belongs_to :repository
-  validates_presence_of :timestamp
+  validates_presence_of :timestamp, :repository
 end

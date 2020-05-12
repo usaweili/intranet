@@ -9,8 +9,8 @@ class ProjectMailer < ActionMailer::Base
     mail(subject: 'Project Team Data Report', to: user_email)
   end
 
-  def send_weekly_project_summary(project_name, manager_emails, data)
-    @data = data
+  def send_weekly_project_summary(project_name, manager_emails, repo_data)
+    @repo_data = repo_data
     @project_name = project_name
     mail(
       subject: "#{project_name} : Weekly Project Summary",

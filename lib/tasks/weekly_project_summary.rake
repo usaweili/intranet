@@ -5,11 +5,15 @@ task :weekly_project_summary => :environment do
   projects.each do |project|
     if project.repositories.count > 0
       manager_emails = project.managers.pluck(:email)
+      repo_data = {}
       project.repositories.each do |repo|
         data = repo.code_climate_statistics.order("created_at desc").limit(weeks).reverse
         if data.length > 0 && !manager_emails.empty?
-          ProjectMailer.delay.send_weekly_project_summary(project.name, manager_emails, data)
+          repo_data[repo.name] = data
         end
+      end
+      unless repo_data.keys.empty?
+        ProjectMailer.delay.send_weekly_project_summary(project.name, manager_emails, repo_data)
       end
     end
   end

@@ -12,5 +12,7 @@ class Repository
   validates_presence_of :project
   # validates_presence_of :name, :url, :host
   # validates :host, inclusion: { in: HOSTS, allow_nil: false }
-  has_many :code_climate_statistics
+  # validates_uniqueness_of :name, :url
+  has_many :code_climate_statistics, dependent: :destroy
+  validates_uniqueness_of :code_climate_id, allow_blank: true, allow_nil: true
 end
