@@ -1,15 +1,9 @@
 - new_project = !@project.persisted?
-<<<<<<< HEAD
-- team_detail_error = @project.errors.full_messages.first == "User projects is invalid"
-%ul.nav.nav-tabs
-  %li{:class => ("active" unless team_detail_error)}
-=======
 - tech_detail_error = @project.errors.full_messages.first == "Technology details is invalid"
 - team_detail_error = @project.errors.full_messages.first == "User projects is invalid"
 
 %ul.nav.nav-tabs
   %li{:class => ("active" if !(team_detail_error || tech_detail_error))}
->>>>>>> 3a5602ec7ca46b7104d3936b4b2eea8e30d56605
     %a{data:{toggle: 'tab'}, href: '#project_form'}
       #{new_project ? 'Create' : 'Update'} Project
   %li{:class => ("active" if tech_detail_error)}
@@ -19,11 +13,7 @@
 
 
 .project_tab_content.tab-content
-<<<<<<< HEAD
-  #project_form.tab-pane.fade{:class => ("in active" unless team_detail_error)}
-=======
   #project_form.tab-pane.fade{:class => ("in active" if !(team_detail_error || tech_detail_error))}
->>>>>>> 3a5602ec7ca46b7104d3936b4b2eea8e30d56605
     = render 'projects/project_form'
   #project_info.tab-pane.fade{:class => ("in active" if tech_detail_error)}
     = render 'projects/project_info_form'
