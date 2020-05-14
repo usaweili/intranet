@@ -40,6 +40,8 @@
               %li
                 = link_to "Employees", main_app.users_path
               %li
+                = link_to "Repositories", main_app.overview_index_repositories_path, data: {'no-turbolink' =>  true}
+              %li
                 = link_to "Screamout", screamout.contents_path, data: {'no-turbolink' =>  true}
               %li
                 = link_to "Vendors", main_app.vendors_path, data: { 'no-turbolink' => true }

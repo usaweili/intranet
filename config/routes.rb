@@ -72,6 +72,11 @@ Rails.application.routes.draw do
     get 'generate_code', as: :generate_code, on: :collection
   end
 
+  resource :repositories do
+    get 'overview_index', as: :overview_index, on: :collection
+    get 'repository_issues', as: :repository_issues, on: :collection
+  end
+
   resources :companies do
     resources :projects, only: [:new, :create, :edit, :update]
   end

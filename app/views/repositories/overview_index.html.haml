@@ -1,0 +1,31 @@
+%h4 REPOSITORIES :
+
+%div{class:"form-horizontal"}
+  %table.table.table-hover#sortable
+    %thead
+      %tr
+        %th NAME
+        %th SLUG
+        %th MAINTAINABILITY
+        %th TEST COVERAGE
+        %th LAST COMMIT
+    %tbody
+      - if @response_body && @response_body['data']
+        - @response_body['data'].each do |repo|
+          - if repo['relationships'] && repo['relationships']['latest_default_branch_snapshot']['data'] && repo['relationships']['latest_default_branch_snapshot']['data']['id']
+            - snap_id = repo['relationships']['latest_default_branch_snapshot']['data']['id']
+          %tr
+            %td= link_to repo['attributes']['human_name'], repository_issues_repositories_path(repo_id: repo['id'], snap_id: snap_id, repo_name: repo['attributes']['human_name'])
+            %td= repo['attributes']['github_slug']
+            %td
+              - if repo['links'] && repo['links']['maintainability_badge']
+                %a{:href => "https://codeclimate.com/repos/#{repo["id"]}/feed"}
+                  =raw image_tag repo['links']['maintainability_badge']
+            %td
+              - if repo['links'] && repo['links']['test_coverage_badge']
+                %a{:href => "https://codeclimate.com/repos/#{repo["id"]}/feed"}
+                  =raw image_tag repo['links']['test_coverage_badge']
+            %td= Time.parse(repo['attributes']['last_activity_at']).strftime('%b, %d %y, %H:%M')
+
+:javascript
+  $('#sortable').dataTable({ "aaSorting": [] });
