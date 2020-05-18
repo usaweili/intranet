@@ -110,12 +110,10 @@ class ProjectsController < ApplicationController
   end
 
   def load_users
-    designations = ['UI/UX Lead', 'UI/UX Designer', 'Senior UI/UX Designer', 'Software Engineer', 'Senior Software Engineer', 'Team Lead', 'QA Engineer', 'Senior QA Engineer', 'QA Lead', 'Intern']
+    designations = ['UI/UX Lead', 'UI/UX Designer', 'Senior UI/UX Designer',
+      'Software Engineer', 'Senior Software Engineer', 'Team Lead',
+      'QA Engineer', 'Senior QA Engineer', 'QA Lead', 'Intern']
     designation_ids = Designation.where(:name.in => designations).pluck(:id)
-    @users = User.project_engineers.select do |user|
-      if user.employee_detail.designation_id.present?
-        designation_ids.include?(user.employee_detail.designation_id)
-      end
-    end
+    @users = User.approved.where("employee_detail.designation_id" => {"$in" => designation_ids}).order([:email, :asc])
   end
 end
