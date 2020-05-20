@@ -107,7 +107,8 @@ class TimeSheet
   end
 
   def valid_date_for_update?
-    date > Date.today - DAYS_FOR_UPDATE
+    # date > Date.today - DAYS_FOR_UPDATE
+    date >= "01/05/2020".to_date
   end
 
   def is_management?
@@ -120,7 +121,8 @@ class TimeSheet
       errors.add(:date, 'Invalid time')
       return false
     end
-    if date < Date.today - DAYS_FOR_CREATE
+    # if date < Date.today - DAYS_FOR_CREATE
+    if date < "01/05/2020".to_date
       text = "Not allowed to fill timesheet for this date. If you want to fill the timesheet, meet your manager."
       errors.add(:date, text)
       return false
