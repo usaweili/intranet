@@ -877,6 +877,7 @@ class TimeSheet
       value['from_time']  = value['date'] + ' ' + value['from_time']
       value['to_time']    = value['date'] + ' ' + value['to_time']
       time_sheet = TimeSheet.new
+      value.delete("_destroy")
       time_sheet.attributes = value
       unless time_sheet.time_validation(value['date'], value['from_time'], value['to_time'], 'from_ui')
         return_value << false
