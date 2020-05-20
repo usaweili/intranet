@@ -21,7 +21,7 @@ class TimeSheet
   validates :date, presence: true, if: :is_future_date?
   validates :from_time, presence: true, if: :from_time_is_future_time?
   validates :to_time, presence: true, if: :to_time_is_future_time?
-  before_validation :valid_date_for_create?, on: :create, unless: :is_management?
+  before_validation :valid_date_for_create?, unless: :is_management?
   validate :time_sheet_overlapping?
   # validate :timesheet_date_greater_than_project_start_date, if: :is_project_assigned_to_user?
 
