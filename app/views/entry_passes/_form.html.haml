@@ -1,0 +1,4 @@
+= simple_form_for @entry_pass do |f|
+  = f.input :date, input_html: {class: 'datepicker'}
+  = f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id }
+  = f.button :submit
