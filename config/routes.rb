@@ -13,6 +13,7 @@ Rails.application.routes.draw do
   resources :policies
   resources :holiday_lists
   resources :designations
+  resources :entry_passes
   get 'holiday_list', to: 'holiday_lists#holiday_list'
   get '/unsubscribe' => 'light/users#unsubscribe', as: 'users/unsubscribe'
   #get '/unsubscribe/:id' => 'light/users#unsubscribe', as: 'users/unsubscribe'
@@ -87,8 +88,6 @@ Rails.application.routes.draw do
     patch :get_event_status
     patch :feedback
   end
-
-  resources :office_pass, only: [:index]
 
   namespace :api, :defaults => {:format => 'json'} do
     namespace :v1 do

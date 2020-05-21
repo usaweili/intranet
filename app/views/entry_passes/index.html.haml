@@ -1,0 +1,22 @@
+= content_tag :a, "", :href => "#office_entry_modal", :class => 'icon-plus pull-right', :data => {:toggle => 'modal'}
+= render 'modal'
+%h2 List of people allowed to work from office
+%table.table.table-bordered
+  %thead
+    -# %tr
+    -#   %th
+    -#     %h3
+    -#       Today
+    -#       = Date.today
+    -#   %th
+    %tr
+      %th Name
+      %th Date
+  %tbody
+    - @office_passes.each do |entry_pass|
+      %tr
+        %td
+          = User.where({id: entry_pass.user_id}).first.try(:name)
+        %td
+          = entry_pass.date
+  
