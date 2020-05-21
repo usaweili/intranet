@@ -88,6 +88,8 @@ Rails.application.routes.draw do
     patch :feedback
   end
 
+  resources :office_pass, only: [:index]
+
   namespace :api, :defaults => {:format => 'json'} do
     namespace :v1 do
       get 'users/info', to: 'users#info'
