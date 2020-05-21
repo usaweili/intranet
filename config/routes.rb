@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   resources :holiday_lists
   resources :designations
   resources :entry_passes
+  get 'office_pass', to: 'entry_passes#office_pass'
   get 'holiday_list', to: 'holiday_lists#holiday_list'
   get '/unsubscribe' => 'light/users#unsubscribe', as: 'users/unsubscribe'
   #get '/unsubscribe/:id' => 'light/users#unsubscribe', as: 'users/unsubscribe'

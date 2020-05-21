@@ -9,10 +9,22 @@ class EntryPassesController < ApplicationController
     if @entry_pass.valid?
       @entry_pass.save
       flash[:success] = "Entry Pass Created Succesfully"
-      redirect_to entry_passes_path
     else
-      render 'index'
+      flash[:error] = @entry_pass.errors.full_messages.join(" ")
     end
+    redirect_to '/office_pass'
+  end
+
+  def office_pass
+    @entry_pass = EntryPass.new
+    @current_user_passes = EntryPass.where({user_id: current_user.id}).sort_by{|entry_pass| entry_pass.date}
+  end
+
+  def destroy
+    @entry_pass = EntryPass.where({id: params[:id]}).first
+    @entry_pass.destroy
+    flash[:success] = "Entry Pass deleted succesfully"
+    redirect_to '/office_pass'
   end
 
   private
