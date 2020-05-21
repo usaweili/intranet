@@ -27,3 +27,5 @@ DEFAULT_TIMESHEET_MANAGERS = []
 
 MANAGEMENT = ["Admin", "HR", "Manager", "Finance"]
 TIMESHEET_MANAGEMENT = ['Admin', 'HR', 'Manager']
+
+DAILY_OFFICE_ENTRY_LIMIT = 1

@@ -1,4 +1,16 @@
 = simple_form_for @entry_pass do |f|
-  = f.input :date, input_html: {class: 'datepicker'}
+  = f.input :date, input_html: {class: 'office-pass-datepicker', autocomplete: "off"}
   = f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id }
-  = f.button :submit
+  = f.button :submit, "Create Office Pass", :class => "btn-success"
+  
+
+:javascript
+  $(document).ready(function(){
+    $('.office-pass-datepicker').datepicker({
+      startDate: '0',
+      endDate: '+7d',
+      format: 'dd/mm/yyyy'
+    });
+    $('.office-pass-datepicker').css("height", "30px")
+    $('.office-pass-datepicker').css("text", "30px")
+  })
