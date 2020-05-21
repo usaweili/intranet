@@ -1,22 +1,20 @@
 = content_tag :a, "", :href => "#office_entry_modal", :class => 'icon-plus pull-right', :data => {:toggle => 'modal'}, "data-toggle" => "tooltip", title: "Create Entry Pass"
 = render 'modal'
 %h2 List of people allowed to work from office
-%table.table.table-bordered
-  %thead
-    -# %tr
-    -#   %th
-    -#     %h3
-    -#       Today
-    -#       = Date.today
-    -#   %th
-    %tr
-      %th Name
-      %th Date
-  %tbody
-    - @office_passes.each do |entry_pass|
-      %tr
-        %td
-          = User.where({id: entry_pass.user_id}).first.try(:name)
-        %td
-          = entry_pass.date
-  
+- (Date.today..Date.today + 7).each do |date|
+  %h4
+    - if date == Date.today
+      = "Today #{date}"
+    - elsif date == Date.today + 1
+      = "Tomorrow #{date}"
+    - else
+      = date if @office_passes.select{|pass| pass.date == date}.count > 0
+  %table.table.table-bordered
+    %tbody
+      - @office_passes.each_with_index do |entry_pass, index|
+        - if index.modulo(6) == 0
+          %tr
+        - if entry_pass.date == date
+          %td
+            = User.where({id: entry_pass.user_id}).first.try(:name)
+    

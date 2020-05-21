@@ -12,7 +12,7 @@ class EntryPassesController < ApplicationController
     else
       flash[:error] = @entry_pass.errors.full_messages.join(" ")
     end
-    redirect_to '/office_pass'
+    redirect_to entry_passes_path
   end
 
   def office_pass
