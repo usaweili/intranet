@@ -194,7 +194,7 @@ class Project
 
   def project_code
     return true if code.nil?
-    project = Project.where(code: self.code).first
+    project = Project.where(code: self.code, :id.ne => self.id).first
     if project.present?
       self.errors.add(:base, "Code already exists") unless
         project.company_id == self.company_id
