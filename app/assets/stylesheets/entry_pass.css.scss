@@ -22,4 +22,17 @@
 
 tr td {
   border: 1px solid #dddddd;
+  max-width: 150px;
+}
+
+.delete-entry {
+  color: #ff0000a1;
+  font-weight: bolder;
+  font-size: large;
+  text-decoration: none;
+}
+.delete-entry:hover{
+  color: red;
+  background-color:white;
+  text-decoration: none;
 }
