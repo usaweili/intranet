@@ -12,9 +12,10 @@
   %table.table.table-bordered
     %tbody
       - @office_passes.each_with_index do |entry_pass, index|
-        - if index.modulo(6) == 0
+        - if index.modulo(7) == 0
           %tr
         - if entry_pass.date == date
-          %td
+          %td{ :class => ("text-success" if (User.where({id: entry_pass.user_id}).first.try(:name) == current_user.name)) }
             = User.where({id: entry_pass.user_id}).first.try(:name)
-    
+          
+      
