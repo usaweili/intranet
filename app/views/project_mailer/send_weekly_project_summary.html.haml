@@ -102,8 +102,10 @@
                                                               - if ["loc", "ratings"].include? metric
                                                                 - diff = data.last[metric].merge(data[data.length-2][metric]) { |k, v1, v2| v1 - v2 } if data.length > 1
                                                                 - data.last[metric].each_with_index do |(k, v), i|
-                                                                  - color = diff[k] > 0? 'green' : 'red'
-                                                                  - color = 'black' if diff[k].zero?
+                                                                  - color = 'black'
+                                                                  - if data.length > 1
+                                                                    - color = diff[k] > 0? 'green' : 'red'
+                                                                    - color = 'black' if diff[k].zero?
                                                                   - if i == 0
                                                                     %td{style: "padding: 4px 20px;"}
                                                                       %b #{metric.titleize} - #{k.titleize}
