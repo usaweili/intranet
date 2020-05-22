@@ -20,6 +20,7 @@ class Ability
       can :manage, TimeSheet
       can :manage, LeaveApplication
       can :resource_list, User
+      can :manage, EntryPass
 
       # TODO remove later after snowflake changes
       can :manage, Designation
@@ -42,6 +43,7 @@ class Ability
     can :manage, HolidayList
     can :manage, Designation
     can :resource_list, User
+    can :manage, EntryPass
   end
 
   def intern_abilities(user_id)
@@ -69,6 +71,7 @@ class Ability
     can :edit, User
     can [:public_profile, :private_profile], User
     can :manage, :admin
+    can :manage, EntryPass
   end
 
   def hr_abilities

@@ -17,5 +17,7 @@
         - if entry_pass.date == date
           %td{ :class => ("text-success" if (User.where({id: entry_pass.user_id}).first.try(:name) == current_user.name)) }
             = User.where({id: entry_pass.user_id}).first.try(:name)
+            - if can? :manage, EntryPass
+              = link_to "X", entry_pass_path(:id => entry_pass.id), :method => :delete, :class => "pull-right delete-entry"
           
       
