@@ -17,7 +17,17 @@ class EntryPassesController < ApplicationController
 
   def office_pass
     @entry_pass = EntryPass.new
-    @current_user_passes = EntryPass.where({user_id: current_user.id}).sort_by{|entry_pass| entry_pass.date}
+    @current_user_passes = EntryPass.where({user_id: current_user.id, date:{"$gte": Date.today}}).sort_by{|entry_pass| entry_pass.date}
+  end
+
+  def report
+    @report_date = report_params[:download_date]
+    @entry_passes = EntryPass.where(date: @report_date)
+    respond_to do |format|
+      format.csv do
+        send_data @entry_passes.to_csv, filename: "Office_entries_#{@report_date}.csv"
+      end
+    end
   end
 
   def destroy
@@ -36,6 +46,10 @@ class EntryPassesController < ApplicationController
 
   def entry_pass_params
     params.require(:entry_pass).permit(:date, :user_id)
+  end
+
+  def report_params
+    params.permit(:download_date)
   end
 
 end

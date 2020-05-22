@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   resources :designations
   resources :entry_passes
   get 'office_pass', to: 'entry_passes#office_pass'
+  post 'entry_passes/report', to: 'entry_passes#report', defaults: { format: :csv }
   get 'holiday_list', to: 'holiday_lists#holiday_list'
   get '/unsubscribe' => 'light/users#unsubscribe', as: 'users/unsubscribe'
   #get '/unsubscribe/:id' => 'light/users#unsubscribe', as: 'users/unsubscribe'
