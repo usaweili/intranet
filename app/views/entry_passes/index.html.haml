@@ -1,5 +1,9 @@
 = content_tag :a, "", :href => "#office_entry_modal", :class => 'icon-plus pull-right', :data => {:toggle => 'modal'}, "data-toggle" => "tooltip", title: "Create Entry Pass"
 = render 'modal'
+
+- if ["HR", "Admin"].include?(current_user.role)
+  = render 'download_report'
+
 %h2 List of people allowed to work from office
 - (Date.today..Date.today + 7).each do |date|
   %h4
