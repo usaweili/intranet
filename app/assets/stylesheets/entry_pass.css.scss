@@ -20,9 +20,15 @@
   color: #005580;
 }
 
-tr td {
-  border: 1px solid #dddddd;
-  max-width: 150px;
+.entry_pass_table{
+  tr td {
+    border: 1px solid #dddddd;
+    width: 20%;
+    max-width: 20%;
+  }
+  .no-bordered {
+    border: none;
+  }
 }
 
 .delete-entry {
@@ -35,4 +41,40 @@ tr td {
   color: red;
   background-color:white;
   text-decoration: none;
+}
+
+.entry_pass_form {
+  .span12 {
+    margin-left: 0px !important;
+  }
+  .span2{
+    margin-left: 0px;
+  }
+  .span1{
+    width: 12%;
+    .available_text {
+      padding-top: 5px;
+      font-size: 14px;
+      font-style: italic;
+    }
+  }
+  .control-label {
+    width: 95px;
+  }
+  .controls {
+    text-align: initial;
+    padding-left: 10px;
+    margin-left: 120px;
+    .error {
+      width: max-content;
+    }
+  }
+  .remove_nested_fields {
+    float: right;
+  }
+  #dates{
+    .span1{
+      margin-left: 13%;
+    }
+  }
 }

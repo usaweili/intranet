@@ -1,31 +1,45 @@
 = content_tag :a, "", :href => "#office_entry_modal", :class => 'icon-plus pull-right', :data => {:toggle => 'modal'}, "data-toggle" => "tooltip", title: "Create Entry Pass"
 = render 'modal'
+=# link_to "", office_pass_path, :class => 'icon-th-list pull-right', :data => {:toggle => 'modal'}, "data-toggle" => "tooltip", title: "Your Entry Passes"
 
 - if ["HR", "Admin"].include?(current_user.role)
-  = render 'download_report'
+  =# render 'download_report'
 
-%h2 List of people allowed to work from office
-- (Date.today..Date.today + 7).each do |date|
-  %h4
-    - if date == Date.today
-      = "Today #{date}"
-    - elsif date == Date.today + 1
-      = "Tomorrow #{date}"
-    - else
-      = date if @office_passes.select{|pass| pass.date == date}.count > 0
-  - names_with_id = []
-  %table.table.table-bordered
-    %tbody
-      - @office_passes.each do |entry_pass|
-        - if entry_pass.date == date
-          - names_with_id << [User.where({id: entry_pass.user_id}).first.try(:name), entry_pass.id]
-      
-      - names_with_id.sort.each_with_index do |name_and_id, index|
-        - if index.modulo(7) == 0
+%h3 List of Employees registered for Office Entry
+.form-horizontal
+  - (Date.today..Date.today + 7).each do |date|
+    %h4
+      - if date == Date.today
+        - if any_employee_registered?(date)
+          = "Today #{date} - #{registered_employee_count_for(date)}"
+          - if can? :report, EntryPass
+            = link_to "", report_entry_passes_path(date: date), class: 'dropdown-toggle icon-download-alt'
+      - elsif date == Date.today + 1
+        - if any_employee_registered?(date)
+          = "Tomorrow #{date} - #{registered_employee_count_for(date)}"
+          - if can? :report, EntryPass
+            = link_to "", report_entry_passes_path(date: date), class: 'dropdown-toggle icon-download-alt'
+      - else
+        - if any_employee_registered?(date)
+          = "#{date} - #{registered_employee_count_for(date)}"
+          - if can? :report, EntryPass
+            = link_to "", report_entry_passes_path(date: date), class: 'dropdown-toggle icon-download-alt'
+    - names_with_id = []
+
+    %table.table.table-bordered.entry_pass_table
+      %tbody
+        - @office_passes.values.flatten.each do |entry_pass|
+          - if entry_pass.date == date
+            - names_with_id << [User.where({id: entry_pass.user_id}).first.try(:name), entry_pass.id]
+
+        - sorted_list(names_with_id).in_groups_of(5, true) do |name_and_ids|
           %tr
-        %td{ :class => ("text-success" if name_and_id[0] == current_user.name) }
-          = name_and_id[0]
-          - if can? :manage, EntryPass
-            = link_to "X", entry_pass_path(:id => name_and_id[1]), :method => :delete, :class => "pull-right delete-entry"
+            - name_and_ids.each do |name_and_id|
+              - if name_and_id.is_a?(Boolean)
+                %td.no-bordered
+              - else
+                %td{ :class => ("text-success" if name_and_id[0] == current_user.name) }
+                  = name_and_id[0]
+                  - if can? :manage, EntryPass.where(id: name_and_id[1]).first
+                    = link_to "X", entry_pass_path(:id => name_and_id[1]), data: {method: :delete, confirm: "Are you sure, you want to delete?"}, :class => "pull-right delete-entry"
 
-      

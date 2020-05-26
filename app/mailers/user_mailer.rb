@@ -101,6 +101,17 @@ class UserMailer < ActionMailer::Base
     )
   end
 
+  def delete_office_pass(date, user_id, deleted_by)
+    @date = date
+    @user = User.find(user_id)
+    @deleted_by = User.find(deleted_by)
+    mail(
+      subject: 'Your office entry pass is deleted',
+      to: @user.email,
+      cc: User.get_hr_emails
+    )
+  end
+
   def notify_probation(users, date)
     @users    = users
     @date     = date

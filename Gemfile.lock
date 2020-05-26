@@ -961,6 +961,9 @@ GEM
     mongoid-paperclip (0.0.11)
       mongoid
       paperclip (>= 2.3.6, != 4.3.0)
+    mongoid-paranoia (2.0.0)
+      activesupport (~> 4.0)
+      mongoid (>= 4.0.0, <= 6.0.0)
     mongoid-rspec (2.2.0)
       mongoid (~> 4.0.0)
       rake
@@ -1280,6 +1283,7 @@ DEPENDENCIES
   mongoid
   mongoid-grid_fs!
   mongoid-history!
+  mongoid-paranoia
   mongoid-rspec
   mongoid_rateable!
   mongoid_slug

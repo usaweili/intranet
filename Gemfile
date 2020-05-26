@@ -6,6 +6,8 @@ gem 'rails', '4.2.5.2'
 gem 'devise'
 gem 'mongoid'
 gem 'mongoid_slug'
+gem 'mongoid-paranoia'
+
 gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
 gem 'rmagick'
 gem 'mongoid-grid_fs', github: 'ahoward/mongoid-grid_fs'

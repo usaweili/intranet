@@ -1,31 +1,35 @@
 class EntryPassesController < ApplicationController
   def index
-    @office_passes = EntryPass.all.sort_by{|entry_pass| entry_pass.date}
-    @entry_pass = EntryPass.new
+    @office_passes = EntryPass.where(date: Date.today..Date.today+7).group_by{|entry_pass| entry_pass.date}
+    @entry_passes = if current_user.entry_passes.where(:date.gte => Date.today).count > 0
+      current_user.entry_passes.where(:date.gte => Date.today)
+    else
+      current_user.entry_passes.build
+    end
+    @user = current_user
+  end
+
+  def new
+    @user = current_user
   end
 
   def create
-    @entry_pass = EntryPass.new(entry_pass_params)
-    if @entry_pass.valid?
-      @entry_pass.save
+    current_user.attributes = {'entry_passes_attributes' => entry_pass_params}
+    if current_user.valid? && current_user.save!
       flash[:success] = "Entry Pass Created Succesfully"
     else
-      flash[:error] = @entry_pass.errors.full_messages.join(" ")
+      @office_passes = EntryPass.where(date: Date.today..Date.today+7).group_by{|entry_pass| entry_pass.date}
+      flash[:error] = "Error while creating entry passes, please try again."
+      @error = true
     end
-    redirect_to entry_passes_path
-  end
-
-  def office_pass
-    @entry_pass = EntryPass.new
-    @current_user_passes = EntryPass.where({user_id: current_user.id, date:{"$gte": Date.today}}).sort_by{|entry_pass| entry_pass.date}
   end
 
   def report
-    @report_date = report_params[:download_date]
+    @report_date = report_params[:date]
     @entry_passes = EntryPass.where(date: @report_date)
     respond_to do |format|
       format.csv do
-        send_data @entry_passes.to_csv, filename: "Office_entries_#{@report_date}.csv"
+        send_data EntryPass.to_csv(@entry_passes), filename: "Office_entries_#{@report_date}.csv"
       end
     end
   end
@@ -33,23 +37,24 @@ class EntryPassesController < ApplicationController
   def destroy
     @entry_pass = EntryPass.where({id: params[:id]}).first
     user_id = @entry_pass.user_id
+    date = @entry_pass.date
     @entry_pass.destroy
     flash[:success] = "Entry Pass deleted succesfully"
-    if user_id == current_user.id
-      redirect_to '/office_pass'
-    else
-      redirect_to entry_passes_path
+    if user_id != current_user.id
+      deleted_by = current_user.id
+      UserMailer.delay.delete_office_pass(date, user_id, deleted_by)
     end
+    redirect_to entry_passes_path
   end
 
   private
 
   def entry_pass_params
-    params.require(:entry_pass).permit(:date, :user_id)
+    params[:user].require(:entry_passes_attributes).permit!
   end
 
   def report_params
-    params.permit(:download_date)
+    params.permit(:date)
   end
 
 end
