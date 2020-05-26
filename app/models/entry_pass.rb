@@ -1,5 +1,7 @@
 class EntryPass
   include Mongoid::Document
+  include Mongoid::Paranoia
+
   field :date, type: Date
   belongs_to :user
 
