@@ -49,6 +49,8 @@ class User
   before_create :associate_employee_id
   after_update :associate_employee_id_if_role_changed
 
+  has_many :entry_passes
+  accepts_nested_attributes_for :entry_passes, reject_if: :all_blank, :allow_destroy => true
 
   accepts_nested_attributes_for :attachments, reject_if: :all_blank, :allow_destroy => true
   accepts_nested_attributes_for :time_sheets, :allow_destroy => true
