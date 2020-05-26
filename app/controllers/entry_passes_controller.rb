@@ -1,6 +1,6 @@
 class EntryPassesController < ApplicationController
   def index
-    @office_passes = EntryPass.all.sort_by{|entry_pass| entry_pass.date}
+    @office_passes = EntryPass.where(date: Date.today..Date.today+7).sort_by{|entry_pass| entry_pass.date}
     @entry_pass = EntryPass.new
   end
 
