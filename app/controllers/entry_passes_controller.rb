@@ -1,6 +1,6 @@
 class EntryPassesController < ApplicationController
   def index
-    @office_passes = EntryPass.where(date: Date.today..Date.today+7).sort_by{|entry_pass| entry_pass.date}
+    @office_passes = EntryPass.where(date: Date.today..Date.today+7).group_by{|entry_pass| entry_pass.date}
     @entry_passes = current_user.entry_passes.where(:date.gte => Date.today) || current_user.entry_passes.build
     @user = current_user
   end
@@ -14,6 +14,7 @@ class EntryPassesController < ApplicationController
     if current_user.valid? && current_user.save!
       flash[:success] = "Entry Pass Created Succesfully"
     else
+      @office_passes = EntryPass.where(date: Date.today..Date.today+7).group_by{|entry_pass| entry_pass.date}
       flash[:error] = "Error while creating entry passes, please try again."
       @error = true
     end

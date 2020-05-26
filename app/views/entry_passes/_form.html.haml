@@ -7,8 +7,13 @@
           = f.input :date, label: 'Select Date', input_html: {class: 'office-pass-datepicker', autocomplete: "off",required: true}
           = f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id }
         .span1.width2
+          %span.available_text= "(  Available)"
           = f.link_to_remove "X", class: "btn btn-danger"
   .offset0
     = entry_pass.link_to_add "Request for Another Date", :entry_passes, data: {target: '#dates'}, class: "btn btn-success", id: "add-pass-button"
     = entry_pass.button :submit, "Create Office Pass", :class => "btn-success"
 
+:javascript
+  total_availablity = #{DAILY_OFFICE_ENTRY_LIMIT}
+  entry_pass_stats = #{entry_pass_availablity_stats}
+  show_stats_on_render()
