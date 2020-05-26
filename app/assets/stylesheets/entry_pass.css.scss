@@ -36,3 +36,27 @@ tr td {
   background-color:white;
   text-decoration: none;
 }
+
+.entry_pass_form {
+  .span2{
+    margin-left: 0px;
+  }
+  .control-label {
+    width: 120px;
+  }
+  .controls {
+    text-align: initial;
+    padding-left: 10px;
+    .error {
+      width: max-content;
+    }
+  }
+  .remove_nested_fields {
+    float: right;
+  }
+  #dates{
+    .span1{
+      margin-left: 13%;
+    }
+  }
+}

@@ -1,0 +1,5 @@
+- if @error == true
+  $(".modal-body").html('#{escape_javascript render("form")}');
+  initialise_pass_datepicker()
+- else
+  window.location = "/entry_passes"

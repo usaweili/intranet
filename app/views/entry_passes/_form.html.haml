@@ -1,17 +1,14 @@
-= simple_form_for @entry_pass do |f|
-  = f.input :date, input_html: {class: 'office-pass-datepicker', autocomplete: "off"}
-  = f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id }
-  = f.button :submit, "Create Office Pass", :class => "btn-success"
-  
 
-:javascript
-  $(document).ready(function(){
-    $('.office-pass-datepicker').datepicker({
-      startDate: '0',
-      endDate: '+7d',
-      format: 'dd/mm/yyyy',
-      autoclose: true
-    });
-    $('.office-pass-datepicker').css("height", "30px")
-    $('.office-pass-datepicker').css("text", "30px")
-  })
+= simple_nested_form_for current_user, url: entry_passes_path, method: :post, html: {class: "form-horizontal entry_pass_form", id: 'entry_pass_form', remote: true} do |entry_pass|
+  #dates
+    = entry_pass.fields_for :entry_passes, @entry_passes do |f|
+      .row.span12
+        .span2.width12
+          = f.input :date, label: 'Select Date', input_html: {class: 'office-pass-datepicker', autocomplete: "off",required: true}
+          = f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id }
+        .span1.width2
+          = f.link_to_remove "X", class: "btn btn-danger"
+  .offset0
+    = entry_pass.link_to_add "Request for Another Date", :entry_passes, data: {target: '#dates'}, class: "btn btn-success", id: "add-pass-button"
+    = entry_pass.button :submit, "Create Office Pass", :class => "btn-success"
+
