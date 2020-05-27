@@ -1,7 +1,11 @@
 class EntryPassesController < ApplicationController
   def index
     @office_passes = EntryPass.where(date: Date.today..Date.today+7).group_by{|entry_pass| entry_pass.date}
-    @entry_passes = current_user.entry_passes.where(:date.gte => Date.today) || current_user.entry_passes.build
+    @entry_passes = if current_user.entry_passes.where(:date.gte => Date.today).count > 0
+      current_user.entry_passes.where(:date.gte => Date.today)
+    else
+      current_user.entry_passes.build
+    end
     @user = current_user
   end
 
