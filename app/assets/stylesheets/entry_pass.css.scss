@@ -23,7 +23,11 @@
 .entry_pass_table{
   tr td {
     border: 1px solid #dddddd;
-    width: 15%;
+    width: 20%;
+    max-width: 20%;
+  }
+  .no-bordered {
+    border: none;
   }
 }
 
