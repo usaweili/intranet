@@ -60,7 +60,7 @@ class Project
   has_many :user_projects, dependent: :destroy
   has_many :repositories, dependent: :destroy
   accepts_nested_attributes_for :repositories, allow_destroy: true
-  accepts_nested_attributes_for :user_projects
+  accepts_nested_attributes_for :user_projects, reject_if: :user_project_record_is_blank?
   belongs_to :company
   has_and_belongs_to_many :managers, class_name: 'User', foreign_key: 'manager_ids', inverse_of: :managed_projects
   validates_presence_of :name
@@ -322,5 +322,9 @@ class Project
 
   def technology_details_record_is_blank?(attributes)
     attributes[:name].blank?  and attributes[:version].blank?
+  end
+
+  def user_project_record_is_blank?(attributes)
+    attributes[:user_id].blank? and attributes[:start_date].blank?
   end
 end

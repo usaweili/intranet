@@ -98,12 +98,3 @@
     checkBoxes.height(referenceCheckBox.height())
     checkBoxes.css('margin-left','4px')
   }
-
-  // link_to_remove just hides the row instead of removing it from the form
-  $(document).on('nested:fieldRemoved', function(event) {
-    $("div").each(function(index, value) {
-      if($(value).css("display") == 'none' && $(value).hasClass('fields')){
-        value.parentNode.removeChild(value);
-      }
-    });
-  });
