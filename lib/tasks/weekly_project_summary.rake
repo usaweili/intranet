@@ -13,6 +13,8 @@ task :weekly_project_summary => :environment do
         end
       end
       unless repo_data.keys.empty?
+        # TODO: Remove following line after testing.
+        manager_emails = ["anuja@joshsoftware.com", "swapnil@joshsoftware.com", "kaiwalya.pataskar@joshsoftware.com"]
         ProjectMailer.delay.send_weekly_project_summary(project.name, manager_emails, repo_data)
       end
     end
