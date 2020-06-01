@@ -4,7 +4,7 @@
     %h4{style:"float:right;"} Total Issues : #{@response_body['meta']['total_count']}
 
 %div{class:"form-horizontal"}
-  %table.table.table-hover#sortable
+  %table.table.table-hover#issues_table
     %thead
       %tr
         %th #
@@ -14,20 +14,22 @@
         %th File
         %th Line Number
     %tbody
-      - if @response_body && @response_body['data']
-        - @response_body['data'].each_with_index do |issue, index|
-          %tr
-            %td= index+1
-            %td= issue['attributes']['description']
-            - severity = {'critical': 'red', 'major': 'orange', 'minor': 'gold'}
-            - color = severity[issue['attributes']['severity'].to_sym]
-            %td{style:"color:#{color}; font-weight:bold"}
-              = issue['attributes']['severity'].titleize
-            %td{style:"font-weight:bold"}= issue['attributes']['categories'].join(', ')
-            %td= issue['attributes']['constant_name']
-            %td
-              - if issue['attributes']['location'] && issue['attributes']['location']['start_line']
-                = issue['attributes']['location']['start_line']
+      %script#issues_template{:type => "text/html"}
+        %tr
+          {{#record}}
+          %td
+            {{index}}
+          %td
+            {{attributes.description}}
+          %td{style:"color:{{color}}; font-weight:bold"}
+            {{attributes.severity}}
+          %td
+            {{attributes.categories}}
+          %td
+            {{attributes.constant_name}}
+          %td
+            {{attributes.location.start_line}}
+          {{/record}}
 
-:javascript
-  $('#sortable').dataTable({ "aaSorting": [] });
+:coffeescript
+  @data = #{@response_body["data"].to_json}

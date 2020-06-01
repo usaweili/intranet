@@ -75,6 +75,7 @@ Rails.application.routes.draw do
   resource :repositories do
     get 'overview_index', as: :overview_index, on: :collection
     get 'repository_issues', as: :repository_issues, on: :collection
+    get 'get_repo_issues', as: :get_repo_issues, on: :collection
   end
 
   resources :companies do
