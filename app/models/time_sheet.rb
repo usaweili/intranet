@@ -21,7 +21,7 @@ class TimeSheet
   validates :date, presence: true, if: :is_future_date?
   validates :from_time, presence: true, if: :from_time_is_future_time?
   validates :to_time, presence: true, if: :to_time_is_future_time?
-  before_validation :valid_date_for_create?, on: :create, unless: :is_management?
+  before_validation :valid_date_for_create?, unless: :is_management?
   validate :time_sheet_overlapping?
   # validate :timesheet_date_greater_than_project_start_date, if: :is_project_assigned_to_user?
 
@@ -107,7 +107,8 @@ class TimeSheet
   end
 
   def valid_date_for_update?
-    date > Date.today - DAYS_FOR_UPDATE
+    # date > Date.today - DAYS_FOR_UPDATE
+    date >= "01/05/2020".to_date
   end
 
   def is_management?
@@ -120,7 +121,8 @@ class TimeSheet
       errors.add(:date, 'Invalid time')
       return false
     end
-    if date < Date.today - DAYS_FOR_CREATE
+    # if date < Date.today - DAYS_FOR_CREATE
+    if date < "01/05/2020".to_date
       text = "Not allowed to fill timesheet for this date. If you want to fill the timesheet, meet your manager."
       errors.add(:date, text)
       return false
@@ -835,11 +837,12 @@ class TimeSheet
     if unfilled_timesheet.present?
       slack_handle = user.public_profile.slack_handle
       message1 = "You haven't filled the timesheet from"
+      unfilled_timesheet_date = [unfilled_timesheet.to_date, "2020-05-01".to_date].max
       message2 = "Go ahead and fill it now. You can fill timesheet for past 7 days. If it exceeds 7 days then contact your manager."
-      text_for_slack = "*#{message1} #{unfilled_timesheet.to_date}. #{message2}*"
-      text_for_email = "#{message1} #{unfilled_timesheet.to_date}. #{message2}"
+      text_for_slack = "*#{message1} #{unfilled_timesheet_date}. #{message2}*"
+      text_for_email = "#{message1} #{unfilled_timesheet_date}. #{message2}"
       TimesheetRemainderMailer.send_timesheet_reminder_mail(user, slack_handle, text_for_email).deliver!
-      send_reminder(slack_handle, text_for_slack) unless slack_handle.blank?
+      send_reminder(slack_handle, text_for_slack) unless slack_handle.blank? rescue "Error in sending reminder to slack"
       return true
     end
     return false
@@ -876,6 +879,7 @@ class TimeSheet
       value['from_time']  = value['date'] + ' ' + value['from_time']
       value['to_time']    = value['date'] + ' ' + value['to_time']
       time_sheet = TimeSheet.new
+      value.delete("_destroy")
       time_sheet.attributes = value
       unless time_sheet.time_validation(value['date'], value['from_time'], value['to_time'], 'from_ui')
         return_value << false

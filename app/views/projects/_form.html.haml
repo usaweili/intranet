@@ -14,8 +14,9 @@
       #{new_project ? 'Create' : 'Update'} Project
   %li{:class => ("active" if tech_detail_error)}
     = link_to 'Tech Details', '#project_info', data:{toggle: ('tab' unless new_project )}, class: :tech_details
-  %li{:class => ("active" if team_detail_error)}
-    = link_to 'Team Details', '#team_info', data:{toggle: ('tab' unless new_project)}, class: :team_details
+  - unless @project.is_activity
+    %li{:class => ("active" if team_detail_error)}
+      = link_to 'Team Details', '#team_info', data:{toggle: ('tab' unless new_project)}, class: :team_details
 
 
 .project_tab_content.tab-content
@@ -27,8 +28,9 @@
     = render 'projects/project_form'
   #project_info.tab-pane.fade{:class => ("in active" if tech_detail_error)}
     = render 'projects/project_info_form'
-  #team_info.tab-pane.fade{:class => ("in active" if team_detail_error)}
-    = render 'projects/team_info_form', users: users
+  - unless @project.is_activity
+    #team_info.tab-pane.fade{:class => ("in active" if team_detail_error)}
+      = render 'projects/team_info_form', users: users
 
 :javascript
   $('.tech_details').click(function(){

@@ -44,12 +44,7 @@ class ProjectsController < ApplicationController
   end
 
   def update
-    if update_obj(@project, safe_params, projects_path)
-      @project.add_manager_as_team_member(params[:project][:manager_ids] || [])
-    else
-      flash[:error] = "Error unable to add or remove team member"
-      render 'edit'
-    end
+    update_obj(@project, safe_params, edit_project_path)
   end
 
   def show
@@ -119,6 +114,10 @@ class ProjectsController < ApplicationController
   end
 
   def load_users
-    @users = User.project_engineers
+    designations = ['UI/UX Lead', 'UI/UX Designer', 'Senior UI/UX Designer',
+      'Software Engineer', 'Senior Software Engineer', 'Team Lead',
+      'QA Engineer', 'Senior QA Engineer', 'QA Lead', 'Intern']
+    designation_ids = Designation.where(:name.in => designations).pluck(:id)
+    @users = User.approved.where("employee_detail.designation_id" => {"$in" => designation_ids}).order([:email, :asc])
   end
 end
