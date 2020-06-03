@@ -198,6 +198,11 @@ class User
   end
 
   def get_managers_emails
+    manager_ids = projects.pluck(:manager_ids).flatten.uniq
+    User.in(id: manager_ids).collect(&:email)
+  end
+
+  def get_managers_emails_for_timesheet
     managers_emails = []
     projects.where(timesheet_mandatory: true).each do |project|
       project.managers.each do |manager|
@@ -209,7 +214,7 @@ class User
   end
 
   def get_managers_names
-    manager_ids = projects.where(timesheet_mandatory:true).pluck(:manager_ids).flatten.uniq
+    manager_ids = projects.pluck(:manager_ids).flatten.uniq
     User.in(id: manager_ids).collect(&:name)
   end
 
