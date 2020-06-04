@@ -8,4 +8,13 @@ class ProjectMailer < ActionMailer::Base
     attachments["Project Teams Data #{Time.now.strftime("%d%b%Y-%H:%M")}.csv"] = csv
     mail(subject: 'Project Team Data Report', to: user_email)
   end
+
+  def send_weekly_project_summary(project_name, manager_emails, repo_data)
+    @repo_data = repo_data
+    @project_name = project_name
+    mail(
+      subject: "#{project_name} : Weekly Project Summary",
+      to: manager_emails
+    )
+  end
 end

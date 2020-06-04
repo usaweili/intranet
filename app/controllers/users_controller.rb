@@ -121,6 +121,11 @@ class UsersController < ApplicationController
     @users = User.employees.approved
   end
 
+  def resource_list_download
+    @users = User.employees.approved
+    send_data @users.to_csv, filename: "ResourceList_#{Time.now.strftime("%d%b%y%k%M")}.csv"
+  end
+
   private
   def load_user
     @user = User.find(params[:id])

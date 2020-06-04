@@ -267,7 +267,30 @@ class User
     end
   end
 
-   def get_user_projects_from_user(project_id, from_date, to_date)
+  def self.to_csv(options={})
+    column_names = ['name', 'joining date', 'previous work experience(months)',
+        'experience as on today(months)', 'designation', 'is_Billable?',
+        'technical skills', 'other skills', 'projects']
+    CSV.generate(options) do |csv|
+      csv << column_names.collect(&:titleize)
+      all.map do |user|
+      tech_skills = user.public_profile.technical_skills.join(', ') if user.public_profile.technical_skills.present?
+      csv << [
+        user.public_profile.name,
+        user.private_profile.try(:date_of_joining),
+        user.private_profile.try(:previous_work_experience),
+        user.try(:experience_as_of_today),
+        user.employee_detail.designation.try(:name),
+        user.employee_detail.is_billable? ? 'Yes' : 'No',
+        tech_skills,
+        user.public_profile.skills,
+        user.projects.collect(&:name).join(', ')
+      ]
+      end
+    end
+  end
+
+  def get_user_projects_from_user(project_id, from_date, to_date)
     user_projects.where("$and"=>[
         {
           "$or" => [

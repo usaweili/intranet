@@ -1,7 +1,7 @@
 %h2
   Documents
 - if can? :manage, Attachment
-  = link_to "Add documet", "#document_modal_new", "data-toggle" => "modal",  data: {'no-turbolink' =>  true}
+  = link_to "Add Document", "#document_modal_new", "data-toggle" => "modal",  data: {'no-turbolink' =>  true}
 .form-horizontal
   - unless @company_docs.empty?
     %table.table.table-hover

@@ -66,7 +66,7 @@ class TimeSheetsController < ApplicationController
       unless return_value.include?(false)
         flash[:notice] = 'Timesheet Updated Succesfully'
         redirect_to users_time_sheets_path(@user.id, from_date: @from_date, to_date: @to_date)
-      else  
+      else
         render 'edit_timesheet'
       end
     else
@@ -80,7 +80,10 @@ class TimeSheetsController < ApplicationController
     @from_date = params['user']['from_date']
     @to_date = params['user']['to_date']
     @user = User.find_by(id: params['user']['user_id'])
-    return_values, @time_sheets = TimeSheet.create_time_sheet(@user.id, current_user, timesheet_params)
+
+    data_params = timesheet_params['time_sheets_attributes'].reject{|key, data| data["_destroy"] == "1"}
+    data_params = {"time_sheets_attributes"=>data_params}
+    return_values, @time_sheets = TimeSheet.create_time_sheet(@user.id, current_user, data_params)
     unless return_values.include?(false)
       flash[:notice] = 'Timesheet created succesfully'
       redirect_to users_time_sheets_path(user_id: @user.id, from_date: @from_date, to_date: @to_date)
@@ -97,7 +100,7 @@ class TimeSheetsController < ApplicationController
     if @time_sheet.save
       render json: { text: "*Timesheet saved successfully!*" }, status: :created
     else
-      error_message = 
+      error_message =
         if @time_sheet.errors[:date].present?
           error =  @time_sheet.errors[:date] if @time_sheet.errors[:date].present?
           TimeSheet.create_error_message_for_slack(error)
@@ -168,8 +171,8 @@ class TimeSheetsController < ApplicationController
   def load_user
     @user = User.where('public_profile.slack_handle' => params['user_id']).first unless params['user_id'].nil?
   end
-  
+
   def timesheet_params
-    params.require(:user).permit(:time_sheets_attributes => [:project_id, :date, :from_time, :to_time, :description, :id ])
+    params.require(:user).permit(:time_sheets_attributes => [:project_id, :date, :from_time, :to_time, :description, :id, :_destroy, :user_id, :from_date, :to_date ])
   end
 end

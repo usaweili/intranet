@@ -44,12 +44,7 @@ class ProjectsController < ApplicationController
   end
 
   def update
-    if update_obj(@project, safe_params, projects_path)
-      @project.add_manager_as_team_member(params[:project][:manager_ids] || [])
-    else
-      flash[:error] = "Error unable to add or remove team member"
-      render 'edit'
-    end
+    update_obj(@project, safe_params, edit_project_path)
   end
 
   def show
@@ -107,7 +102,8 @@ class ProjectsController < ApplicationController
     :other_frameworks,:other_details, :image, :url, :description, :case_study,:logo, :visible_on_website, :website_sequence_number,
     :code, :number_of_employees, :invoice_date, :company_id, :billing_frequency, :type_of_project, :is_activity,
     :manager_ids => [], technology_details_attributes: %i[id name version _destroy],
-    user_projects_attributes: [:start_date, :end_date, :time_sheet, :allocation, :active, :id, :user_id])
+    user_projects_attributes: [:start_date, :end_date, :time_sheet, :allocation, :active, :id, :_destroy, :user_id],
+    repositories_attributes: %i[id name host url code_climate_id maintainability_badge test_coverage_badge _destroy])
   end
 
   def load_project
@@ -115,6 +111,10 @@ class ProjectsController < ApplicationController
   end
 
   def load_users
-    @users = User.project_engineers
+    designations = ['UI/UX Lead', 'UI/UX Designer', 'Senior UI/UX Designer',
+      'Software Engineer', 'Senior Software Engineer', 'Team Lead',
+      'QA Engineer', 'Senior QA Engineer', 'QA Lead', 'Intern']
+    designation_ids = Designation.where(:name.in => designations).pluck(:id)
+    @users = User.approved.where("employee_detail.designation_id" => {"$in" => designation_ids}).order([:email, :asc])
   end
 end
