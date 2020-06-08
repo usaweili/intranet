@@ -9,6 +9,7 @@ class Repository
   field :code_climate_id
   field :maintainability_badge
   field :test_coverage_badge
+  field :visibility
   validates_presence_of :project
   # validates_presence_of :name, :url, :host
   # validates :host, inclusion: { in: HOSTS, allow_nil: false }

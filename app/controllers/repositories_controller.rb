@@ -1,21 +1,29 @@
 class RepositoriesController < ApplicationController
   before_action :authenticate_user!
+  @@snap_id = nil
 
   def overview_index
-    url = "http://api.codeclimate.com/v1/orgs/#{ENV['CODE_CLIMATE_ORGANIZATION_KEY']}/repos"
-    headers = { 'Accept' => 'application/vnd.api+json',
-                'Authorization' => "Token token=#{ENV['CODE_CLIMATE_TOKEN']}" }
+    @repositories = Repository.all
+  end
+
+  def repository_issues
+    url = "https://api.codeclimate.com/v1/repos/#{params[:repo_id]}"
+    headers = { 'Accept' => 'application/vnd.api+json', 'Authorization' => "Token token=#{ENV['CODE_CLIMATE_TOKEN']}" }
     begin
       response = HTTParty.get(url, headers: headers, timeout: 20)
     rescue Timeout::Error => e
       puts "Error: Request Timeout for #{repo.project.name}"
     end
-    @response_body = JSON.parse(response.body)
-  end
-
-  def repository_issues
-    @repo_name = params[:repo_name]
-    @response_body = params[:repo_id] && params[:snap_id] ? get_issues : {}
+    response = JSON.parse(response.body)['data']
+    if response
+      if response['attributes'] && response['attributes']['human_name']
+        @repo_name = response['attributes']['human_name']
+      end
+      if response['relationships'] && response['relationships']['latest_default_branch_snapshot']
+        @@snap_id = response['relationships']['latest_default_branch_snapshot']['data']['id']
+      end
+    end
+    @response_body = params[:repo_id] ? get_issues : {}
   end
 
   def get_repo_issues
@@ -33,7 +41,7 @@ class RepositoriesController < ApplicationController
   # Recursive get_issues to fetch the paginated data from CodeClimate, where page[size] limit is 100.
   def get_issues(page = 1, limit = 100)
     query_string = "page[size]=#{limit}&page[number]=#{page}"
-    url = "https://api.codeclimate.com/v1/repos/#{params[:repo_id]}/snapshots/#{params[:snap_id]}/issues?#{query_string}"
+    url = "https://api.codeclimate.com/v1/repos/#{params[:repo_id]}/snapshots/#{@@snap_id}/issues?#{query_string}"
     headers = { 'Accept' => 'application/vnd.api+json', 'Authorization' => "Token token=#{ENV['CODE_CLIMATE_TOKEN']}" }
     begin
       response = HTTParty.get(url, headers: headers, timeout: 20)

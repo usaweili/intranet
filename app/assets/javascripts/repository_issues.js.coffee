@@ -23,6 +23,7 @@ $(document).ready ->
     fetch_data_limit: 100
     params: { page: page }
     callbacks: callback
+    fields: ['attributes.description', 'attributes.severity', 'attributes.categories[0]']
 
   if($('#issues_table').length)
     $('#issues_table').stream_table options, data if typeof data isnt "undefined"

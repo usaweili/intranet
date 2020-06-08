@@ -19,9 +19,16 @@
             = t.input :maintainability_badge, placeholder: "Code Climate -> Repo Settings"
           .span4
             = t.input :test_coverage_badge, placeholder: "Code Climate -> Repo Settings"
-          .span2{style: "float: right;"}
+        .row
+          .span2
+            = t.label "visibility"
+          .span3
+            .make-switch{"data-on" => "warning", "data-off" => "info", "data-on-label" => "Hidden", "data-off-label" => "All"}
+              = t.check_box :visibility, {class: "active-check-box"}, "false", "true"
+
+          .span4{style: "float: right;"}
             = t.link_to_remove 'Remove', class: 'btn btn-danger'
         %hr
-    .offset4
+    .offset2
       = f.link_to_add 'Add Record', :repositories, data: {target: "#repository_fields"}, class: 'btn btn-success'
       = f.submit :Save, class: 'btn controls btn-info saveBtn'
