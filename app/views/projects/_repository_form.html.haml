@@ -19,7 +19,10 @@
             = t.input :maintainability_badge, placeholder: "Code Climate -> Repo Settings"
           .span4
             = t.input :test_coverage_badge, placeholder: "Code Climate -> Repo Settings"
-          .span2{style: "float: right;"}
+        .row
+          .span4
+            = t.input :rollbar_access_token
+          .span2.offset2
             = t.link_to_remove 'Remove', class: 'btn btn-danger'
         %hr
     .offset4
