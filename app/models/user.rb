@@ -163,7 +163,7 @@ class User
     error_msg.push(errors.full_messages,
                    public_profile.errors.full_messages,
                    private_profile.errors.full_messages,
-                  employee_detail.try(:errors).try(:full_messages))
+                   employee_detail.try(:errors).try(:full_messages))
     error_msg.join(' ')
   end
 
@@ -203,6 +203,11 @@ class User
   end
 
   def get_managers_emails
+    manager_ids = projects.pluck(:manager_ids).flatten.uniq
+    User.in(id: manager_ids).collect(&:email)
+  end
+
+  def get_managers_emails_for_timesheet
     managers_emails = []
     projects.where(timesheet_mandatory: true).each do |project|
       project.managers.each do |manager|
