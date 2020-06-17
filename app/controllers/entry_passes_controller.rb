@@ -17,6 +17,8 @@ class EntryPassesController < ApplicationController
     current_user.attributes = {'entry_passes_attributes' => entry_pass_params}
     if current_user.valid? && current_user.save!
       flash[:success] = "Entry Pass Created Succesfully"
+      entry_passes_ids = current_user.entry_passes.pluck(:id)
+      UserMailer.delay.new_entry_passes(entry_passes_ids)
     else
       @office_passes = EntryPass.where(date: Date.today..Date.today+7).group_by{|entry_pass| entry_pass.date}
       flash[:error] = "Error while creating entry passes, please try again."
