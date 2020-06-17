@@ -1,4 +1,7 @@
 class EntryPassesController < ApplicationController
+  before_action :authenticate_user!
+  load_and_authorize_resource
+
   def index
     @office_passes = EntryPass.where(date: Date.today..Date.today+7).group_by{|entry_pass| entry_pass.date}
     @entry_passes = if current_user.entry_passes.where(:date.gte => Date.today).count > 0
