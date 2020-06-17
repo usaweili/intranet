@@ -37,13 +37,14 @@ class EntryPassesController < ApplicationController
   def destroy
     @entry_pass = EntryPass.where({id: params[:id]}).first
     user_id = @entry_pass.user_id
+    date = @entry_pass.date
     @entry_pass.destroy
     flash[:success] = "Entry Pass deleted succesfully"
-    if user_id == current_user.id
-      redirect_to '/office_pass'
-    else
-      redirect_to entry_passes_path
+    if user_id != current_user.id
+      deleted_by = current_user.id
+      UserMailer.delay.delete_office_pass(date, user_id, deleted_by)
     end
+    redirect_to entry_passes_path
   end
 
   private
