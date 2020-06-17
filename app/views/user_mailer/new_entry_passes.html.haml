@@ -41,7 +41,7 @@
                                                   %td.kmTextContent{:style => "border-collapse:collapse;mso-table-lspace:0;mso-table-rspace:0;color:#505050;font-family:Helvetica, Arial;font-size:14px;line-height:150%;text-align:left;color:#FFFFFF;padding-bottom:9px;text-align:left;padding-right:18px;padding-left:18px;padding-top:20px;background-color:#1A1515;", :valign => "top"}
                                                     %p{:style => "margin:0;padding-bottom:2px;text-align: right;"}
                                                       %span{:style => "font-size:24px;"}
-                                                        %span{:style => "color: rgb(255, 240, 245);"} New Office Entry Passes
+                                                        %span{:style => "color: rgb(255, 240, 245);"} New Office Entry Pass(es)
                         %tr
                           %td{:align => "center", :style => "border-collapse:collapse;mso-table-lspace:0;mso-table-rspace:0", :valign => "top"}
                             %table.templateRow{:border => "0", :cellpadding => "0", :cellspacing => "0", :style => "border-collapse:collapse;mso-table-lspace:0;mso-table-rspace:0", :width => "100%"}
@@ -73,10 +73,9 @@
                                                       Hello,
                                                       %br/
                                                     %p
-                                                      #{@user.public_profile.name} has requested for #{@entry_passes.count} office pass(es) on below date(s)
+                                                      #{@user.public_profile.name} has requested for entries to the office on below #{@entry_passes.count} date(s)
                                                       %br/
-                                                      %b Date(s):
-                                                      %div{:style => "margin-left: 30px"}
+                                                      %div{:style => "margin-left: 20px"}
                                                         -@entry_passes.each do |entry_pass|
                                                           #{entry_pass.date}
                                                           %br/

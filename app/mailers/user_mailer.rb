@@ -104,11 +104,9 @@ class UserMailer < ActionMailer::Base
   def new_entry_passes(entry_passes_ids)
     @entry_passes = EntryPass.where(:id.in => entry_passes_ids).sort_by(&:date)
     @user = @entry_passes.first.user
-    hr_emails = User.get_hr_emails
-    receivers = ["shailesh.kalekar@joshsoftware.com", "sameert@joshsoftware.com"] + hr_emails
     mail(
       subject: "Office Entry Pass created by #{@user.name}",
-      to: receivers
+      to: OFFICE_ENTRY_PASS_MAIL_RECEPIENT
     )
   end
 
