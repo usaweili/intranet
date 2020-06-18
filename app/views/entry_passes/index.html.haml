@@ -30,7 +30,7 @@
       %tbody
         - @office_passes.values.flatten.each do |entry_pass|
           - if entry_pass.date == date
-            - names_with_id << [User.where({id: entry_pass.user_id}).first.try(:name), entry_pass.id]
+            - names_with_id << [get_pass_user_name(entry_pass.user_id), entry_pass.id]
 
         - sorted_list(names_with_id).in_groups_of(5, true) do |name_and_ids|
           %tr

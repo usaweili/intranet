@@ -18,4 +18,8 @@ module EntryPassesHelper
     @office_passes.map{|i, data| passes_data.merge!("#{i.to_s}" => DAILY_OFFICE_ENTRY_LIMIT - data.count)}
     passes_data.to_json
   end
+
+  def get_pass_user_name(user_id)
+    User.where({id: user_id}).first.try(:name)
+  end
 end

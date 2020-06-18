@@ -9,7 +9,7 @@
 %center
   = f.submit (params[:action] == "new" ? 'Apply' : 'Save Changes'), class: 'btn'
 :javascript
-  set_number_of_days()
+
   DPGlobal = $.fn.datepicker.DPGlobal;
   date_format = 'dd-mm-yyyy';
 
@@ -39,7 +39,7 @@
         $('.end_date_error').remove()
       }
     });
-
+    set_number_of_days()
   });
 
 :css

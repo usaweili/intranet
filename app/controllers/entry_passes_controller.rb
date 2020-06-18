@@ -4,7 +4,7 @@ class EntryPassesController < ApplicationController
 
   def index
     @office_passes = EntryPass.where(date: Date.today..Date.today+7).group_by{|entry_pass| entry_pass.date}
-    @entry_passes = current_user.entry_passes.where(:date.gte => Date.today)
+    @entry_passes = current_user.entry_passes.where(:date.gte => Date.today).order_by([:date, :asc])
     @new_entry_pass = current_user.entry_passes.build
     @user = current_user
   end
@@ -43,7 +43,6 @@ class EntryPassesController < ApplicationController
     @entry_pass = EntryPass.where({id: params[:id]}).first
     user_id = @entry_pass.user_id
     date = @entry_pass.date
-    byebug
     @entry_pass.destroy
     flash[:success] = "Entry Pass deleted succesfully"
     if user_id != current_user.id

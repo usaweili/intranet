@@ -1,7 +1,4 @@
 $ ->
-  initialise_pass_datepicker()
-  $(document).on 'nested:fieldAdded', (event) ->
-    initialise_pass_datepicker()
 
   $('.entry_pass_form').on 'submit', (e) ->
     e.preventDefault()
@@ -11,12 +8,26 @@ $ ->
       e.stopPropagation()
       initialise_pass_datepicker()
 
+disabledDates = ->
+  blockedDates = []
+  $.each $('.registered_entry_pass input'), (i, ele) ->
+    blockedDates.push $(ele).val()
+    return
+
+  $.each entry_pass_stats, (date, availablity) ->
+    if availablity == 0
+      blockedDates.push date
+    return
+  blockedDates
+
+
 @initialise_pass_datepicker =->
   $('.office-pass-datepicker').datepicker
       startDate: '0'
       endDate: '+7d'
       format: 'dd/mm/yyyy'
       autoclose: true
+      datesDisabled: disabledDates()
 
   $('.office-pass-datepicker').css 'height', '30px'
   $('.office-pass-datepicker').css 'text', '30px'

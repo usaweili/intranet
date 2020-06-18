@@ -3,19 +3,19 @@
   #dates
     - if @entry_passes.present?
       %fieldset
-        %legend Already Requested Office Entries
-        = entry_pass.fields_for :entry_passes, @entry_passes do |f|
-          .row.span4
+        %legend Already Requested Office Entries On
+        .row.span4
+          = entry_pass.fields_for :entry_passes, @entry_passes do |f|
             .span2.width6
               .registered_entry_pass
                 = f.input :date, label: false, disabled: true, input_html: {class: 'office-pass-datepicker', autocomplete: "off",required: true}
-    
+
     %fieldset
-      %legend New Entries 
+      %legend Add New Entries
       = entry_pass.fields_for :entry_passes, @new_entry_pass do |f|
         .row.span4
           .span2.width6
-            = f.input :date, label: false, placeholder: 'Select Date', input_html: {class: 'office-pass-datepicker', autocomplete: "off",required: true}
+            = f.input :date, label: false, placeholder: 'Select Date', input_html: {class: 'office-pass-datepicker', autocomplete: "off",required: true, readonly: true}
             = f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id }
           .span2.width2
             %span.available_text= "(  Available)"
@@ -28,3 +28,9 @@
   total_availablity = #{DAILY_OFFICE_ENTRY_LIMIT}
   entry_pass_stats = #{entry_pass_availablity_stats}
   show_stats_on_render()
+  initialise_pass_datepicker()
+  $(document).on('nested:fieldAdded', function(event) {
+    return initialise_pass_datepicker();
+  });
+
+
