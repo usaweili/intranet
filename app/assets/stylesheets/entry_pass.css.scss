@@ -31,6 +31,10 @@
   }
 }
 
+.registered_entry_pass {
+  margin-left: 50%;
+}
+
 .delete-entry {
   color: #ff0000a1;
   font-weight: bolder;
@@ -44,6 +48,8 @@
 }
 
 .entry_pass_form {
+  margin-top: 0px !important;
+  border: none;
   .span12 {
     margin-left: 0px !important;
   }
@@ -64,7 +70,7 @@
   .controls {
     text-align: initial;
     padding-left: 10px;
-    margin-left: 120px;
+    margin-left: 20px;
     .error {
       width: max-content;
     }

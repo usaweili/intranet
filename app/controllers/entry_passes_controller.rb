@@ -4,11 +4,8 @@ class EntryPassesController < ApplicationController
 
   def index
     @office_passes = EntryPass.where(date: Date.today..Date.today+7).group_by{|entry_pass| entry_pass.date}
-    @entry_passes = if current_user.entry_passes.where(:date.gte => Date.today).count > 0
-      current_user.entry_passes.where(:date.gte => Date.today)
-    else
-      current_user.entry_passes.build
-    end
+    @entry_passes = current_user.entry_passes.where(:date.gte => Date.today)
+    @new_entry_pass = current_user.entry_passes.build
     @user = current_user
   end
 
@@ -46,6 +43,7 @@ class EntryPassesController < ApplicationController
     @entry_pass = EntryPass.where({id: params[:id]}).first
     user_id = @entry_pass.user_id
     date = @entry_pass.date
+    byebug
     @entry_pass.destroy
     flash[:success] = "Entry Pass deleted succesfully"
     if user_id != current_user.id
@@ -64,5 +62,4 @@ class EntryPassesController < ApplicationController
   def report_params
     params.permit(:date)
   end
-
 end
