@@ -20,9 +20,9 @@
 
 .leave_application_tab_content.tab-content
   #processed_leave.tab-pane.fade
-    = render 'leave_applications/leave_view', leave_data: @processed_leaves
+    = render 'leave_applications/leave_view', leave_data: @processed_leaves, pending: false
   #pending_leave.tab-pane.fade.in.active
-    = render 'leave_applications/leave_view', leave_data: @pending_leaves
+    = render 'leave_applications/leave_view', leave_data: @pending_leaves, pending: true
 :javascript
 
   var reject_reason = ''
