@@ -8,7 +8,10 @@
         %th Days
         %th Reason
         %th.date Applied On
-        %th Status
+        - if pending
+          %th Managers
+        - else
+          %th Status
         %th Type
         - if (leave_data.present? and !leave_data.first.pending?) or can? :manage, LeaveApplication
           %th Note
@@ -25,7 +28,10 @@
           %td= appr_leave.number_of_days
           %td= appr_leave.reason
           %td= appr_leave.created_at.try(:strftime, "%d-%m-%Y")
-          %td.status= appr_leave.leave_status
+          - if pending
+            %td= appr_leave.user.get_managers_names.join(", ")
+          - else
+            %td.status= appr_leave.leave_status
           %td= appr_leave.leave_type
           - if (!pending_leave) or can? :manage, LeaveApplication
             %td
