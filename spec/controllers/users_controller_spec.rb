@@ -30,8 +30,8 @@ describe UsersController do
         email: "someone@joshsoftware.com",
         role: "Employee",
         employee_detail_attributes: {location: "Plano"}}}
-      flash.notice.should eql("Invitation sent Succesfully")
-      User.count.should == 2
+      expect(flash.notice).to eq("Invitation sent Successfully")
+      expect(User.count).to eq(2)
       employee = User.where(email: "someone@joshsoftware.com").first
       expect(employee.employee_detail.employee_id.to_i).to eq(9001)
     end
@@ -41,15 +41,15 @@ describe UsersController do
         email: "someone@joshsoftware.com",
         role: "Employee",
         employee_detail_attributes: {location: "Pune"}}}
-      flash.notice.should eql("Invitation sent Succesfully")
-      User.count.should == 2
+      expect(flash.notice).to eq("Invitation sent Successfully")
+      expect(User.count).to eq(2)
       employee = User.where(email: "someone@joshsoftware.com").first
       expect(employee.employee_detail.employee_id.to_i).to eq(2) # Admin will get emp_id = 1
     end
 
     it 'invitee should have joshsoftware account' do
       post :invite_user, { user: FactoryGirl.attributes_for(:user) }
-      expect(flash.notice).to eq("Invitation sent Succesfully")
+      expect(flash.notice).to eq("Invitation sent Successfully")
       expect(User.count).to eq(2)
     end
   end
@@ -233,6 +233,16 @@ describe UsersController do
     end
     it 'should show all resources' do
       get :resource_list
+      expect(response).to have_http_status(:success)
+    end
+  end
+
+  context "#resource_list_download" do
+    it 'should send Resource List csv' do
+      user1 = FactoryGirl.create(:user, role: "Employee", status: 'approved')
+      user2 = FactoryGirl.create(:user, role: "Employee", status: 'approved')
+      sign_in user1
+      get :resource_list_download
       expect(response).to have_http_status(:success)
     end
   end

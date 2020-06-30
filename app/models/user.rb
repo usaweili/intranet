@@ -49,6 +49,8 @@ class User
   before_create :associate_employee_id
   after_update :associate_employee_id_if_role_changed
 
+  has_many :entry_passes
+  accepts_nested_attributes_for :entry_passes, reject_if: :all_blank, :allow_destroy => true
 
   accepts_nested_attributes_for :attachments, reject_if: :all_blank, :allow_destroy => true
   accepts_nested_attributes_for :time_sheets, :allow_destroy => true
@@ -161,7 +163,7 @@ class User
     error_msg.push(errors.full_messages,
                    public_profile.errors.full_messages,
                    private_profile.errors.full_messages,
-                  employee_detail.try(:errors).try(:full_messages))
+                   employee_detail.try(:errors).try(:full_messages))
     error_msg.join(' ')
   end
 
@@ -201,6 +203,11 @@ class User
   end
 
   def get_managers_emails
+    manager_ids = projects.pluck(:manager_ids).flatten.uniq
+    User.in(id: manager_ids).collect(&:email)
+  end
+
+  def get_managers_emails_for_timesheet
     managers_emails = []
     projects.where(timesheet_mandatory: true).each do |project|
       project.managers.each do |manager|
@@ -212,7 +219,7 @@ class User
   end
 
   def get_managers_names
-    manager_ids = projects.where(timesheet_mandatory:true).pluck(:manager_ids).flatten.uniq
+    manager_ids = projects.pluck(:manager_ids).flatten.uniq
     User.in(id: manager_ids).collect(&:name)
   end
 

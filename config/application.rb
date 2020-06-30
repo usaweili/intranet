@@ -27,11 +27,12 @@ module Intranet
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     config.autoload_paths += Dir["#{config.root}/lib", "#{config.root}/lib/**/"]
     config.autoload_paths += %W(#{config.root}/app/middlewares/*)
+
     config.middleware.insert_after(Warden::Manager, EventServiceProxy)
     config.before_configuration do
       env_file = File.join(Rails.root, 'config', 'environment.yml')
 
-      environment_yml = YAML.load(File.open(env_file)).detect do |key, value| 
+      environment_yml = YAML.load(File.open(env_file)).detect do |key, value|
         Rails.env == key.to_s
       end if File.exist?(env_file)
 

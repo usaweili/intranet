@@ -57,7 +57,7 @@ class UserMailer < ActionMailer::Base
     admin_emails = User.approved.where(role: 'Admin').all.map(&:email)
     @receiver_emails = [admin_emails, hr_emails].flatten.join(',')
     leaves.map do |leave|
-      leave.sanctioning_manager = User.find(leave.processed_by).name
+      leave.sanctioning_manager = User.where(id: leave.processed_by).first.try(:name)
     end
     @leaves = leaves
     mail(to: @receiver_emails, subject: "Employees on leave tomorrow.") if leaves.present?
@@ -98,6 +98,26 @@ class UserMailer < ActionMailer::Base
       subject: 'Action Required on Pending Leave Requests',
       to: managers,
       cc: hr_emails
+    )
+  end
+
+  def new_entry_passes(entry_passes_ids)
+    @entry_passes = EntryPass.where(:id.in => entry_passes_ids).sort_by(&:date)
+    @user = @entry_passes.first.user
+    mail(
+      subject: "Office Entry Pass created by #{@user.name}",
+      to: OFFICE_ENTRY_PASS_MAIL_RECEPIENT
+    )
+  end
+
+  def delete_office_pass(date, user_id, deleted_by)
+    @date = date
+    @user = User.find(user_id)
+    @deleted_by = User.find(deleted_by)
+    mail(
+      subject: 'Your office entry pass is deleted',
+      to: @user.email,
+      cc: User.get_hr_emails
     )
   end
 
