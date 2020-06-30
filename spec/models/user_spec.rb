@@ -20,13 +20,13 @@ describe User do
   it { should accept_nested_attributes_for(:private_profile) }
   it { should validate_presence_of(:role) }
   it { should validate_presence_of(:email) }
-  
+
   it "should have employer as default role when created" do
     user = FactoryGirl.build(:user)
     expect(user.role).to eq("Employee")
     expect(user.role?("Employee")).to eq(true)
   end
-  
+
   it "intern should not eligible for leave" do
     user = FactoryGirl.create(:user, role: 'Intern')
     expect(user.eligible_for_leave?).to eq(false)
@@ -34,13 +34,13 @@ describe User do
 
   it "nil date of joining employee should not eligible for leave" do
     user = FactoryGirl.build(:user)
-    expect(user.eligible_for_leave?).to eq(false) 
+    expect(user.eligible_for_leave?).to eq(false)
   end
-  
+
   it "valid employee should be eligible for leave" do
     user = FactoryGirl.create(:user)
-    expect(user.eligible_for_leave?).to eq(true) 
-  end 
+    expect(user.eligible_for_leave?).to eq(true)
+  end
 
   it 'should assign website sequence number auto incremented for new user' do
     user1 = FactoryGirl.create(:user)
@@ -82,7 +82,7 @@ describe User do
       expect(User.where(role: 'HR')).to eq([])
       expect{@user.sent_mail_for_approval(leave_application)}.not_to raise_error
     end
-    
+
     it "should send email if admin role is absent" do
       hr_user = FactoryGirl.create(:hr)
       leave_application = FactoryGirl.create(:leave_application,
@@ -205,7 +205,7 @@ describe User do
       end
     end
   end
-  
+
   context 'Get managers emails' do
     let!(:user) { FactoryGirl.create(:user) }
 
@@ -235,7 +235,8 @@ describe User do
       user_project_1 = FactoryGirl.create(:user_project,
         user: user,
         project: project_1,
-        start_date: Date.today - 2
+        start_date: Date.today - 2,
+        time_sheet: true
       )
       user_project_2 = FactoryGirl.create(:user_project,
         user: user,
