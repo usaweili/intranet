@@ -1,9 +1,9 @@
 .row
-  %h4{style:"float:left;"}
+  %h4.left
     = link_to 'Repositories', overview_index_repositories_path
     &nbsp; > &nbsp; #{@repo_name ? @repo_name.upcase : 'Unknown Repository'} &nbsp; Issues :
   - if @response_body && @response_body['meta']
-    %h4{style:"float:right;"} Total Issues : #{@response_body['meta']['total_count']}
+    %h4.right Total Issues : #{@response_body['meta']['total_count']}
 
 %div{class:"form-horizontal"}
   %table.table.table-hover#issues_table
@@ -23,7 +23,7 @@
             {{index}}
           %td
             {{attributes.description}}
-          %td{style:"color:{{color}}; font-weight:bold; text-transform:capitalize;"}
+          %td.severity{style:"color:{{color}}"}
             {{attributes.severity}}
           %td
             {{attributes.categories}}
