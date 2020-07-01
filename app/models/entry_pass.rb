@@ -3,10 +3,12 @@ class EntryPass
   include Mongoid::Paranoia
 
   field :date, type: Date
+  field :details, type: String
   belongs_to :user
 
   validates :date, presence: true, uniqueness: {scope: :user_id, message: "already selected"}
   validate :validate_daily_limit
+  validates :details, presence: true
 
   def self.to_csv(records)
     attributes = %w{Date Name EmployeeID Email}

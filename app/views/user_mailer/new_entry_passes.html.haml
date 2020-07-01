@@ -75,11 +75,18 @@
                                                     %p
                                                       #{@user.public_profile.name} has requested for entries to the office on below #{@entry_passes.count} date(s)
                                                       %br/
-                                                      %div{:style => "margin-left: 20px"}
-                                                        -@entry_passes.each do |entry_pass|
-                                                          #{entry_pass.date}
-                                                          %br/
                                                       %br/
+                                                      %table{:border => '1px solid black;', :style => 'border-collapse: collapse;', :width => '600'}
+                                                        %tr
+                                                          %th{style: "width: 30%; padding: 10px"} Date
+                                                          %th{style: "padding: 10px"} Details
+                                                        -@entry_passes.each do |entry_pass|
+                                                          %tr
+                                                            %td{style: "padding: 10px"} #{entry_pass.date}
+                                                            %td{style: "padding: 10px"} #{entry_pass.details}
+
+                                                      %br/
+
                                                       = link_to "View Details", entry_passes_url
                                                     %p{:style => "margin:0;padding-bottom:0"}
                                                       Regards,
