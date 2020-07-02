@@ -18,12 +18,9 @@ def load_issues(page = 1, repo)
       total_issues = response_body['result']['total_count'] - (100 * page - 1)
       items = response_body['result']['items']
 
-      items.each do |item|
-        active_issue_count += 1 if item['status'] == 'active'
-        resolved_issue_count += 1 if item['status'] == 'resolved'
-        new_issue_count += 1 if item['first_occurrence_timestamp'] >= (Time.now.beginning_of_day - 7.days).to_i
-        puts "active_issue_count: #{active_issue_count}, resolved_issue_count: #{resolved_issue_count}, new_issue_count: #{new_issue_count}"
-      end
+      active_issue_count = items.select {|i| i['status'] == 'active'}.count
+      resolved_issue_count = items.select {|i| i['status'] == 'resolved'}.count
+      new_issue_count = items.select {|i| i['first_occurrence_timestamp'] >= (Time.now.beginning_of_day - 7.days).to_i}.count
 
       rollbar_statistic = RollbarStatistic.where(date: Date.today, repository: repo).last
       if rollbar_statistic.present?
