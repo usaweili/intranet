@@ -40,7 +40,6 @@ gem 'jquery-timepicker-rails'
 
 #sinatra
 gem 'sinatra'
-
 #for exporting excel sheet
 gem 'rubyzip', '= 1.0.0'
 gem 'axlsx', '= 2.0.1'
