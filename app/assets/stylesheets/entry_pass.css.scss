@@ -1,0 +1,112 @@
+// Place all the styles related to the OfficePass controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+.office-pass-datepicker {
+  height: 50px;
+  width: 150px;
+}
+
+.modal {
+  text-align: center;
+}
+
+#office_entry_modal {
+  width: min-content;
+  left: 40%;
+  fieldset {
+    display: inline-flex;
+  }
+}
+
+.icon-th-list {
+  font-size: 40px;
+  color: #005580 !important;
+}
+
+.icon-plus {
+  font-size: 40px;
+  color: #005580;
+}
+
+.entry_pass_table{
+  tr td {
+    border: 1px solid #dddddd;
+    width: 20%;
+    max-width: 20%;
+  }
+  .no-bordered {
+    border: none;
+  }
+}
+
+.registered_entry_pass {
+  margin-left: 0%;
+}
+
+.delete-entry {
+  color: #ff0000a1;
+  font-weight: bolder;
+  font-size: large;
+  text-decoration: none;
+}
+.delete-entry:hover{
+  color: red;
+  background-color:white;
+  text-decoration: none;
+}
+
+.entry_pass_form {
+  margin-top: 0px !important;
+  padding-left: 15px !important;
+  border: none;
+  .row {
+    margin-bottom: 15px;
+  }
+  .span12, .span8 {
+    margin-left: 0px !important;
+  }
+  .span2{
+    margin-left: 0px;
+    padding-left: 12px;
+  }
+  .span1{
+    width: 12%;
+    .available_text {
+      padding-top: 5px;
+      font-size: 14px;
+      font-style: italic;
+    }
+  }
+  .control-label {
+    width: 95px;
+  }
+  .controls {
+    text-align: initial;
+    padding-left: 10px;
+    margin-left: 20px;
+    textarea .error {
+      width: max-content;
+    }
+  }
+
+  .controls textarea {
+    width: 100%;
+    height: 66px;
+  }
+  .registered_entry_pass textarea {
+    height: auto;
+  }
+
+  .remove_nested_fields {
+    float: right;
+  }
+
+  #dates{
+    .span1{
+      margin-left: 13%;
+    }
+  }
+  .user_entry_passes_details {
+    margin-left: 0px;
+  }
+}

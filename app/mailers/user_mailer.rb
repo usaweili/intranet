@@ -19,6 +19,10 @@ class UserMailer < ActionMailer::Base
   def leave_application(sender_email, receivers, leave_application_id)
     @user = User.find_by(email: sender_email)
     @receivers = receivers
+    @older_leaves = LeaveApplication.get_users_past_leaves(@user.id)
+    @next_planned_leaves = LeaveApplication.get_users_upcoming_leaves(@user.id).where(
+      :id.ne => leave_application_id
+    )
     @leave_application = LeaveApplication.where(id: leave_application_id).first
     mail(from: @user.email, to: receivers, subject: "#{@user.name} has applied for #{@leave_application.leave_type}")
   end
@@ -57,10 +61,17 @@ class UserMailer < ActionMailer::Base
     admin_emails = User.approved.where(role: 'Admin').all.map(&:email)
     @receiver_emails = [admin_emails, hr_emails].flatten.join(',')
     leaves.map do |leave|
-      leave.sanctioning_manager = User.find(leave.processed_by).name
+      leave.sanctioning_manager = User.where(id: leave.processed_by).first.try(:name)
     end
     @leaves = leaves
     mail(to: @receiver_emails, subject: "Employees on leave tomorrow.") if leaves.present?
+  end
+
+  def invalid_blog_url(user_id)
+    @user = User.where(id: user_id).first
+    hr_emails = User.approved.where(role: 'HR').collect(&:email)
+    @receiver_emails = [hr_emails, @user.email].flatten.join(',')
+    mail(to: @receiver_emails, subject: 'Invalid Blog URL')
   end
 
   def new_blog_notification(params)
@@ -98,6 +109,26 @@ class UserMailer < ActionMailer::Base
       subject: 'Action Required on Pending Leave Requests',
       to: managers,
       cc: hr_emails
+    )
+  end
+
+  def new_entry_passes(entry_passes_ids)
+    @entry_passes = EntryPass.where(:id.in => entry_passes_ids).sort_by(&:date)
+    @user = @entry_passes.first.user
+    mail(
+      subject: "Office Entry Pass created by #{@user.name}",
+      to: [OFFICE_ENTRY_PASS_MAIL_RECEPIENT, @user.email].flatten
+    )
+  end
+
+  def delete_office_pass(date, user_id, deleted_by)
+    @date = date
+    @user = User.find(user_id)
+    @deleted_by = User.find(deleted_by)
+    mail(
+      subject: 'Your office entry pass is deleted',
+      to: @user.email,
+      cc: User.get_hr_emails
     )
   end
 

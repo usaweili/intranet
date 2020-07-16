@@ -93,10 +93,22 @@ every :day, :at => '10:00am' do
   rake "probation_notification:probation_end"
 end
 
-every :monday, :at => '07:00am' do
+every :sunday, :at => '11:00pm' do
   rake "weekly_codeclimate_statistics"
 end
 
 every :monday, :at => '09:00am' do
   rake "weekly_project_summary"
+end
+
+every :monday, :at => '09:00am' do
+  rake "fetch_rollbar_statistics"
+end
+
+every :tuesday, :at => '09:00am' do
+  rake 'weekend_timesheet_report'
+end
+
+every :day, :at => '00:05am' do
+  rake "delete_data:soft_delete_entry_pass_old_entries"
 end

@@ -20,13 +20,13 @@ describe User do
   it { should accept_nested_attributes_for(:private_profile) }
   it { should validate_presence_of(:role) }
   it { should validate_presence_of(:email) }
-  
+
   it "should have employer as default role when created" do
     user = FactoryGirl.build(:user)
     expect(user.role).to eq("Employee")
     expect(user.role?("Employee")).to eq(true)
   end
-  
+
   it "intern should not eligible for leave" do
     user = FactoryGirl.create(:user, role: 'Intern')
     expect(user.eligible_for_leave?).to eq(false)
@@ -34,13 +34,13 @@ describe User do
 
   it "nil date of joining employee should not eligible for leave" do
     user = FactoryGirl.build(:user)
-    expect(user.eligible_for_leave?).to eq(false) 
+    expect(user.eligible_for_leave?).to eq(false)
   end
-  
+
   it "valid employee should be eligible for leave" do
     user = FactoryGirl.create(:user)
-    expect(user.eligible_for_leave?).to eq(true) 
-  end 
+    expect(user.eligible_for_leave?).to eq(true)
+  end
 
   it 'should assign website sequence number auto incremented for new user' do
     user1 = FactoryGirl.create(:user)
@@ -82,7 +82,7 @@ describe User do
       expect(User.where(role: 'HR')).to eq([])
       expect{@user.sent_mail_for_approval(leave_application)}.not_to raise_error
     end
-    
+
     it "should send email if admin role is absent" do
       hr_user = FactoryGirl.create(:hr)
       leave_application = FactoryGirl.create(:leave_application,
@@ -205,7 +205,7 @@ describe User do
       end
     end
   end
-  
+
   context 'Get managers emails' do
     let!(:user) { FactoryGirl.create(:user) }
 
@@ -222,8 +222,32 @@ describe User do
       project.managers << manager_two
       managers_emails = user.get_managers_emails
       expect(managers_emails.count).to eq(2)
-      expect(managers_emails[0]).to eq(managers_emails[0])
-      expect(managers_emails[1]).to eq(managers_emails[1])
+      expect(managers_emails[0]).to eq(manager_one.email)
+      expect(managers_emails[1]).to eq(manager_two.email)
+    end
+
+    it 'Should give the managers email ids of all projects whose timesheet' +
+       ' is mandatory for particular Employee' do
+      project_1 = FactoryGirl.create(:project)
+      project_2 = FactoryGirl.create(:project, timesheet_mandatory: false)
+      manager_1 = FactoryGirl.create(:user, role: 'Manager')
+      manager_2 = FactoryGirl.create(:user, role: 'Manager')
+      user_project_1 = FactoryGirl.create(:user_project,
+        user: user,
+        project: project_1,
+        start_date: Date.today - 2,
+        time_sheet: true
+      )
+      user_project_2 = FactoryGirl.create(:user_project,
+        user: user,
+        project: project_2,
+        start_date: Date.today - 4
+      )
+      project_1.managers << manager_1
+      project_2.managers << manager_2
+      managers_emails = user.get_managers_emails_for_timesheet
+      expect(managers_emails.count).to eq(1)
+      expect(managers_emails[0]).to eq(manager_1.email)
     end
 
     it 'Should skip the email if already added' do
@@ -244,7 +268,7 @@ describe User do
       project_two.managers << manager
       managers_emails = user.get_managers_emails
       expect(managers_emails.count).to eq(1)
-      expect(managers_emails[0]).to eq(managers_emails[0])
+      expect(managers_emails[0]).to eq(manager.email)
     end
 
     it 'Should not give the emails if manager is not assigned to project' do
@@ -374,7 +398,8 @@ describe User do
             user: user,
             project: project,
             start_date: '01/08/2018'.to_date,
-            end_date: '10/10/2018'.to_date
+            end_date: '10/10/2018'.to_date,
+            active: false
           )
           FactoryGirl.create(:user_project,
             user: user,
@@ -433,46 +458,71 @@ describe User do
   end
 
   context 'Employee Auto Id generation' do
-    let!(:user) { FactoryGirl.create(:user) }
-    let(:internuser) { FactoryGirl.create(:user,
+    before do
+      @user = FactoryGirl.create(:user)
+      @intern = FactoryGirl.create(:user,
         role: 'Intern',
         employee_detail: FactoryGirl.build(:employee_detail)
       )
-    }
-    it "should generate new Employee ID if employee is new" do      
-      user = FactoryGirl.create(:user)
-      expect(user.employee_detail.employee_id.to_i).to eq(2)
+    end
+
+    it "should generate new Employee ID if employee is new" do
+      user1 = FactoryGirl.create(:user)
+      expect(user1.employee_detail.employee_id.to_i).to eq(2)
     end
 
     it "should not generate ID if employee is exist" do
-      user = FactoryGirl.create(:user)
-      expect(user.employee_detail.employee_id).
-        to eq(user.employee_detail.employee_id)
+      user1 = FactoryGirl.create(:user)
+      expect(user1.employee_detail.employee_id).
+        to eq(user1.employee_detail.employee_id)
+    end
+
+    it "should generate ID > 9000 if location is Plano" do
+      user1 = FactoryGirl.build(:user, employee_detail: FactoryGirl.build(:employee_detail))
+      user1.employee_detail.location = "Plano"
+      user1.save
+      expect(user1.reload.employee_detail.try(:employee_id).to_i).to eq(9001)
+      expect(user1.reload.employee_detail.try(:location)).to eq('Plano')
+    end
+
+    it "should generate ID < 9000 if location is Pune" do
+      user1 = FactoryGirl.build(:user)
+      user1.save!
+      expect(user1.reload.employee_detail.try(:employee_id).to_i).to eq(2)
+      expect(user1.reload.employee_detail.try(:location)).to eq('Pune')
     end
 
     it "should not generate ID if user role is Intern" do
-      user = FactoryGirl.create(:user, role: 'Intern')
-      expect(user.employee_detail).to eq(nil)
+      intern = FactoryGirl.create(:user, role: 'Intern')
+      expect(intern.employee_detail.employee_id).to eq(nil)
     end
 
-    it "should generate id when user role is changed Intern to Employee" do
-      internuser.update_attributes(role: "Employee")
-      expect(internuser.employee_detail.employee_id.to_i).to eq(2)
+    it "should generate ID < 9000 when user role is changed Intern to Employee" +
+       " for location Pune" do
+      @intern.update_attributes(role: "Employee")
+      expect(@intern.employee_detail.employee_id.to_i).to eq(2)
+    end
+
+    it "should generate ID > 9000 when user role is changed Intern to Employee" +
+       " for location Plano" do
+      @intern.employee_detail.update_attributes(location: 'Plano')
+      @intern.update_attributes(role: "Employee")
+      expect(@intern.employee_detail.employee_id.to_i).to eq(9001)
     end
 
     it "should not override other details when user role is changed intern to employee" do
-      internuser.update_attributes(role: "Employee")
-      expect(internuser.dob_day).to eq(internuser.dob_day)
-      expect(internuser.dob_month).to eq(internuser.dob_month)
-      expect(internuser.doj_day).to eq(internuser.doj_day)
-      expect(internuser.doj_month).to eq(internuser.doj_month)
-      expect(internuser.email).to eq(internuser.email)
-      expect(internuser.status).to eq(internuser.status)
-      expect(internuser.employee_detail.employee_id.to_i).to eq(2)
-      expect(internuser.employee_detail.date_of_relieving).
-        to eq(internuser.employee_detail.date_of_relieving)
-      expect(internuser.employee_detail.available_leaves).
-        to eq(internuser.employee_detail.available_leaves)
+      @intern.update_attributes(role: "Employee")
+      expect(@intern.dob_day).to eq(@intern.dob_day)
+      expect(@intern.dob_month).to eq(@intern.dob_month)
+      expect(@intern.doj_day).to eq(@intern.doj_day)
+      expect(@intern.doj_month).to eq(@intern.doj_month)
+      expect(@intern.email).to eq(@intern.email)
+      expect(@intern.status).to eq(@intern.status)
+      expect(@intern.employee_detail.employee_id.to_i).to eq(2)
+      expect(@intern.employee_detail.date_of_relieving).
+        to eq(@intern.employee_detail.date_of_relieving)
+      expect(@intern.employee_detail.available_leaves).
+        to eq(@intern.employee_detail.available_leaves)
     end
   end
 

@@ -13,6 +13,12 @@ Rails.application.routes.draw do
   resources :policies
   resources :holiday_lists
   resources :designations
+  resources :entry_passes do
+    collection do
+      get :report, defaults: { format: :csv }
+    end
+  end
+
   get 'holiday_list', to: 'holiday_lists#holiday_list'
   get '/unsubscribe' => 'light/users#unsubscribe', as: 'users/unsubscribe'
   #get '/unsubscribe/:id' => 'light/users#unsubscribe', as: 'users/unsubscribe'

@@ -31,6 +31,7 @@ class TimeSheet
   ALLOCATED_HOURS = 8
   DAYS_FOR_UPDATE = 7
   DAYS_FOR_CREATE = 7
+  PENDING_THRESHOLD = 3                     #threshold pending days after which mail will be sent to all receivers
 
   def parse_timesheet_data(params)
     split_text = params['text'].split
@@ -107,8 +108,7 @@ class TimeSheet
   end
 
   def valid_date_for_update?
-    # date > Date.today - DAYS_FOR_UPDATE
-    date >= "01/05/2020".to_date
+    date > Date.today - DAYS_FOR_UPDATE
   end
 
   def is_management?
@@ -121,8 +121,7 @@ class TimeSheet
       errors.add(:date, 'Invalid time')
       return false
     end
-    # if date < Date.today - DAYS_FOR_CREATE
-    if date < "01/05/2020".to_date
+    if date < Date.today - DAYS_FOR_CREATE
       text = "Not allowed to fill timesheet for this date. If you want to fill the timesheet, meet your manager."
       errors.add(:date, text)
       return false
@@ -431,8 +430,8 @@ class TimeSheet
     return individual_project_report, project_report
   end
 
-  def self.get_project_and_generate_weekly_report(mananers, from_date, to_date)
-    mananers.each do |manager|
+  def self.get_project_and_generate_weekly_report(managers, from_date, to_date)
+    managers.each do |manager|
       unfilled_time_sheet_report = []
       weekly_report = []
       manager.managed_projects.each do |project|
@@ -454,6 +453,31 @@ class TimeSheet
         end
       end
       send_report_through_mail(weekly_report, manager.email, unfilled_time_sheet_report) if weekly_report.present?
+    end
+  end
+
+  def self.generate_and_send_weekend_report(holiday_list, start_date)
+    weekend_report = []
+    holiday_list.each do |date|
+      project_ids = TimeSheet.where(date: date).map(&:project_id).uniq
+      project_ids.each do |project|
+        users = TimeSheet.where(date: date, project_id: project)
+                         .order(:start_time.asc)
+                         .map(&:user_id).uniq
+        users.each do |user|
+          timesheets = TimeSheet.where(date: date, project_id: project, user_id: user)
+          weekend_report += timesheets.map { |i| [ i.project.name, 
+                                                   i.user.name, 
+                                                   i.date.to_s,  
+                                                   i.from_time.strftime("%I:%M%p"), 
+                                                   i.to_time.strftime("%I:%M%p"),
+                                                   i.description] }
+        end 
+      end
+    end
+    if weekend_report.present?
+      csv = generate_weekend_report_in_csv_format(weekend_report)
+      WeeklyTimesheetReportMailer.send_weekend_timesheet_report(csv, start_date).deliver_now!
     end
   end
 
@@ -601,7 +625,7 @@ class TimeSheet
 
   def self.send_report_through_mail(weekly_report, email, unfilled_time_sheet_report)
     csv = generate_weekly_report_in_csv_format(weekly_report)
-    WeeklyTimesheetReportMailer.send_weekly_timesheet_report(csv, email, unfilled_time_sheet_report).deliver!
+    WeeklyTimesheetReportMailer.send_weekly_timesheet_report(csv, email, unfilled_time_sheet_report).deliver_now!
   end
 
   def self.calculate_working_minutes(time_sheet)
@@ -681,6 +705,18 @@ class TimeSheet
 
   def self.generate_weekly_report_in_csv_format(weekly_report)
     headers = ['Employee name', 'Project name', 'No of days worked', 'Leaves', 'Holidays']
+    weekly_report_in_csv =
+      CSV.generate(headers: true) do |csv|
+        csv << headers
+        weekly_report.each do |report|
+          csv << report
+        end
+      end
+    weekly_report_in_csv
+  end
+
+  def self.generate_weekend_report_in_csv_format(weekly_report)
+    headers = ['Project Name', 'Employee Name', 'Date', 'From Time', 'To Time', 'Description']
     weekly_report_in_csv =
       CSV.generate(headers: true) do |csv|
         csv << headers
@@ -813,7 +849,7 @@ class TimeSheet
       message = "You haven't filled the timesheet for yesterday. Go ahead and fill it now. You can fill timesheet for past 7 days. If it exceeds 7 days then contact your manager."
       text_for_slack = "*#{message}*"
       text_for_email = "#{message}"
-      TimesheetRemainderMailer.send_timesheet_reminder_mail(user, slack_uuid, text_for_email).deliver!
+      TimesheetRemainderMailer.send_timesheet_reminder_mail(user, slack_uuid, text_for_email).deliver_now!
       send_reminder(slack_uuid, text_for_slack) unless slack_uuid.blank?
       return false
     end
@@ -844,7 +880,8 @@ class TimeSheet
       message2 = "Go ahead and fill it now. You can fill timesheet for past 7 days. If it exceeds 7 days then contact your manager."
       text_for_slack = "*#{message1} #{unfilled_timesheet_date}. #{message2}*"
       text_for_email = "#{message1} #{unfilled_timesheet_date}. #{message2}"
-      TimesheetRemainderMailer.send_timesheet_reminder_mail(user, slack_handle, text_for_email).deliver!
+      pending_more_than_threshold = (Date.today - unfilled_timesheet_date) > PENDING_THRESHOLD
+      TimesheetRemainderMailer.send_timesheet_reminder_mail(user, slack_handle, text_for_email, pending_more_than_threshold).deliver_now!
       send_reminder(slack_handle, text_for_slack) unless slack_handle.blank? rescue "Error in sending reminder to slack"
       return true
     end
@@ -971,6 +1008,7 @@ class TimeSheet
   end
 
   def self.from_date_less_than_to_date?(from_date, to_date)
+    return false if from_date.blank? or to_date.blank?
     from_date.to_date <= to_date.to_date
   end
 
@@ -1146,7 +1184,7 @@ class TimeSheet
     csv     = generate_csv_for_employees_not_filled_timesheet(employee_list)
     text    = "PFA Employee List- Who have not filled timesheet from #{from_date} to #{to_date}"
     options = { csv: csv, text: text, emails: emails, from_date: from_date, to_date: to_date }
-    WeeklyTimesheetReportMailer.send_report_who_havent_filled_timesheet(options).deliver!
+    WeeklyTimesheetReportMailer.send_report_who_havent_filled_timesheet(options).deliver_now!
   end
 
   def self.generate_summary_report(from_date, to_date, params, current_user)
@@ -1161,7 +1199,8 @@ class TimeSheet
       params:           params,
       user_email:       current_user.email,
       user_name:        current_user.name,
-      from_date:        from_date, to_date: to_date,
+      from_date:        from_date,
+      to_date:          to_date,
       subject:          subject
     }
   end

@@ -23,7 +23,7 @@ class CompaniesController < ApplicationController
   def create
     @company = Company.new(company_params)
     if @company.save
-      flash[:success] = "Company created Succesfully"
+      flash[:success] = "Company created Successfully"
       redirect_to companies_path
     else
       render 'new'
@@ -36,6 +36,16 @@ class CompaniesController < ApplicationController
 
   def show
     @projects = @company.projects.group_by(&:is_active)
+    if(@projects.key?(true))
+      @projects[true].each do |project|
+        project.working_employees_count = UserProject.where(project_id: project._id, end_date: nil).count
+      end
+    end
+    if(@projects.key?(false))
+      @projects[false].each do |project|
+        project.working_employees_count = 0
+      end
+    end
     respond_to do |format|
       format.html
       format.json{ render json: @projects.to_json}
@@ -44,7 +54,7 @@ class CompaniesController < ApplicationController
 
   def update
     if @company.update(company_params)
-      flash[:success] = "Company updated Succesfully"
+      flash[:success] = "Company updated Successfully"
       redirect_to companies_path
     else
       flash[:error] = "Company: #{@company.errors.full_messages.join(',')}"
@@ -54,7 +64,7 @@ class CompaniesController < ApplicationController
 
   def destroy
     if @company.destroy
-      flash[:notice] = "Company deleted Succesfully"
+      flash[:notice] = "Company deleted Successfully"
     else
       flash[:notice] = "Error in deleting Company"
     end

@@ -49,9 +49,12 @@ class User
   before_create :associate_employee_id
   after_update :associate_employee_id_if_role_changed
 
+  has_many :entry_passes
+  accepts_nested_attributes_for :entry_passes, reject_if: :all_blank, :allow_destroy => true
 
   accepts_nested_attributes_for :attachments, reject_if: :all_blank, :allow_destroy => true
   accepts_nested_attributes_for :time_sheets, :allow_destroy => true
+  accepts_nested_attributes_for :employee_detail
   validates :email, format: {with: /\A.+@#{ORGANIZATION_DOMAIN}/, message: "Only #{ORGANIZATION_NAME} email-id is allowed."}
   validates :role, :email, presence: true
   validates_associated :employee_detail
@@ -70,6 +73,7 @@ class User
   delegate :date_of_joining, to: :private_profile, :allow_nil => true
   delegate :date_of_birth, to: :public_profile, :allow_nil => true
   delegate :date_of_relieving, to: :employee_detail, :allow_nil =>true
+  delegate :location, to: :employee_detail, :allow_nil => true
 
   scope :leaders, ->{ visible_on_website.asc(:website_sequence_number).in(role: ROLE[:admin]) }
   scope :members, ->{ visible_on_website.nin(role: ROLE[:admin]).asc(['public_profile.first_name']) }
@@ -158,7 +162,8 @@ class User
     error_msg = []
     error_msg.push(errors.full_messages,
                    public_profile.errors.full_messages,
-                   private_profile.errors.full_messages)
+                   private_profile.errors.full_messages,
+                   employee_detail.try(:errors).try(:full_messages))
     error_msg.join(' ')
   end
 
@@ -198,9 +203,14 @@ class User
   end
 
   def get_managers_emails
+    manager_ids = projects.pluck(:manager_ids).flatten.uniq
+    User.in(id: manager_ids).collect(&:email)
+  end
+
+  def get_managers_emails_for_timesheet
     managers_emails = []
-    projects.where(timesheet_mandatory: true).each do |project|
-      project.managers.each do |manager|
+    user_projects.where(time_sheet: true).each do |user_project|
+      user_project.project.managers.each do |manager|
         next if managers_emails.include?(manager.email)
         managers_emails << manager.email
       end
@@ -209,7 +219,7 @@ class User
   end
 
   def get_managers_names
-    manager_ids = projects.where(timesheet_mandatory:true).pluck(:manager_ids).flatten.uniq
+    manager_ids = projects.pluck(:manager_ids).flatten.uniq
     User.in(id: manager_ids).collect(&:name)
   end
 
@@ -233,14 +243,27 @@ class User
 
   def calculate_next_employee_id
     employee_id_array = User.distinct("employee_detail.employee_id")
-    emp_id = employee_id_array.empty? ?  0 : employee_id_array.map(&:to_i).max
+    employee_id_array.map!(&:to_i)
+    usa_employee_ids = employee_id_array.select{|id| id > 9000}
+    pune_employee_ids = employee_id_array.select {|id| id <= 9000}
+
+    if self.employee_detail.try(:location) == "Plano"
+      emp_id = usa_employee_ids.empty? ? 9000 : usa_employee_ids.max  
+    else
+      emp_id = pune_employee_ids.empty? ? 0 : pune_employee_ids.max
+    end
     emp_id = emp_id + 1
   end
 
   def associate_employee_id
     return if is_intern?(role)
     emp_id = calculate_next_employee_id
-    self.employee_detail.present? ?  self.employee_detail.employee_id = emp_id : self.employee_detail = EmployeeDetail.new(employee_id: emp_id)
+
+    if self.employee_detail.present?
+      self.employee_detail.employee_id = emp_id
+    else
+      self.employee_detail = EmployeeDetail.new(employee_id: emp_id)
+    end
   end
 
   def associate_employee_id_if_role_changed

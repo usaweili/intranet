@@ -18,7 +18,7 @@
 //= require redactor-rails
 //= require jquery-ui
 //= require jquery-ui/sortable
-//= require bootstrap-datepicker/core
+// require bootstrap-datepicker/core
 //= require bootstrap-switch
 //= require jquery_nested_form
 //= require jqBootstrapValidation

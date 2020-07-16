@@ -1,4 +1,5 @@
 class TimeSheetsController < ApplicationController
+  before_action :authenticate_user!
   skip_before_filter :verify_authenticity_token
   load_and_authorize_resource only: [:index, :users_timesheet, :edit_timesheet, :update_timesheet, :new, :projects_report, :add_time_sheet]
   load_and_authorize_resource only: :individual_project_report, class: Project
@@ -35,7 +36,12 @@ class TimeSheetsController < ApplicationController
     @from_date = params[:from_date] || Date.today.beginning_of_month.to_s
     @to_date = params[:to_date] || Date.today.to_s
     @user = User.find(params[:user_id])
-    @individual_timesheet_report, @total_work_and_leaves = TimeSheet.generate_individual_timesheet_report(@user, params) if TimeSheet.from_date_less_than_to_date?(@from_date, @to_date)
+    @individual_timesheet_report, @total_work_and_leaves = {}, {}
+    if TimeSheet.from_date_less_than_to_date?(@from_date, @to_date)
+      @individual_timesheet_report, @total_work_and_leaves = TimeSheet.generate_individual_timesheet_report(@user, params) 
+    else
+      flash[:error] = 'Please select appropriate date'
+    end
   end
 
   def edit_timesheet
@@ -64,7 +70,7 @@ class TimeSheetsController < ApplicationController
       current_user.is_admin_or_hr? || current_user.is_manager?
       return_value, @time_sheets = TimeSheet.update_time_sheet(@time_sheets, current_user, timesheet_params)
       unless return_value.include?(false)
-        flash[:notice] = 'Timesheet Updated Succesfully'
+        flash[:notice] = 'Timesheet Updated Successfully'
         redirect_to users_time_sheets_path(@user.id, from_date: @from_date, to_date: @to_date)
       else
         render 'edit_timesheet'
@@ -85,11 +91,11 @@ class TimeSheetsController < ApplicationController
     data_params = {"time_sheets_attributes"=>data_params}
     return_values, @time_sheets = TimeSheet.create_time_sheet(@user.id, current_user, data_params)
     unless return_values.include?(false)
-      flash[:notice] = 'Timesheet created succesfully'
+      flash[:notice] = 'Timesheet created successfully'
       redirect_to users_time_sheets_path(user_id: @user.id, from_date: @from_date, to_date: @to_date)
     else
       if return_values.include?(true)
-        flash[:notice] = "#{return_values.count(true)} #{'timesheet'.pluralize(return_values.count(true))} created succesfully"
+        flash[:notice] = "#{return_values.count(true)} #{'timesheet'.pluralize(return_values.count(true))} created successfully"
       end
       render 'new'
     end

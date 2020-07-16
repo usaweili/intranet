@@ -6,6 +6,7 @@ describe UsersController do
     before(:each) do
       @admin = FactoryGirl.create(:admin)
       sign_in @admin
+      # Problem: Employee ID not getting assigned to admin
     end
 
     it 'In order to invite user' do
@@ -19,10 +20,37 @@ describe UsersController do
       should render_template(:invite_user)
     end
 
+    it 'should not invite user without location' do
+      post :invite_user, {user: {employee_detail_attributes: {location: ""}}}
+      should render_template(:invite_user)
+    end
+
+    it 'should assign employee id > 9000 if location is Plano' do
+      post :invite_user, {user: {
+        email: "someone@joshsoftware.com",
+        role: "Employee",
+        employee_detail_attributes: {location: "Plano"}}}
+      expect(flash.notice).to eq("Invitation sent Successfully")
+      expect(User.count).to eq(2)
+      employee = User.where(email: "someone@joshsoftware.com").first
+      expect(employee.employee_detail.employee_id.to_i).to eq(9001)
+    end
+
+    it 'should assign employee id < 9000 if location is Pune' do
+      post :invite_user, {user: {
+        email: "someone@joshsoftware.com",
+        role: "Employee",
+        employee_detail_attributes: {location: "Pune"}}}
+      expect(flash.notice).to eq("Invitation sent Successfully")
+      expect(User.count).to eq(2)
+      employee = User.where(email: "someone@joshsoftware.com").first
+      expect(employee.employee_detail.employee_id.to_i).to eq(2) # Admin will get emp_id = 1
+    end
+
     it 'invitee should have joshsoftware account' do
       post :invite_user, { user: FactoryGirl.attributes_for(:user) }
-      flash.notice.should eql("Invitation sent Succesfully")
-      User.count.should == 2
+      expect(flash.notice).to eq("Invitation sent Successfully")
+      expect(User.count).to eq(2)
     end
   end
 
@@ -40,7 +68,7 @@ describe UsersController do
         id: user.id
       }
       put :public_profile, params
-      user.errors.full_messages.should eq([])
+      expect(user.errors.full_messages).to eq([])
     end
 
     it "should fail in case of public profile if required field missing" do
@@ -49,7 +77,7 @@ describe UsersController do
         id: user.id
       }
       put :public_profile, params
-      user.errors.full_messages.should_not eq(nil)
+      expect(user.errors.full_messages).to eq([])
     end
 
     it "private profile successfully " do
@@ -58,7 +86,7 @@ describe UsersController do
         id: user.id
       }
       put :private_profile, params
-      user.errors.full_messages.should eq([])
+      expect(user.errors.full_messages).to eq([])
     end
 
     it "should fail if required data not sent" do
@@ -67,7 +95,7 @@ describe UsersController do
         id: user.id
       }
       put :private_profile, params
-      user.errors.full_messages.should eq([])
+      expect(user.errors.full_messages).to eq([])
     end
 
     it 'Should add project' do
@@ -162,6 +190,88 @@ describe UsersController do
 
       xhr :get, :get_feed, params
       expect(assigns(:blog_entries).count).to eq 10
+    end
+  end
+
+  context '#index' do
+    before do
+      @user = FactoryGirl.create(:user)
+      sign_in @user
+      FactoryGirl.create(:user)
+    end
+
+    it 'should render all employees' do
+      params = { all: true }
+      get :index, params
+      expect(response).to have_http_status(:success)
+    end
+
+    it 'should render approved employees only' do
+      params = {}
+      get :index, params
+      expect(response).to have_http_status(:success)
+    end
+  end
+
+  context '#show' do
+    before(:each) do
+      @user = FactoryGirl.create(:user)
+      sign_in @user
+    end
+    it 'should show selected employee' do
+      @user = FactoryGirl.create(:user)
+      params = {id: @user.id}
+      get :show, params
+      expect(response).to have_http_status(:success)
+    end
+  end
+
+  context '#resource_list' do
+    before(:each) do
+      @user = FactoryGirl.create(:user)
+      sign_in @user
+    end
+    it 'should show all resources' do
+      get :resource_list
+      expect(response).to have_http_status(:success)
+    end
+  end
+
+  context "#resource_list_download" do
+    it 'should send Resource List csv' do
+      user1 = FactoryGirl.create(:user, role: "Employee", status: 'approved')
+      user2 = FactoryGirl.create(:user, role: "Employee", status: 'approved')
+      sign_in user1
+      get :resource_list_download
+      expect(response).to have_http_status(:success)
+    end
+  end
+
+  context '#download_document' do
+    before(:each) do
+      @user = FactoryGirl.create(:user)
+      sign_in @user
+    end
+    it 'should download documents' do
+      attachment = FactoryGirl.create(:attachment, user: @user)
+      params = { id: attachment.id}
+      get :download_document, params
+      expect(response).to have_http_status(:success)
+    end
+  end
+
+  context '#update_available_leave' do
+    before(:each) do
+      @admin = FactoryGirl.create(:admin)
+      sign_in @admin
+    end
+    it 'should update available leaves' do
+      @employee = FactoryGirl.create(:employee)
+      params = { id: @employee.id, value: 20 }
+      put :update_available_leave, params
+      @employee.reload
+      expect(response).to have_http_status(:success)
+      expect(@employee.employee_detail.available_leaves).to eq(20)
     end
   end
 

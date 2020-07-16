@@ -65,7 +65,7 @@ GIT
 
 GIT
   remote: git@github.com:joshsoftware/lightair.git
-  revision: a061cf99e0102c398ccde3ac0cc4c9232e17639d
+  revision: 4d3bea6a3ec1a47b5b4d0f110cc120772b7c3a79
   branch: engine
   specs:
     light (0.0.1)
@@ -102,7 +102,7 @@ GIT
 
 GIT
   remote: git@github.com:joshsoftware/screamout.git
-  revision: d14af4ee35d5d6f4fb7ec8c132b67adaa7adf450
+  revision: 8389d97c2962796d501e8aaea5dbd13386a75d58
   branch: engine
   specs:
     screamout (0.0.1)
@@ -961,6 +961,9 @@ GEM
     mongoid-paperclip (0.0.11)
       mongoid
       paperclip (>= 2.3.6, != 4.3.0)
+    mongoid-paranoia (2.0.0)
+      activesupport (~> 4.0)
+      mongoid (>= 4.0.0, <= 6.0.0)
     mongoid-rspec (2.2.0)
       mongoid (~> 4.0.0)
       rake
@@ -1247,7 +1250,6 @@ DEPENDENCIES
   axlsx_rails
   better_errors
   binding_of_caller
-  bootstrap-datepicker-rails (= 1.3.0.2)
   brakeman
   bson_ext
   business_time
@@ -1280,6 +1282,7 @@ DEPENDENCIES
   mongoid
   mongoid-grid_fs!
   mongoid-history!
+  mongoid-paranoia
   mongoid-rspec
   mongoid_rateable!
   mongoid_slug

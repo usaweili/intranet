@@ -164,6 +164,12 @@ RSpec.describe TimeSheet, type: :model do
         expect(time_sheet.errors.full_messages).to eq([])
         expect(time_sheet.reload.description).to eq('call')
       end
+
+      it 'fail because date is not present' do
+        time_sheet = FactoryGirl.build(:time_sheet, date: nil)
+        expect(time_sheet.save).to eq(false)
+        expect(time_sheet.errors[:date]).to eq(['Invalid time'])
+      end
     end
 
     context 'Time should' do
@@ -278,6 +284,61 @@ RSpec.describe TimeSheet, type: :model do
           ['Time duration is overlapping with already entered time duration for the day']
         )
       end
+    end
+  end
+
+  context 'Timesheet parse_timesheet_data' do
+    it 'Should return data for valid request' do
+      user = FactoryGirl.create(:user)
+      project = FactoryGirl.create(:project)
+      user.public_profile.slack_handle = 'rubylover'
+      user.public_profile.save
+      user_project = FactoryGirl.create(:user_project, user: user, project: project)
+      timesheet = FactoryGirl.create(:time_sheet, created_at: Date.yesterday, description: 'abcd efg')
+      params = {
+        'user_id' => 'rubylover',
+        'channel_id' => 'dummy',
+        'text' => "#{project.name} #{Date.yesterday} 10 11 abcd efg"
+      }
+      return_value, timesheet_data = timesheet.parse_timesheet_data(params)
+      expected_data = {
+        'user_id' => user.id,
+        'project_id' => project.id,
+        'date' => timesheet.date,
+        'from_time' => timesheet.from_time,
+        'to_time' => timesheet.to_time,
+        'description' => timesheet.description.split().join(' ') + ' '
+      }
+      expect(return_value).to eq(true)
+      expect(timesheet_data).to eq(expected_data)
+    end
+  end
+
+  context 'Summary report' do
+    it 'should create all employee summary' do
+      user1 = FactoryGirl.create(:user, status: 'approved')
+      user2 = FactoryGirl.create(:user, status: 'approved')
+      project1 = FactoryGirl.create(:project)
+      project2 = FactoryGirl.create(:project)
+      FactoryGirl.create(:user_project, user: user1, project: project1)
+      FactoryGirl.create(:user_project, user: user2, project: project1)
+      FactoryGirl.create(:user_project, user: user1, project: project2)
+      timesheet1 = FactoryGirl.create(:time_sheet, user: user1, project: project1)
+      timesheet2 = FactoryGirl.create(:time_sheet, user: user2, project: project1)
+      timesheet3 = FactoryGirl.create(:time_sheet, user: user1, project: project2, from_time: "#{Date.yesterday} 11:00", to_time: "#{Date.yesterday} 12:00")
+      timesheet_summary = TimeSheet.create_all_employee_summary(Date.yesterday-1, Date.today)
+      expected_summary = [{
+            emp_id: '1',
+            user_name: user1.public_profile.name,
+            total_worked_hours: 2
+          },
+          {
+            emp_id: '2',
+            user_name: user2.public_profile.name,
+            total_worked_hours: 1
+      }]
+      timesheet_summary = timesheet_summary.sort_by { |timesheet| timesheet[:emp_id] }
+      expect(timesheet_summary).to eq(expected_summary)
     end
   end
 
@@ -712,7 +773,7 @@ RSpec.describe TimeSheet, type: :model do
         expect(allocated_hours).to eq("13 Days (104h)")
       end
 
-      it 'if there is one haliday' do
+      it 'if there is one holiday' do
         FactoryGirl.create(:user_project,
           user: user,
           project: project,
@@ -986,7 +1047,9 @@ RSpec.describe TimeSheet, type: :model do
         from_time: "#{Date.today - 1} 19:00",
         to_time: "#{Date.today - 1} 20:00"
       )
-      FactoryGirl.create(:holiday, holiday_date: Date.today - 4)
+      date = Date.today - 4
+      date = date - 2.days if date.saturday? || date.sunday?
+      FactoryGirl.create(:holiday, holiday_date: date)
       FactoryGirl.create(:leave_application,
         user: user,
         start_at: Date.today - 2,
@@ -1937,7 +2000,7 @@ RSpec.describe TimeSheet, type: :model do
     let!(:user) { FactoryGirl.create(:user, status: STATUS[2]) }
     let!(:project) { FactoryGirl.create(:project, start_date: Date.today - 5) }
     it 'should send mail if user is not assinged on project and filled timesheet' do
-      time_sheet = FactoryGirl.create(:time_sheet, user: user, project: project, date: Date.today - 1)
+      time_sheet = FactoryGirl.create(:time_sheet, user: user, project: project, created_at: Date.today - 1)
       TimeSheet.get_users_and_timesheet_who_have_filled_timesheet_for_diffrent_project
       expect(ActionMailer::Base.deliveries.count).to eq(1)
     end
@@ -1945,6 +2008,46 @@ RSpec.describe TimeSheet, type: :model do
     it 'should not send mail if project is assigned to this user' do
       user_project = FactoryGirl.create(:user_project, user: user, project: project)
       timesheet    = FactoryGirl.create(:time_sheet, user: user, project: project)
+    end
+  end
+
+  context "Employee's weekend work" do
+    let!(:user) { FactoryGirl.create(:user, status: STATUS[2]) }
+    let!(:user_hr) { FactoryGirl.create(:user, role: 'HR', status: STATUS[2]) }
+    let!(:project) { FactoryGirl.create(:project, timesheet_mandatory: true) }
+    
+    before do
+      ActionMailer::Base.deliveries = []
+      @start_date = Date.today - 14
+    end
+
+    it 'send mail- when employee have filled timesheet on weekend' do
+      FactoryGirl.create(:user_project, start_date: Date.today - 20,
+                                        user: user,
+                                        project: project)
+      date = Date.today - Date.today.wday
+      FactoryGirl.create(:time_sheet, date: date, user: user, project: project )
+      TimeSheet.generate_and_send_weekend_report([date], @start_date)
+
+      expect(ActionMailer::Base.deliveries.count).to eq(1)
+      expect(ActionMailer::Base.deliveries.first.subject).to eq(
+        "Weekend Timesheet Report (#{@start_date.strftime('%d %B')} - #{Date.today.strftime('%d %B')})"
+      )
+    end
+
+    it 'send mail- when employee have filled timesheet on holiday' do
+      FactoryGirl.create(:user_project, start_date: Date.today - 20,
+                                        user: user,
+                                        project: project)
+      date = Date.today - 1
+      FactoryGirl.build(:holiday, holiday_date: date, reason: 'Test')
+      FactoryGirl.create(:time_sheet, date: date, user: user, project: project )
+      TimeSheet.generate_and_send_weekend_report([date], @start_date)
+
+      expect(ActionMailer::Base.deliveries.count).to eq(1)
+      expect(ActionMailer::Base.deliveries.first.subject).to eq(
+        "Weekend Timesheet Report (#{@start_date.strftime('%d %B')} - #{Date.today.strftime('%d %B')})"
+      )
     end
   end
   

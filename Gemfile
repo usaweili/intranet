@@ -6,6 +6,8 @@ gem 'rails', '4.2.5.2'
 gem 'devise'
 gem 'mongoid'
 gem 'mongoid_slug'
+gem 'mongoid-paranoia'
+
 gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
 gem 'rmagick'
 gem 'mongoid-grid_fs', github: 'ahoward/mongoid-grid_fs'
@@ -19,7 +21,7 @@ gem 'simple_form', :git => 'git://github.com/plataformatec/simple_form.git'
 gem 'nested_form'
 gem "omniauth-google-oauth2"
 gem 'rnotifier'
-gem 'bootstrap-datepicker-rails', '1.3.0.2'
+#gem 'bootstrap-datepicker-rails', '1.3.0.2'
 gem 'colorbox-rails'
 gem 'google_drive'
 gem 'redactor-rails', '0.4.5'
@@ -38,7 +40,6 @@ gem 'jquery-timepicker-rails'
 
 #sinatra
 gem 'sinatra'
-
 #for exporting excel sheet
 gem 'rubyzip', '= 1.0.0'
 gem 'axlsx', '= 2.0.1'

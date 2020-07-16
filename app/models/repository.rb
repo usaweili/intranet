@@ -11,9 +11,11 @@ class Repository
   field :test_coverage_badge
   field :visibility
   validates_presence_of :project
-  # validates_presence_of :name, :url, :host
-  # validates :host, inclusion: { in: HOSTS, allow_nil: false }
-  # validates_uniqueness_of :name, :url
+  validates_presence_of :name, :url, :host
+  validates :host, inclusion: { in: HOSTS, allow_nil: false }
+  validates_uniqueness_of :url
   has_many :code_climate_statistics, dependent: :destroy
+  field :rollbar_access_token
+  has_many :rollbar_statistics, dependent: :destroy
   validates_uniqueness_of :code_climate_id, allow_blank: true, allow_nil: true
 end

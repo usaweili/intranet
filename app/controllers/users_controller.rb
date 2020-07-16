@@ -29,7 +29,7 @@ class UsersController < ApplicationController
     return_value_of_add_project, return_value_of_remove_project = @user.add_or_remove_projects(params) if params[:user][:project_ids].present?
     if return_value_of_add_project && return_value_of_remove_project
       if @user.save
-        flash.notice = 'Profile updated Succesfully'
+        flash.notice = 'Profile updated Successfully'
       else
         flash[:error] = "Error #{@user.generate_errors_message}"
       end
@@ -62,7 +62,7 @@ class UsersController < ApplicationController
       #update_attribute was getting called on embedded_document so slug which is defined in parent was not getting updated so
       #update_attributes is caaled on user insted of public_profile/private_profile
       if @user.update_attributes(profile => params.require(profile).permit!)
-        flash.notice = 'Profile Updated Succesfully'
+        flash.notice = 'Profile Updated Successfully'
         #UserMailer.delay.verification(@user.id)
         redirect_to public_profile_user_path(@user)
       else
@@ -74,11 +74,12 @@ class UsersController < ApplicationController
   def invite_user
     if request.get?
       @user = User.new
+      @user.employee_detail = EmployeeDetail.new
     else
-      @user = User.new(params[:user].permit(:email, :role))
+      @user = User.new(params[:user].permit(:email, :role, employee_detail_attributes: [:location] ))
       @user.password = Devise.friendly_token[0,20]
       if @user.save
-        flash.notice = 'Invitation sent Succesfully'
+        flash.notice = 'Invitation sent Successfully'
         UserMailer.delay.invitation(current_user.id, @user.id)
         redirect_to invite_user_path
       else
@@ -134,7 +135,7 @@ class UsersController < ApplicationController
   def user_params
     safe_params = []
     if params[:user][:employee_detail_attributes].present?
-      safe_params = [ employee_detail_attributes: [:id, :employee_id, :date_of_relieving, :designation, :description, :is_billable, :designation_track, :notification_emails => [] ] ]
+      safe_params = [ employee_detail_attributes: [:id, :employee_id, :location, :date_of_relieving, :designation, :description, :is_billable, :designation_track, :notification_emails => [] ] ]
     elsif params[:user][:attachments_attributes].present?
       safe_params = [attachments_attributes: [:id, :name, :document, :_destroy]]
     else
@@ -224,15 +225,20 @@ class UsersController < ApplicationController
 
     return if blog_url.blank?
 
-    xml_feed = Feedjira::Feed.fetch_raw "#{blog_url}/feed"
+    xml_feed = Feedjira::Feed.fetch_raw get_blog_url(blog_url)
     if xml_feed.eql?(0)
       @blog_message = "The server has not found anything matching the URI given!!"
       return nil
     end
 
-    blog_feed = Feedjira::Feed.parse xml_feed
+    begin
+      blog_feed = Feedjira::Feed.parse xml_feed
+    rescue
+      @blog_message = "Invalid Blog URL!!"
+      UserMailer.delay.invalid_blog_url(@user.id) if @user.is_approved?
+      return nil 
+    end
 
-    return nil if blog_feed.try(:entries).try(:blank?)
     if blog_feed != 0
       blog_feed.entries[0..9]
     else
@@ -241,4 +247,20 @@ class UsersController < ApplicationController
     end
   end
 
+  def get_blog_url(url)
+    if url.include?('medium')
+      medium_url(url)
+    elsif url.include?('blogspot')
+      "#{url}/feeds/posts/default?q=KEYWORD"
+    else
+      "#{url}/feed"
+    end
+  end
+
+  def medium_url(url)
+    domain_name = 'https://medium.com/'
+    parse_url = url.split(/\'medium.com\''|\//)
+    medium_id = parse_url.select { |i| i.start_with?('@') }.first
+    domain_name + 'feed/' + medium_id
+  end
 end

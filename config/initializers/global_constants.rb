@@ -27,3 +27,9 @@ DEFAULT_TIMESHEET_MANAGERS = []
 
 MANAGEMENT = ["Admin", "HR", "Manager", "Finance"]
 TIMESHEET_MANAGEMENT = ['Admin', 'HR', 'Manager']
+
+DAILY_OFFICE_ENTRY_LIMIT = 30
+
+OFFICE_ENTRY_PASS_MAIL_RECEPIENT=["shailesh.kalekar@joshsoftware.com", "sameert@joshsoftware.com", "hr@joshsoftware.com"]
+
+ROLLBAR_ISSUES_URL = 'https://api.rollbar.com/api/1/items'

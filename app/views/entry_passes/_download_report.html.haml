@@ -1,0 +1,3 @@
+= form_tag url: "entry_passes/report.csv", method: "GET", action: "report" do
+  = text_field_tag :download_date, Date.today, class: "datepicker office-pass-datepicker"
+  = submit_tag "Download", :class => "btn btn-info", :style => "margin-bottom: 10px"

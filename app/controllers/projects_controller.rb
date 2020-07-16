@@ -36,7 +36,7 @@ class ProjectsController < ApplicationController
   def create
     @project = Project.new(safe_params)
     if @project.save
-      flash[:success] = "Project created Succesfully"
+      flash[:success] = "Project created Successfully"
       redirect_to projects_path
     else
       render 'new'
@@ -54,7 +54,7 @@ class ProjectsController < ApplicationController
 
   def destroy
     if @project.destroy
-     flash[:notice] = "Project deleted Succesfully"
+     flash[:notice] = "Project deleted Successfully"
     else
      flash[:notice] = "Error in deleting project"
     end
@@ -103,7 +103,7 @@ class ProjectsController < ApplicationController
     :code, :number_of_employees, :invoice_date, :company_id, :billing_frequency, :type_of_project, :is_activity,
     :manager_ids => [], technology_details_attributes: %i[id name version _destroy],
     user_projects_attributes: [:start_date, :end_date, :time_sheet, :allocation, :active, :id, :_destroy, :user_id],
-    repositories_attributes: %i[id name host url code_climate_id maintainability_badge test_coverage_badge visibility _destroy])
+    repositories_attributes: %i[id name host url code_climate_id maintainability_badge test_coverage_badge visibility _destroy rollbar_access_token])
   end
 
   def load_project

@@ -36,7 +36,7 @@ class LeaveApplication
   validate :end_date_less_than_start_date, if: 'start_at.present?'
   validate :validate_date, on: [:create, :update]
 
-  before_save :deduct_available_leave_send_mail
+  after_save :deduct_available_leave_send_mail
   after_update :update_available_leave_send_mail, if: "pending?"
 
   scope :pending, ->{where(leave_status: PENDING)}
@@ -65,6 +65,10 @@ class LeaveApplication
 
   def approved?
     leave_status == APPROVED
+  end
+
+  def processed_by_name
+    User.where(id: self.processed_by).first.try(:name)
   end
 
   def process_reject_application
@@ -99,6 +103,22 @@ class LeaveApplication
 
   def self.get_leaves_for_sending_reminder(date)
     LeaveApplication.where(start_at: date, leave_status: APPROVED)
+  end
+
+  def self.get_users_past_leaves(user_id)
+    LeaveApplication.where(
+      user_id: user_id,
+      start_at: Date.today - 6.month...Date.today,
+      leave_status: 'Approved'
+    ).order_by(:start_at.desc)
+  end
+
+  def self.get_users_upcoming_leaves(user_id)
+    LeaveApplication.where(
+      user_id: user_id,
+      start_at: {'$gt' => Date.today},
+      :leave_status.ne => REJECTED
+    ).order_by(:start_at.asc)
   end
 
   def self.pending_leaves_reminder

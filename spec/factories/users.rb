@@ -3,6 +3,7 @@ FactoryGirl.define do
     role { 'Employee' }
     sequence(:email) { |n| "emp#{n}@#{ORGANIZATION_DOMAIN}" }
     password { Faker::Internet.password }
+    employee_detail_attributes { FactoryGirl.attributes_for(:employee_detail) }
     before(:create) do |user|
       user.public_profile = FactoryGirl.create(:public_profile, user: user)
       user.private_profile = FactoryGirl.create(:private_profile, user: user)
@@ -29,8 +30,10 @@ FactoryGirl.define do
 
   factory :employee, class: User do
     role { 'Employee' }
+    status { 'approved' }
     sequence(:email) { |i | Faker::Name.first_name + i.to_s + "@#{ORGANIZATION_DOMAIN}" }
     password { Faker::Internet.password }
+    employee_detail_attributes { FactoryGirl.attributes_for(:employee_detail) }
   end
 
   factory :manager, class: User do

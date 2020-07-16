@@ -52,7 +52,10 @@
             = link_to "Export Project Report", main_app.export_project_report_time_sheets_path, class: 'menu-font'
   %li
     = link_to "Assessments", ENV['snowflake_url']
+  %li
+    = link_to "Office Entry Pass", '/entry_passes'
   %li.divider
+
   %li
     = link_to 'Sign out', main_app.destroy_user_session_path, method: :delete
 :css

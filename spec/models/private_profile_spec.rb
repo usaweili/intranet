@@ -34,7 +34,7 @@ describe PrivateProfile do
     after do
       expect(user.save).to eq(false)
       expect(user.generate_errors_message).to eq(
-        "Private profile is invalid  Date of joining can't be blank"
+        "Private profile is invalid  Date of joining can't be blank "
       )
     end
 
@@ -80,7 +80,7 @@ describe PrivateProfile do
 
     after do
       expect(user.save).to eq(true)
-      expect(user.generate_errors_message).to eq('  ')
+      expect(user.generate_errors_message).to eq('   ')
     end
 
     it 'because joining date is present, role is employee' do
@@ -102,7 +102,7 @@ describe PrivateProfile do
       private_profile = FactoryGirl.create(:private_profile, user: user,
         end_of_probation: Date.today + 7)
       PrivateProfile.notify_probation_end
-      expect( ActionMailer::Base.deliveries[0].subject).to eq('End of probation period')
+      expect(ActionMailer::Base.deliveries[0].subject).to eq('Action Required: Probation period of employees ending soon')
       expect(ActionMailer::Base.deliveries.count).to eq(1)
     end
 
