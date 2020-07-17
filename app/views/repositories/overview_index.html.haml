@@ -1,0 +1,25 @@
+%h4 REPOSITORIES :
+
+%div{class:"form-horizontal"}
+  %table.table.table-hover#sortable
+    %thead
+      %tr
+        %th #
+        %th NAME
+        %th URL
+        %th MAINTAINABILITY
+        %th TEST COVERAGE
+    %tbody
+      - @repositories.each_with_index do |repo, index|
+        %tr
+          %td= index+1
+          %td
+            - hidden = repo.visibility.eql?("false") && !current_user.is_admin? && repo.project.users.pluck(:email).exclude?(current_user.email)
+            %b= hidden ? repo.name : (link_to repo.name, repository_issues_repositories_path(repo_id: repo.code_climate_id))
+          %td= repo.url ? (link_to repo.url, repo.url, target: '_blank') : '-'
+          %td
+            = repo.maintainability_badge.present? ? (raw repo.maintainability_badge) : '-'
+          %td
+            = repo.test_coverage_badge.present? ? (raw repo.test_coverage_badge) : '-'
+:javascript
+  $('#sortable').dataTable({ "aaSorting": [] });

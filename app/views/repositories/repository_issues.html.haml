@@ -1,0 +1,41 @@
+.row
+  %h4.left
+    = link_to 'Repositories', overview_index_repositories_path
+    &nbsp; > &nbsp; #{@repo_name ? @repo_name.upcase : 'Unknown Repository'} &nbsp; Issues :
+  - if @response_body && @response_body['meta']
+    %h4.right Total Issues : #{@response_body['meta']['total_count']}
+
+%div{class:"form-horizontal"}
+  %table.table.table-hover#issues_table
+    %thead
+      %tr
+        %th #
+        %th Description
+        %th Severity
+        %th Category
+        %th File
+        %th Line Number
+    %tbody
+      %script#issues_template{:type => "text/html"}
+        %tr
+          {{#record}}
+          %td
+            {{index}}
+          %td
+            {{attributes.description}}
+          %td.severity{style:"color:{{color}}"}
+            {{attributes.severity}}
+          %td
+            {{attributes.categories}}
+          %td
+            {{attributes.constant_name}}
+          %td
+            {{attributes.location.start_line}}
+          {{/record}}
+
+  - if @response_body["data"].nil?
+    %center
+      NO Rows Found
+
+:coffeescript
+  @data = #{@response_body["data"].to_json}
