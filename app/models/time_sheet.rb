@@ -8,6 +8,7 @@ class TimeSheet
   field :date,            :type => Date
   field :from_time,       :type => Time
   field :to_time,         :type => Time
+  field :duration,        :type => Integer
   field :description,     :type => String
   field :created_by,      :type => String
   field :updated_by,      :type => String
@@ -15,23 +16,71 @@ class TimeSheet
   belongs_to :user
   belongs_to :project
 
-  validates :from_time, :to_time, uniqueness: { scope: [:user_id, :date], message: "Record already present" }
   validates :project_id, :date, :description, presence: true
-
-  validates :date, presence: true, if: :is_future_date?
-  validates :from_time, presence: true, if: :from_time_is_future_time?
-  validates :to_time, presence: true, if: :to_time_is_future_time?
+  validate :is_future_date?
   before_validation :valid_date_for_create?, unless: :is_management?
-  validate :time_sheet_overlapping?
+
+  validates :from_time, :to_time, uniqueness: { scope: [:user_id, :date], message: "Record already present" }, if: :is_from_time_and_to_time_present?
+  # when both of them are absent thats when we have to check for the duration
+  validates :duration, presence: true, unless: :is_from_time_or_to_time_present?
+  # when atleast one of those is present thats when check for others presence
+  validate :presence_of_from_time_and_to_time?, if: :is_from_time_or_to_time_present?
+  validate :from_time_is_future_time?, :to_time_is_future_time?, :time_sheet_overlapping?, if: :is_from_time_and_to_time_present?
+  validate :working_hours_less_than_max_threshold
   # validate :timesheet_date_greater_than_project_start_date, if: :is_project_assigned_to_user?
 
+  DURATION_HASH = {
+    30 => "30 mins", 60 => "1 hour", 90 => "1 hour 30 mins",
+    120 => "2 hours", 150 => "2 hours 30 mins", 180 => "3 hours",
+    210 => "3 hours 30 mins", 240 => "4 hours", 270 => "4 hours 30 mins",
+    300 => "5 hours", 330 => "5 hours 30 mins", 360 => "6 hours",
+    390 => "6 hours 30 mins", 420 => "7 hours",
+    450 => "7 hours 30 mins", 480 => "8 hours"
+  }
   MAX_TIMESHEET_COMMAND_LENGTH = 5
   DATE_FORMAT_LENGTH = 3
   MAX_DAILY_STATUS_COMMAND_LENGTH = 2
   ALLOCATED_HOURS = 8
   DAYS_FOR_UPDATE = 7
-  DAYS_FOR_CREATE = 7
-  PENDING_THRESHOLD = 3                     #threshold pending days after which mail will be sent to all receivers
+  # change it back after running rake task to calculate duration
+  DAYS_FOR_CREATE = Date.today - TimeSheet.first.date
+  # threshold pending days after which mail will be sent to all receivers
+  PENDING_THRESHOLD = 3
+  # Working hours threshold for a day
+  WORKING_HOURS_THRESHOLD = 24
+
+  def is_from_time_and_to_time_present?
+    from_time.present? and to_time.present?
+  end
+
+  def is_from_time_or_to_time_present?
+    from_time.present? or to_time.present?
+  end
+
+  def presence_of_from_time_and_to_time?
+    text = "can't be blank"
+    unless to_time.present?
+      errors.add(:to_time, text)
+    end
+    unless from_time.present?
+      errors.add(:from_time, text)
+    end
+  end
+
+  # this method is used to check if total worked hours for a day is within limit
+  def working_hours_less_than_max_threshold
+    total_duration = TimeSheet.where(user: user, date: date).sum(:duration)
+    # here to_i is used as calculate_working_minutes for time-range return float which causes issues
+    self.duration = TimeSheet.calculate_working_minutes(self).to_i
+    total_duration += duration
+    # for update purpose if record persists deduct previous duration
+    # duration_was in condition if previous duration is nil
+    total_duration -= duration_was if persisted? and duration_was
+    total_hours_worked = TimeSheet.total_worked_in_hours(total_duration)
+    if total_hours_worked > WORKING_HOURS_THRESHOLD
+      errors.add(:duration, "total working hours can't exceed #{WORKING_HOURS_THRESHOLD} hours")
+    end
+  end
 
   def parse_timesheet_data(params)
     split_text = params['text'].split
@@ -202,6 +251,7 @@ class TimeSheet
     return_value = true
     TimeSheet.where(date: date, user_id: user_id).order("from_time ASC").each do |time_sheet|
       next if time_sheet == self
+      next unless time_sheet.is_from_time_and_to_time_present?
       if time_sheet.from_time < from_time && time_sheet.to_time > to_time ||
        time_sheet.from_time > from_time && time_sheet.to_time < to_time ||
        time_sheet.from_time > from_time && time_sheet.to_time > to_time && time_sheet.from_time < to_time ||
@@ -309,15 +359,15 @@ class TimeSheet
         total_minutes += minutes
         time_sheet_data = []
       end
-      hours, minitues = calculate_hours_and_minutes(total_minutes.to_i)
-      next if hours == 0 && minitues == 0
-      time_sheet_message += " *#{project.name}: #{hours}H #{minitues}M*"
+      hours, minutes = calculate_hours_and_minutes(total_minutes.to_i)
+      next if hours == 0 && minutes == 0
+      time_sheet_message += " *#{project.name}: #{hours}H #{minutes}M*"
       total_minutes = 0
     end
     return time_sheet_log, time_sheet_message
   end
 
-  def self.generete_employee_timesheet_report(timesheets, from_date, to_date, current_user)
+  def self.generate_employee_timesheet_report(timesheets, from_date, to_date, current_user)
     timesheet_reports = []
     timesheets.each do |timesheet|
       user = load_user_with_id(timesheet['_id'])
@@ -466,11 +516,10 @@ class TimeSheet
                          .map(&:user_id).uniq
         users.each do |user|
           timesheets = TimeSheet.where(date: date, project_id: project, user_id: user)
-          weekend_report += timesheets.map { |i| [ i.project.name, 
-                                                   i.user.name, 
-                                                   i.date.to_s,  
-                                                   i.from_time.strftime("%I:%M%p"), 
-                                                   i.to_time.strftime("%I:%M%p"),
+          weekend_report += timesheets.map { |i| [ i.project.name,
+                                                   i.user.name,
+                                                   i.date.to_s,
+                                                   DURATION_HASH[i.duration],
                                                    i.description] }
         end 
       end
@@ -594,9 +643,11 @@ class TimeSheet
   end
 
   def self.format_time(time_sheet)
-    from_time = time_sheet.from_time.strftime("%I:%M%p")
-    to_time = time_sheet.to_time.strftime("%I:%M%p")
-
+    from_time, to_time = "N.A.", "N.A."
+    unless time_sheet.from_time.blank? or time_sheet.to_time.blank?
+      from_time = time_sheet.from_time.strftime("%I:%M%p")
+      to_time = time_sheet.to_time.strftime("%I:%M%p")
+    end
     return from_time, to_time
   end
 
@@ -629,7 +680,10 @@ class TimeSheet
   end
 
   def self.calculate_working_minutes(time_sheet)
-    TimeDifference.between(time_sheet.to_time, time_sheet.from_time).in_minutes
+    unless time_sheet.from_time.blank? or time_sheet.to_time.blank?
+      return TimeDifference.between(time_sheet.to_time, time_sheet.from_time).in_minutes
+    end
+    return time_sheet.duration
   end
 
   def self.get_allocated_hours(project, from_date, to_date)
@@ -716,7 +770,7 @@ class TimeSheet
   end
 
   def self.generate_weekend_report_in_csv_format(weekly_report)
-    headers = ['Project Name', 'Employee Name', 'Date', 'From Time', 'To Time', 'Description']
+    headers = ['Project Name', 'Employee Name', 'Date', 'Duration', 'Description']
     weekly_report_in_csv =
       CSV.generate(headers: true) do |csv|
         csv << headers
@@ -758,19 +812,19 @@ class TimeSheet
   end
 
   def self.calculate_hours_and_minutes(total_minutes)
-    hours, minutes = conver_minutes_into_hours(total_minutes)
+    hours, minutes = convert_minutes_into_hours(total_minutes)
     minutes = '%02i'%minutes
     return hours, minutes
   end
 
-  def self.conver_minutes_into_hours(total_minutes)
+  def self.convert_minutes_into_hours(total_minutes)
     hours = total_minutes / 60
     minutes = total_minutes % 60
     return hours, minutes
   end
 
   def self.total_worked_in_hours(total_minutes)
-    hours, minutes = conver_minutes_into_hours(total_minutes)
+    hours, minutes = convert_minutes_into_hours(total_minutes)
     hours = minutes < 30 ? hours : hours + 1
     hours
   end
@@ -894,12 +948,14 @@ class TimeSheet
     params['time_sheets_attributes'].each do |key, value|
       time_sheet = time_sheets.find(value[:id])
       value['updated_by'] = current_user.id
-      value['from_time']  = value['date'] + ' ' + value['from_time']
-      value['to_time']    = value['date'] + ' ' + value['to_time']
       updated_time_sheets << time_sheet
-      unless time_sheet.time_validation(value['date'], value['from_time'], value['to_time'], 'from_ui')
-        return_value << false
-        next
+      unless value[:from_time].blank? or value[:to_time].blank?
+        value['from_time']  = value['date'] + ' ' + value['from_time']
+        value['to_time']    = value['date'] + ' ' + value['to_time']
+        unless time_sheet.time_validation(value['date'], value['from_time'], value['to_time'], 'from_ui')
+          return_value << false
+          next
+        end
       end
       if time_sheet.update_attributes(value)
         return_value << true
@@ -916,16 +972,18 @@ class TimeSheet
     params['time_sheets_attributes'].each do |key, value|
       value['user_id']    = user_id
       value['created_by'] = current_user.id
-      value['from_time']  = value['date'] + ' ' + value['from_time']
-      value['to_time']    = value['date'] + ' ' + value['to_time']
       time_sheet = TimeSheet.new
       value.delete("_destroy")
-      time_sheet.attributes = value
-      unless time_sheet.time_validation(value['date'], value['from_time'], value['to_time'], 'from_ui')
-        return_value << false
-        time_sheets << time_sheet
-        next
+      unless value[:from_time].blank? or value[:to_time].blank?
+        value['from_time']  = value['date'] + ' ' + value['from_time']
+        value['to_time']    = value['date'] + ' ' + value['to_time']
+        unless time_sheet.time_validation(value['date'], value['from_time'], value['to_time'], 'from_ui')
+          return_value << false
+          time_sheets << time_sheet
+          next
+        end
       end
+      time_sheet.attributes = value
       if time_sheet.save
         return_value << true
       else
@@ -1033,11 +1091,13 @@ class TimeSheet
       time_sheets.each do|time_sheet|
         time_sheet_data = {}
         next if user.user_projects.where(project_id: time_sheet.project_id).exists?
+        duration = DURATION_HASH[time_sheet.duration].nil? ? time_sheet.duration.to_s + "mins" : DURATION_HASH[time_sheet.duration]
         time_sheet_data = {
           project_name: time_sheet.project.name,
           date:         time_sheet.date,
           from_time:    time_sheet.from_time,
           to_time:      time_sheet.to_time,
+          duration:     duration,
           description:  time_sheet.description
         }
         user_timesheet << time_sheet_data
@@ -1048,6 +1108,7 @@ class TimeSheet
     end
   end
 
+  # conversion of minutes into milliseconds
   def self.load_timesheet(timesheet_ids, from_date, to_date)
     TimeSheet.collection.aggregate(
       [
@@ -1069,12 +1130,7 @@ class TimeSheet
               "project_id" => "$project_id"
             },
             "totalSum" => {
-              "$sum" => {
-                "$subtract" => [
-                  "$to_time",
-                  "$from_time"
-                ]
-              }
+              "$sum" => "$duration"
             }
           }
         },
@@ -1084,7 +1140,13 @@ class TimeSheet
             "working_status" => {
               "$push" => {
                 "project_id" => "$_id.project_id",
-                "total_time" => "$totalSum"
+                "total_time" => {
+                  "$multiply" => [
+                    "$totalSum",
+                    60,
+                    1000
+                  ]
+                }
               }
             }
           }
@@ -1093,6 +1155,7 @@ class TimeSheet
     )
   end
 
+  # duration is in minutes and we are calculating worked hours by milliseconds
   def self.load_projects_report(from_date, to_date)
     TimeSheet.collection.aggregate([
       {
@@ -1109,10 +1172,11 @@ class TimeSheet
             "project_id"=>"$project_id"
           },
           "totalSum"=>{
-            "$sum"=>{
-              "$subtract"=>[
-                "$to_time",
-                "$from_time"
+            "$sum"=> {
+              "$multiply" => [
+                "$duration",
+                60,
+                1000
               ]
             }
           }
@@ -1140,9 +1204,10 @@ class TimeSheet
           },
           "totalSum" => {
             "$sum" => {
-              "$subtract" => [
-                "$to_time",
-                "$from_time"
+              "$multiply" => [
+                "$duration",
+                60,
+                1000
               ]
             }
           }
