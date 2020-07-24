@@ -3,7 +3,7 @@ class RepositoriesController < ApplicationController
   @@snap_id = nil
 
   def overview_index
-    @repositories = Repository.all
+    @repositories = Repository.where(:name.nin => [nil, ''])
   end
 
   def repository_issues
