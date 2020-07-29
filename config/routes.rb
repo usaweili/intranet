@@ -13,6 +13,7 @@ Rails.application.routes.draw do
   resources :policies
   resources :holiday_lists
   resources :designations
+  resources :open_source_projects
   resources :entry_passes do
     collection do
       get :report, defaults: { format: :csv }
@@ -106,6 +107,7 @@ Rails.application.routes.draw do
       get 'team', to: "website#team"
       get 'news', to: "website#news"
       get 'portfolio', to: "website#portfolio"
+      get 'open_source_contribution', to: 'website#open_source_contribution'
       post 'contact_us', to: "website#contact_us"
       post 'contact_clipp', to: "clipp_contacts#contact_clipp"
       post 'career', to: "website#career"
