@@ -44,6 +44,7 @@ class Ability
     can :manage, Designation
     can :resource_list, User
     can :manage, EntryPass
+    can :manage, OpenSourceProject
   end
 
   def intern_abilities(user_id)

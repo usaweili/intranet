@@ -25,6 +25,7 @@ class Project
   field :logo
   field :visible_on_home_page, type: Boolean, default: false
   field :visible_on_website, type: Boolean, default: true
+  field :showcase_as_open_source, type: Boolean, default: false
   # More Details
   field :ruby_version
   field :rails_version
@@ -68,6 +69,7 @@ class Project
   scope :all_active, ->{where(is_active: true).asc(:name)}
   scope :visible_on_website, -> {where(visible_on_website: true)}
   scope :sort_by_position, -> { asc(:position)}
+  scope :open_source_projects, -> {where(showcase_as_open_source: true)}
 
   attr_accessor :allocated_employees, :manager_name, :employee_names, :working_employees_count
 

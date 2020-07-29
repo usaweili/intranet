@@ -31,6 +31,14 @@ class Api::V1::WebsiteController < ApplicationController
     end
   end
 
+  def open_source_contribution
+    open_source_projects = OpenSourceProject.all
+    project_visible_on_website = Project.open_source_projects
+    return_projects = open_source_projects + project_visible_on_website
+    return_projects = return_projects.sort{ |a, b| a.name <=> b.name }
+    render json: return_projects.as_json(project_fields)
+  end
+
   def career
     @career = Career.new(career_params)
     if @career.save
