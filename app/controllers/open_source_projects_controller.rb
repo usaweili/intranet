@@ -48,6 +48,6 @@ class OpenSourceProjectsController < ApplicationController
   private
   def safe_params
     params.require(:open_source_project).permit(:name, :image, :url, :description, :case_study,
-      :user_ids => [], technology_details_attributes: %i[id name version _destroy])
+      :showcase_on_website, :user_ids => [], technology_details_attributes: %i[id name version _destroy])
   end
 end

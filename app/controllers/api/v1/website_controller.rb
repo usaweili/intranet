@@ -32,11 +32,21 @@ class Api::V1::WebsiteController < ApplicationController
   end
 
   def open_source_contribution
-    open_source_projects = OpenSourceProject.all
+    open_source_projects = OpenSourceProject.showcase_on_website
     project_visible_on_website = Project.open_source_projects
     return_projects = open_source_projects + project_visible_on_website
     return_projects = return_projects.sort{ |a, b| a.name <=> b.name }
     render json: return_projects.as_json(project_fields)
+  end
+
+  def hackathons
+    hackathons = ShowcaseEvent.showcase_on_website.hackathons
+    render json: hackathons.as_json(hackathon_fields)
+  end
+
+  def community_events
+    community_events = ShowcaseEvent.showcase_on_website.community_events
+    render json: community_events.as_json(community_event_fields)
   end
 
   def career
@@ -71,6 +81,37 @@ class Api::V1::WebsiteController < ApplicationController
 
   def project_fields
     {only: [:name, :description, :url], methods: [:case_study_url, :tags, :image_url]}
+  end
+
+  def hackathon_fields
+    {
+      only: [:name, :description, :date, :venue, :videos, :photos],
+      include: {
+        showcase_event_applications: {
+          only: [:name, :description, :domain],
+          include: {
+            showcase_event_teams: {
+              only: [:name, :proposed_solution, :repository_link, :demo_link],
+              include: {
+                members: {
+                  only: [:email],
+                  methods: [:name]
+                },
+                technology_details: {
+                  only: [:name, :version]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  end
+
+  def community_event_fields
+    {
+      only: [:name, :description, :date, :venue, :videos, :photos]
+    }
   end
 
   def restrict_access
