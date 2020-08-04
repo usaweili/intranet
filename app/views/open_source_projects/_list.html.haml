@@ -4,6 +4,7 @@
       %th #
       %th Project Name
       %th Repository URL
+      %th Showcase on Website
       - if can? :manage, OpenSourceProject
         %th Action
   %tbody
@@ -12,6 +13,7 @@
         %td= i+1
         %td= link_to open_source_project.name, open_source_project_path(open_source_project)
         %td= link_to open_source_project.url, "https://#{open_source_project.url}"
+        %td= open_source_project.showcase_on_website
         - if can? :manage, OpenSourceProject
           %td
             =link_to '', edit_open_source_project_path(open_source_project), class: "icon-edit", data: {'no-turbolink' =>  true}

@@ -6,9 +6,10 @@ class OpenSourceProject
   mount_uploader :image, FileUploader
   mount_uploader :case_study, FileUploader
 
-  field :name,          type: String
+  field :name,                type: String
   field :image
-  field :description,   type: String
+  field :description,         type: String
+  field :showcase_on_website, type: Boolean, default: false
   field :case_study
   field :url
   slug :name
@@ -20,6 +21,8 @@ class OpenSourceProject
 
   validates_presence_of :name, :description, :url
   validates_uniqueness_of :url, :name
+
+  scope :showcase_on_website, ->{where(showcase_on_website: true).asc(:name)}
 
   def self.get_all_sorted_by_name
     OpenSourceProject.all.asc(:name)
