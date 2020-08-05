@@ -3,7 +3,6 @@ class ShowcaseEvent
   include Mongoid::Slug
   include Mongoid::Timestamps
 
-  mount_uploader :photos, FileUploader
 
   TYPES = ['Hackathon', 'Community']
 
@@ -13,10 +12,11 @@ class ShowcaseEvent
   field :date,                type: Date
   field :venue,               type: String
   field :showcase_on_website, type: Boolean
-  field :photos
   # video links
   field :video
   slug :name
+
+  has_many :file_attachments, dependent: :destroy
 
   has_many :showcase_event_applications, dependent: :destroy
   accepts_nested_attributes_for :showcase_event_applications, allow_destroy: true
@@ -38,5 +38,9 @@ class ShowcaseEvent
 
   def is_hackathon?
     type == "Hackathon"
+  end
+
+  def photos
+    file_attachments.where(type: 'photo').collect(&:doc)
   end
 end

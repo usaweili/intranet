@@ -85,7 +85,8 @@ class Api::V1::WebsiteController < ApplicationController
 
   def hackathon_fields
     {
-      only: [:name, :description, :date, :venue, :videos, :photos],
+      only: [:name, :description, :date, :venue, :videos],
+      methods: [:photos],
       include: {
         showcase_event_applications: {
           only: [:name, :description, :domain],
@@ -110,7 +111,8 @@ class Api::V1::WebsiteController < ApplicationController
 
   def community_event_fields
     {
-      only: [:name, :description, :date, :venue, :videos, :photos]
+      only: [:name, :description, :date, :venue, :videos],
+      methods: [:photos]
     }
   end
 

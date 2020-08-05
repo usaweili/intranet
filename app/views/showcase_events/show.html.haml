@@ -33,7 +33,12 @@
         %td= link_to @showcase_event.video, @showcase_event.video
       %tr
         %th Photos
-        %td= image_tag @showcase_event.photos, size:'300x300'
+        %td
+          %table
+            - @showcase_event.file_attachments.each_slice(3).each do |photo_attachments|
+              %tr
+                - photo_attachments.each do |photo_attachment|
+                  %td{style: 'padding: 5'}= image_tag(photo_attachment.doc, size: '300x300')
   - if @showcase_event.is_hackathon? and @showcase_event_applications.count > 0
     %h3 Topics
     %div{style: 'margin-left: 20'}

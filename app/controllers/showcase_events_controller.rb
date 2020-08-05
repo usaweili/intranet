@@ -17,6 +17,9 @@ class ShowcaseEventsController < ApplicationController
   def create
     @showcase_event = ShowcaseEvent.new(safe_params)
     if @showcase_event.save
+      params[:showcase_event][:photos].try(:each) do |photo|
+        @showcase_event.file_attachments.create!(:doc => photo, type: 'photo')
+      end
       flash[:success] = "Event created Successfully"
       redirect_to showcase_events_path
     else
@@ -30,7 +33,10 @@ class ShowcaseEventsController < ApplicationController
 
   def update
     if @showcase_event.update(safe_params)
-      redirect_to edit_showcase_event_path
+      params[:showcase_event][:photos].try(:each) do |photo|
+        @showcase_event.file_attachments.create!(:doc => photo, type: 'photo')
+      end
+      redirect_to edit_showcase_event_path(@showcase_event)
     else
       @showcase_event_applications = @showcase_event.showcase_event_applications
       flash[:error] = "Event updation failed"
@@ -53,7 +59,7 @@ class ShowcaseEventsController < ApplicationController
 
   private
   def safe_params
-    params.require(:showcase_event).permit(:name, :type, :url, :description, :date, :venue, :photos, :video,
+    params.require(:showcase_event).permit(:name, :type, :url, :description, :date, :venue, :video,
       :showcase_on_website, showcase_event_applications_attributes: %i[id name description domain _destroy], :user_ids => [],
       showcase_event_teams_attributes: [:id, :name, :showcase_event_application_id, :proposed_solution,
       :repository_link, :demo_link, :_destroy, :member_ids => [], technology_details_attributes: %i[id name version _destroy]])
