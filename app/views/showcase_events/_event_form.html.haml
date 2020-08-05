@@ -11,11 +11,15 @@
           = f.check_box :showcase_on_website, {}, 'true', 'false'
       = f.input :date, label: 'Date', input_html: {class: 'datepicker', data: {'behaviour' => 'datepicker', 'validation-required-message' => 'You must select date'}, required: true, value: f.object.date.try(:strftime, '%d-%m-%Y')}
       = f.input :venue, as: :text, input_html: {class: "text-description", style: 'height:70; width: 208'}
-      = image_tag f.object.photos, size: "300x300", style: 'float:right', id: 'photos'
-      = label_tag "Photos", nil, class: 'control-label'
-      .controls
-        = f.file_field :photos, required: true, id: 'logo-upload', accept: ".jpg, .jpeg, .png"
       = f.input :video
+      = f.input :photos, as: :file, input_html: {:multiple => true}
+      - if @showcase_event.file_attachments.count > 0
+        %table{style: 'margin-left: 50'}
+          %h4 Photos
+          - @showcase_event.file_attachments.each_slice(3).each do |photo_attachments|
+            %tr
+              - photo_attachments.each do |photo_attachment|
+                %td{style: 'padding: 5'}= image_tag(photo_attachment.doc, size: '300x300')
   = f.submit :Save, class: 'btn controls btn-success'
 
 :css

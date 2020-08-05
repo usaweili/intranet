@@ -22,7 +22,7 @@
         %hr
         %h4 Technology Details
         %div{id: "#{index}_tech_detail_fields"}
-          = f.fields_for :technology_details do|t|
+          = f.fields_for :technology_details do |t|
             .row
               .span4.off-set2
                 = t.input :name, collection: (LANGUAGE + FRAMEWORK).sort_by(&:downcase), input_html: {"data-placeholder" => "Add Technology",class:'technology'}, label: "Technology/Framework", include_blank: true, include_hidden: false
