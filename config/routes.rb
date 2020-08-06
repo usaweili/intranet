@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   resources :designations
   resources :open_source_projects
   resources :showcase_events
+  resources :trainings
   resources :entry_passes do
     collection do
       get :report, defaults: { format: :csv }
@@ -108,6 +109,7 @@ Rails.application.routes.draw do
       get 'team', to: "website#team"
       get 'news', to: "website#news"
       get 'hackathons', to: "website#hackathons"
+      get 'trainings', to: "website#trainings"
       get 'community_events', to: "website#community_events"
       get 'portfolio', to: "website#portfolio"
       get 'open_source_contribution', to: 'website#open_source_contribution'
