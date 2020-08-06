@@ -41,7 +41,7 @@
         %td
           - if a.object.type_of_address == ADDRESSES[1]
             = a.label 'Same as permenent'
-            .make-switch#address_button{"data-on" => "success", "data-off" => "warning", "data-on-label"=>"Yes", "data-off-label"=> "NO"}
+            .make-switch#address_button{ tabindex: 0, "data-on": "success", "data-off": "warning", "data-on-label": "Yes", "data-off-label": "NO"}
               = a.check_box :same_as_permanent_address, {}, 'true', 'false'
           %div{class: "#{a.object.type_of_address.downcase}"}
             %h4
