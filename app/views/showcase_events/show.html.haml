@@ -55,7 +55,7 @@
             %td= event_application.domain
         %h4
           %a{href: "##{event_application.name}", 'data-toggle':"collapse"}
-            Teams
+            View Teams
         %div.collapse{id: "#{event_application.name}", style: 'margin-left: 20'}
           = render 'event_teams_info', event_application: event_application
         %hr

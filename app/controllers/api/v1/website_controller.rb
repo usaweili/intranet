@@ -44,6 +44,11 @@ class Api::V1::WebsiteController < ApplicationController
     render json: hackathons.as_json(hackathon_fields)
   end
 
+  def trainings
+    trainings = Training.showcase_on_website
+    render json: trainings.as_json(training_fields)
+  end
+
   def community_events
     community_events = ShowcaseEvent.showcase_on_website.community_events
     render json: community_events.as_json(community_event_fields)
@@ -113,6 +118,29 @@ class Api::V1::WebsiteController < ApplicationController
     {
       only: [:name, :description, :date, :venue, :videos],
       methods: [:photos]
+    }
+  end
+
+  def training_fields
+    {
+      only: [:subject, :objectives, :date, :venue, :video, :blog_link, :duration],
+      methods: [:photos, :ppts],
+      include: {
+        trainer: {
+          only: [:email],
+          methods: [:name, :designation_name]
+        },
+        chapters: {
+          only: [:subject, :objectives, :video, :blog_link, :duration],
+          methods: [:photos, :ppts],
+          include: {
+            trainer: {
+              only: [:email],
+              methods: [:name, :designation_name]
+            }
+          }
+        }
+      }
     }
   end
 

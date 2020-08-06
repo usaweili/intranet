@@ -23,6 +23,7 @@ class Ability
       can :manage, EntryPass
       can :manage, OpenSourceProject
       can :manage, ShowcaseEvent
+      can :manage, Training
       # TODO remove later after snowflake changes
       can :manage, Designation
     elsif user.role? 'Employee'
@@ -47,6 +48,7 @@ class Ability
     can :manage, EntryPass
     can :manage, OpenSourceProject
     can :manage, ShowcaseEvent
+    can :manage, Training
   end
 
   def intern_abilities(user_id)
