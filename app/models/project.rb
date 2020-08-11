@@ -130,7 +130,7 @@ class Project
       :payment_gateway, :image_store, :background_jobs, :other_frameworks, :other_details].each do |field|
        tags << self.tag_name(field) if self.try(field).present?
     end
-    tags.compact.flatten
+    tags.compact.flatten.sort
   end
 
   def self.to_csv(options = {})

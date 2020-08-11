@@ -6,6 +6,7 @@
       %th Date
       %th Duration
       %th Venue
+      %th Chapters
       %th Showcase on Website
       - if can? :manage, Training
         %th Action
@@ -17,6 +18,7 @@
         %td= training.date
         %td= training.duration
         %td= training.venue
+        %td= training.chapters.count
         %td= training.showcase_on_website
         - if can? :manage, Training
           %td

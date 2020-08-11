@@ -28,7 +28,7 @@ class TrainingsController < ApplicationController
   def update
     if @training.update(safe_params)
       create_file_attachments(params)
-      redirect_to trainings_path(@training)
+      redirect_to trainings_path
     else
       flash[:error] = "Training record updation failed"
       render 'edit'
@@ -49,8 +49,8 @@ class TrainingsController < ApplicationController
 
   private
   def safe_params
-    params.require(:training).permit(:subject, :objectives, :date, :showcase_on_website, :venue, :duration, :video, :blog_link, :trainer_id,
-      :chapters_attributes => [:id, :subject, :objectives, :video, :trainer_id, :blog_link, :duration, :_destroy])
+    params.require(:training).permit(:subject, :objectives, :date, :showcase_on_website, :venue, :duration, :video, :blog_link, :trainer_ids => [],
+      :chapters_attributes => [:id, :chapter_number, :subject, :objectives, :video, :blog_link, :duration, :_destroy, :trainer_ids => []])
   end
 
   def create_file_attachments(params)
@@ -62,7 +62,7 @@ class TrainingsController < ApplicationController
     end
     params[:training][:chapters_attributes].try(:each) do |chapter_attributes|
       next if chapter_attributes[1][:_destroy] == '1'
-      chapter = Training.find(chapter_attributes[1]['id'])
+      chapter = @training.chapters.find_by(chapter_number: chapter_attributes[1]['chapter_number'])
       chapter_attributes[1][:photos].try(:each) do |photo|
         chapter.file_attachments.create!(:doc => photo, type: 'photo')
       end
