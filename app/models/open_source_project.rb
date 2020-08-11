@@ -33,7 +33,7 @@ class OpenSourceProject
     technology_details.each do |technology_detail|
       tags << "#{technology_detail.name} #{technology_detail.version}"
     end
-    tags.compact.flatten
+    tags.compact.flatten.sort
   end
 
   private

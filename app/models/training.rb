@@ -6,14 +6,15 @@ class Training
   TYPES = ['Hackathon', 'Community']
 
   field :subject,             type: String
-  field :objectives,           type: String
+  field :objectives,          type: String
   field :date,                type: Date
   field :venue,               type: String
   field :showcase_on_website, type: Boolean, default: false
-  field :duration
+  field :chapter_number,      type: Integer
+  # duration in days
+  field :duration,            type: Integer
   field :video
   field :blog_link
-  field :ppt
 
   slug :subject
 
@@ -22,28 +23,30 @@ class Training
 
   has_many :chapters, class_name: 'Training', dependent: :destroy
   belongs_to :training
-  accepts_nested_attributes_for :chapters, reject_if: :chapter_record_is_blank?
+  accepts_nested_attributes_for :chapters, allow_destroy: true, reject_if: :chapter_record_is_blank?
 
-  belongs_to :trainer, class_name: 'User'
+  has_and_belongs_to_many :trainers, class_name: 'User'
   belongs_to :training
 
-  has_many :technology_details
-  accepts_nested_attributes_for :technology_details, allow_destroy: true
-
   validates_presence_of :subject, :objectives, :duration
+  validates :chapter_number, uniqueness: { scope: :training, message: "already present" }, unless: 'training_id.nil?'
   scope :showcase_on_website, -> {training_only.where(showcase_on_website: true)}
   # training_only is for those records who are not chapters as the training has a self association
   scope :training_only, -> {where(training_id: nil)}
 
   def chapter_record_is_blank?(attributes)
-    attributes[:subject].blank?  and attributes[:objective].blank? and attributes[:duration].blank?
+    attributes[:subject].blank?  and attributes[:objective].blank? and attributes[:duration].blank? and attributes[:chapter_number].blank?
+  end
+
+  def duration_to_display
+    "#{duration} #{'day'.pluralize(duration)}"
   end
 
   def photos
-    file_attachments.where(type: 'photo').collect(&:doc)
+    file_attachments.where(type: 'photo').map {|photo| photo.doc.as_json[:doc]}
   end
 
   def ppts
-    file_attachments.where(type: 'ppt').collect(&:doc)
+    file_attachments.where(type: 'ppt').map {|ppt| ppt.doc.url}
   end
 end

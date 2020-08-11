@@ -31,27 +31,27 @@ class Api::V1::WebsiteController < ApplicationController
     end
   end
 
-  def open_source_contribution
+  def open_source_contributions
     open_source_projects = OpenSourceProject.showcase_on_website
     project_visible_on_website = Project.open_source_projects
     return_projects = open_source_projects + project_visible_on_website
     return_projects = return_projects.sort{ |a, b| a.name <=> b.name }
-    render json: return_projects.as_json(project_fields)
+    render json: {projects: return_projects.as_json(project_fields)}
   end
 
   def hackathons
     hackathons = ShowcaseEvent.showcase_on_website.hackathons
-    render json: hackathons.as_json(hackathon_fields)
+    render json: {hackathons: hackathons.as_json(hackathon_fields)}
   end
 
   def trainings
     trainings = Training.showcase_on_website
-    render json: trainings.as_json(training_fields)
+    render json: {trainings: trainings.as_json(training_fields)}
   end
 
   def community_events
     community_events = ShowcaseEvent.showcase_on_website.community_events
-    render json: community_events.as_json(community_event_fields)
+    render json: {community_events: community_events.as_json(community_event_fields)}
   end
 
   def career
@@ -90,7 +90,7 @@ class Api::V1::WebsiteController < ApplicationController
 
   def hackathon_fields
     {
-      only: [:name, :description, :date, :venue, :videos],
+      only: [:name, :description, :date, :venue, :video],
       methods: [:photos],
       include: {
         showcase_event_applications: {
@@ -116,22 +116,22 @@ class Api::V1::WebsiteController < ApplicationController
 
   def community_event_fields
     {
-      only: [:name, :description, :date, :venue, :videos],
+      only: [:name, :description, :date, :venue, :video],
       methods: [:photos]
     }
   end
 
   def training_fields
     {
-      only: [:subject, :objectives, :date, :venue, :video, :blog_link, :duration],
-      methods: [:photos, :ppts],
+      only: [:subject, :objectives, :date, :venue, :video, :blog_link],
+      methods: [:photos, :ppts, :duration_to_display],
       include: {
-        trainer: {
+        trainers: {
           only: [:email],
           methods: [:name, :designation_name]
         },
         chapters: {
-          only: [:subject, :objectives, :video, :blog_link, :duration],
+          only: [:chapter_number, :subject, :objectives, :video, :blog_link, :duration],
           methods: [:photos, :ppts],
           include: {
             trainer: {

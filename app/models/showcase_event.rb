@@ -24,7 +24,7 @@ class ShowcaseEvent
   has_many :showcase_event_teams, dependent: :destroy
   accepts_nested_attributes_for :showcase_event_teams, allow_destroy: true
 
-  validates_presence_of :name, :description, :date, :venue
+  validates_presence_of :name, :description, :date, :venue, :type
   validates_uniqueness_of :name
   validates :type, inclusion: { in: TYPES, allow_nil: false }
 
@@ -41,6 +41,6 @@ class ShowcaseEvent
   end
 
   def photos
-    file_attachments.where(type: 'photo').collect(&:doc)
+    file_attachments.where(type: 'photo').map {|photo| photo.doc.as_json[:doc]}
   end
 end

@@ -112,7 +112,7 @@ Rails.application.routes.draw do
       get 'trainings', to: "website#trainings"
       get 'community_events', to: "website#community_events"
       get 'portfolio', to: "website#portfolio"
-      get 'open_source_contribution', to: 'website#open_source_contribution'
+      get 'open_source_contributions', to: 'website#open_source_contributions'
       post 'contact_us', to: "website#contact_us"
       post 'contact_clipp', to: "clipp_contacts#contact_clipp"
       post 'career', to: "website#career"
