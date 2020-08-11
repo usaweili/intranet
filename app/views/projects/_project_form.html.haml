@@ -1,4 +1,4 @@
-= simple_form_for @project, :html => {class: "form-horizontal"} do |f|
+= simple_form_for @project, url: @project.new_record? ? projects_path : project_path(@project.id),  :html => {class: "form-horizontal"} do |f|
   .control-group
     .row
       .col-md-6
@@ -45,7 +45,7 @@
           = f.input :invoice_date, input_html: {class: :datepicker}, value: f.object.start_date.try(:strftime, '%d-%m-%Y')
           = f.input :code, label: "Project Code", id: "projectcode" do
             = f.text_field :code, readonly: f.object.code
-            - unless f.object.code
+            - unless f.object.code.present?
               = link_to "javascript:void(0)", onclick: "generate_code();" do
                 Generate New Code
               - if @company && @company.projects.exists?

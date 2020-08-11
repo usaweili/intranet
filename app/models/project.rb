@@ -207,10 +207,10 @@ class Project
   end
 
   def project_code
-    return true if code.nil?
+    self.errors.add(:code, "can't be blank") unless code.present?
     project = Project.where(code: self.code, :id.ne => self.id).first
     if project.present?
-      self.errors.add(:base, "Code already exists") unless
+      self.errors.add(:code, 'Code already exists') unless
         project.company_id == self.company_id
     end
   end
