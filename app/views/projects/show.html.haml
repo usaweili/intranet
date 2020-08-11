@@ -16,9 +16,6 @@
           %th End Date
           %td= @project.end_date
         %tr
-          %th End Date
-          %td= @project.end_date
-        %tr
           %th Invoice Date
           %td= @project.invoice_date
         %tr
@@ -34,7 +31,7 @@
           %th Code climate snippet
           %td=raw @project.code_climate_snippet
         %tr
-          %th Comapny
+          %th Company
           %td= link_to @project.company.try(:name), @project.company
   %table.table.table-hover.table-stripe
     %tr
