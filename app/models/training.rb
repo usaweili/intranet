@@ -21,7 +21,7 @@ class Training
   has_many :file_attachments, dependent: :destroy
   accepts_nested_attributes_for :file_attachments
 
-  has_many :chapters, class_name: 'Training', dependent: :destroy
+  has_many :chapters, class_name: 'Training', dependent: :destroy, order: "chapter_number ASC"
   belongs_to :training
   accepts_nested_attributes_for :chapters, allow_destroy: true, reject_if: :chapter_record_is_blank?
 

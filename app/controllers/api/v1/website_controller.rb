@@ -131,10 +131,10 @@ class Api::V1::WebsiteController < ApplicationController
           methods: [:name, :designation_name]
         },
         chapters: {
-          only: [:chapter_number, :subject, :objectives, :video, :blog_link, :duration],
-          methods: [:photos, :ppts],
+          only: [:chapter_number, :subject, :objectives, :video, :blog_link],
+          methods: [:photos, :ppts, :duration_to_display],
           include: {
-            trainer: {
+            trainers: {
               only: [:email],
               methods: [:name, :designation_name]
             }
