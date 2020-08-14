@@ -47,6 +47,6 @@ class Training
   end
 
   def ppts
-    file_attachments.where(type: 'ppt').map {|ppt| ppt.doc.url}
+    file_attachments.where(type: 'ppt').map {|ppt| {url: ppt.doc.url}}
   end
 end
