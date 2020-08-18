@@ -29,6 +29,7 @@ class Training
   belongs_to :training
 
   validates_presence_of :subject, :objectives, :duration
+  validates_presence_of :chapter_number, unless: 'training_id.nil?'
   validates :chapter_number, uniqueness: { scope: :training, message: "already present" }, unless: 'training_id.nil?'
   scope :showcase_on_website, -> {training_only.where(showcase_on_website: true)}
   # training_only is for those records who are not chapters as the training has a self association

@@ -8,7 +8,6 @@ class OpenSourceProjectsController < ApplicationController
 
   def new
     @open_source_project = OpenSourceProject.new()
-    @open_source_project.technology_details.build
   end
 
   def create

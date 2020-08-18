@@ -11,5 +11,5 @@ class ShowcaseEventApplication
   has_many :showcase_event_teams, dependent: :destroy
 
   validates_presence_of :name, :description, :domain
-  validates :name, uniqueness: {scope: :showcase_event_id, message: "already present"}
+  validates :name, uniqueness: {scope: :showcase_event_id, message: "already present for Event"}
 end
