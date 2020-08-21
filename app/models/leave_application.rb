@@ -76,9 +76,18 @@ class LeaveApplication
       user = self.user
       # deduction and addition should only happen for the leaves in ongoing year
       start_at = self.start_at
-      end_at = [self.end_at, self.start_at.end_of_year].min
-      number_of_days = HolidayList.number_of_working_days(start_at, end_at)
-      user.employee_detail.add_rejected_leave(number_of_days)
+      end_at = self.end_at
+      if Date.today.year == start_at.year
+        # for dates starting in current year
+        end_at = [self.end_at, self.start_at.end_of_year].min
+        number_of_days = HolidayList.number_of_working_days(start_at, end_at)
+        user.employee_detail.add_rejected_leave(number_of_days)
+      elsif Date.today.year == end_at.year
+        # for last year leaves lying end date in current year
+        start_at = [self.start_at, self.end_at.beginning_of_year].max
+        number_of_days = HolidayList.number_of_working_days(start_at, end_at)
+        user.employee_detail.add_rejected_leave(number_of_days)
+      end
     end
     UserMailer.delay.reject_leave(self.id)
   end
@@ -160,6 +169,10 @@ class LeaveApplication
       # for 20th DEC to 23rd DEC, end_at = 23rd DEC
       end_at = [end_at, start_at.end_of_year].min
       number_of_days = HolidayList.number_of_working_days(start_at, end_at)
+    elsif Date.today.year == end_at.year
+      # for last year leaves lying end date in current year
+      start_at = [start_at, end_at.beginning_of_year].max
+      number_of_days = HolidayList.number_of_working_days(start_at, end_at)
     end
     if (pending? and self.leave_status_was.nil?) or (approved? and self.leave_status_was == REJECTED)
       user.employee_detail.deduct_available_leaves(number_of_days) if leave_request?
@@ -172,9 +185,13 @@ class LeaveApplication
     if leave_request?
       end_at_was = self.end_at_was
       start_at_was = self.start_at_was
-      # if previously the leave was for going year, same condition as in deduct_available_leave_send_mail
+      # same condition as in deduct_available_leave_send_mail
       if Date.today.year == start_at_was.year
         end_at_was = [end_at_was, start_at_was.end_of_year].min
+        prev_number_of_days = HolidayList.number_of_working_days(start_at_was, end_at_was)
+        user.employee_detail.add_rejected_leave(prev_number_of_days)
+      elsif Date.today.year == end_at_was.year
+        start_at_was = [start_at_was, end_at_was.beginning_of_year].max
         prev_number_of_days = HolidayList.number_of_working_days(start_at_was, end_at_was)
         user.employee_detail.add_rejected_leave(prev_number_of_days)
       end
@@ -183,6 +200,10 @@ class LeaveApplication
       # the leave currently is for going year
       if Date.today.year == start_at.year
         end_at = [end_at, start_at.end_of_year].min
+        number_of_days = HolidayList.number_of_working_days(start_at, end_at)
+        user.employee_detail.deduct_available_leaves(number_of_days)
+      elsif Date.today.year == end_at.year
+        start_at = [start_at, end_at.beginning_of_year].max
         number_of_days = HolidayList.number_of_working_days(start_at, end_at)
         user.employee_detail.deduct_available_leaves(number_of_days)
       end
