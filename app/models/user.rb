@@ -90,10 +90,27 @@ class User
     [record.id.to_s, record.authenticatable_salt]
   end
 
+  def set_user_project_entries_inactive
+    UserProject.where(user_id: self.id, active: true).update_all(active: false, end_date: Date.today)
+  end
+
+  def remove_from_manager_ids
+    managed_projects.each do |project|
+      project.set(manager_ids: project.manager_ids.reject {|manager_id| manager_id == id})
+    end
+    self.set(managed_project_ids: [])
+  end
+
+  def remove_from_notification_emails
+    User.where(:'employee_detail.notification_emails'.in => [self.email]).each do |user|
+      user.employee_detail.set(notification_emails: user.employee_detail.notification_emails.reject {|email| email == self.email})
+    end
+  end
+
   def notification_emails
     [
       User.approved.where(role: 'HR').pluck(:email), User.approved.where(role: 'Admin').first.try(:email),
-      self.employee_detail.try(:notification_emails).try(:split, ','), self.get_managers_emails
+      self.employee_detail.try(:get_notification_emails).try(:split, ','), self.get_managers_emails
     ].flatten.compact.uniq
   end
 
@@ -167,6 +184,13 @@ class User
     error_msg.join(' ')
   end
 
+  def reject_future_leaves
+    return if self.status == 'approved'
+    LeaveApplication.where(:start_at.gte => Date.today, user: self).each do |leave_application|
+      leave_application.update(leave_status: 'Rejected')
+    end
+  end
+
   def add_or_remove_projects(params)
     return_value_of_add_project = return_value_of_remove_project = true
     existing_project_ids = UserProject.where(user_id: id, end_date: nil).pluck(:project_id)
@@ -204,7 +228,7 @@ class User
 
   def get_managers_emails
     manager_ids = projects.pluck(:manager_ids).flatten.uniq
-    User.in(id: manager_ids).collect(&:email)
+    User.in(id: manager_ids, status: 'approved').collect(&:email)
   end
 
   def get_managers_emails_for_timesheet
@@ -220,7 +244,7 @@ class User
 
   def get_managers_names
     manager_ids = projects.pluck(:manager_ids).flatten.uniq
-    User.in(id: manager_ids).collect(&:name)
+    User.in(id: manager_ids, status: 'approved').collect(&:name)
   end
 
   def self.get_hr_emails
