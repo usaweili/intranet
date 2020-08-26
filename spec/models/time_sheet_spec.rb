@@ -1361,7 +1361,7 @@ RSpec.describe TimeSheet, type: :model do
       FactoryGirl.create(:holiday, holiday_date: '11/10/2018'.to_date)
       from_date = '05/10/2018'.to_date
       to_date = '15/10/2018'.to_date
-      count = TimeSheet.get_holiday_count(from_date, to_date)
+      count = TimeSheet.get_holiday_count(from_date, to_date, "India")
       expect(count).to eq(2)
     end
 
@@ -1370,7 +1370,7 @@ RSpec.describe TimeSheet, type: :model do
       FactoryGirl.create(:holiday, holiday_date: '11/10/2018'.to_date)
       from_date = '01/10/2018'.to_date
       to_date = '05/10/2018'.to_date
-      count = TimeSheet.get_holiday_count(from_date, to_date)
+      count = TimeSheet.get_holiday_count(from_date, to_date, "India")
       expect(count).to eq(0)
     end
   end
@@ -2109,7 +2109,7 @@ RSpec.describe TimeSheet, type: :model do
                                         project: project)
       date = Date.today - Date.today.wday
       FactoryGirl.create(:time_sheet, date: date, user: user, project: project )
-      TimeSheet.generate_and_send_weekend_report([date], @start_date)
+      TimeSheet.generate_and_send_weekend_report([{date: date, country: 'India'}], @start_date)
 
       expect(ActionMailer::Base.deliveries.count).to eq(1)
       expect(ActionMailer::Base.deliveries.first.subject).to eq(
@@ -2122,9 +2122,9 @@ RSpec.describe TimeSheet, type: :model do
                                         user: user,
                                         project: project)
       date = Date.today - 1
-      FactoryGirl.build(:holiday, holiday_date: date, reason: 'Test')
+      FactoryGirl.build(:holiday, holiday_date: date, reason: 'Test', country: 'India')
       FactoryGirl.create(:time_sheet, date: date, user: user, project: project )
-      TimeSheet.generate_and_send_weekend_report([date], @start_date)
+      TimeSheet.generate_and_send_weekend_report([{date: date, country: 'India'}], @start_date)
 
       expect(ActionMailer::Base.deliveries.count).to eq(1)
       expect(ActionMailer::Base.deliveries.first.subject).to eq(

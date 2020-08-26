@@ -1,6 +1,7 @@
 FactoryGirl.define do
   factory :holiday, class: HolidayList do
     reason { Faker::Lorem.sentence(4) }
+    country { 'India' }
 
     after(:build) do |obj|
       if(obj.holiday_date == nil)

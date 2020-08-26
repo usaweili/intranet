@@ -6,7 +6,6 @@ describe HolidayList do
     it { should have_fields(:holiday_date, :reason) }
     it { should validate_presence_of(:holiday_date) }
     it { should validate_presence_of(:reason) }
-    it { should validate_uniqueness_of(:holiday_date) }
   end
 
   context 'Weekends' do
@@ -30,7 +29,7 @@ describe HolidayList do
 
   it 'should return next working day' do
     date = '26/06/2020'.to_date
-    next_date = HolidayList.next_working_day(date)
+    next_date = HolidayList.next_working_day(date, 'India')
     expect(next_date).to eq('29/06/2020'.to_date)
   end
 end
