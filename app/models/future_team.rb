@@ -25,6 +25,9 @@ class FutureTeam
   validate :validate_requirement_received_on, on: [:create, :update]
   validate :validate_skills, on: [:create, :update]
 
+  scope :pending, ->{where(:current_status.ne => 'Closed')}
+  scope :closed, ->{where(:current_status => 'Closed')}
+
   def self.to_csv()
     attributes = ["customer", "years_of_experience", "skills", "number_of_open_positions", "requirement_received_on", "required_by_date", "current_status", "proposed_candidates"]
     CSV.generate(headers: true) do |csv|
