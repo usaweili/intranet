@@ -15,7 +15,13 @@ Rails.application.routes.draw do
   resources :designations
   resources :open_source_projects
   resources :showcase_events
-  resources :trainings
+
+  resources :trainings do
+    collection do
+      get '/video_render/:id', to: 'trainings#video_render', as: :video_render
+    end
+  end
+
   resources :entry_passes do
     collection do
       get :report, defaults: { format: :csv }

@@ -47,6 +47,9 @@ class TrainingsController < ApplicationController
      redirect_to trainings_path
   end
 
+  def video_render
+  end
+
   private
   def safe_params
     params.require(:training).permit(:subject, :objectives, :date, :showcase_on_website, :venue, :duration, :video, :blog_link, :trainer_ids => [],

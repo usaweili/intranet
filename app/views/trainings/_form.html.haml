@@ -2,7 +2,7 @@
   .control-group
     .row
       .span4.off-set2
-        = f.input :subject, required: false, class: 'pull-left'
+        = f.input :subject, required: true, class: 'pull-left'
       .span4.off-set2
         = f.input :objectives
     .row
@@ -38,9 +38,9 @@
         %h5 Chapter Details
         .row
           .span4.off-set2
-            = chapter_form.input :chapter_number, input_html: {type: 'number'}
+            = chapter_form.input :chapter_number, input_html: {type: 'number'}, required: true
           .span4.off-set2
-            = chapter_form.input :subject
+            = chapter_form.input :subject, required: true
         .row
           .span4.off-set2
             = chapter_form.input :objectives

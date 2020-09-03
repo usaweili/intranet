@@ -1,30 +1,11 @@
-%table.table.table-hover#sortable
-  %thead
-    %tr
-      %th #
-      %th Subject
-      %th Date
-      %th Duration
-      %th Venue
-      %th Chapters
-      %th Showcase on Website
-      - if can? :manage, Training
-        %th Action
-  %tbody
-    - @trainings.each_with_index do |training, i|
-      %tr.item{"data-item-id" => training.id}
-        %td= i+1
-        %td= link_to training.subject, training_path(training)
-        %td= training.date
-        %td= training.duration
-        %td= training.venue
-        %td= training.chapters.count
-        %td= training.showcase_on_website
-        - if can? :manage, Training
-          %td
-            =link_to '', edit_training_path(training), class: "icon-edit", data: {'no-turbolink' =>  true}
-            |
-            =link_to '', training_path(training), method: :delete, "data-confirm" => "Are you sure?", class: "icon-trash"
-
-:javascript
-  $('#sortable').dataTable({ "aaSorting": [] });
+.list-group.list-group-root.well
+  - @trainings.each do |training|
+    %h4.list-group-item
+      %a{href: "##{training.subject}", 'data-toggle':"collapse"}
+        .icon.icon-chevron-right
+        = training.subject
+      = link_to '', edit_training_path(training), class: "icon-edit", data: {'no-turbolink' =>  true}, style: 'margin-left: 10;'
+    %div.collapse{id: "#{training.subject}"}
+      - training.chapters.each do |chapter|
+        %h4.list-group-item
+          = link_to "#{chapter.chapter_number}. #{chapter.subject}", video_render_trainings_path(chapter), target: "_blank", style: 'margin-left: 20'
