@@ -259,7 +259,7 @@ class User
   def project_details
     details = employee_project_details
     manager_projects = managed_projects.where(is_active: true)
-    manager_projects.each { |i| details << { id: i.id, name: i.name }}
+    manager_projects.each { |i| details << { id: i.id.to_s, name: i.name }}
     details
   end
 
@@ -267,7 +267,7 @@ class User
     details = []
     project_ids.each do |id|
       project = Project.where(id: id).first
-      details << { id: project.id, name: project.name }
+      details << { id: project.id.to_s, name: project.name }
     end
     details
   end

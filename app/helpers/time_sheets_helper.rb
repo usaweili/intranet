@@ -6,6 +6,6 @@ module TimeSheetsHelper
   end
 
   def project_data
-    @user.project_details
+    @user.project_details.map(&:values)
   end
 end
