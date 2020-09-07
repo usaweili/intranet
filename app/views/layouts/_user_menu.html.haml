@@ -34,7 +34,8 @@
     = link_to "Leave Applications", main_app.view_leaves_path
   - if ["Admin", "Super Admin"].include?(current_user.role)
     %li
-      = link_to "Contacts", main_app.site_contacts_path, data: { 'no-turbolink' => true }
+      = link_to "Contacts", main_app.site_contacts_path, data: { 'no-turbolink' => true }, role: 'menuitem'
+  - if ["Admin", "Super Admin", "HR"].include?(current_user.role)
     %li
       = link_to "Manage Leave", main_app.leave_applications_path
   %li.hide
