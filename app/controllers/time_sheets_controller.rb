@@ -165,6 +165,13 @@ class TimeSheetsController < ApplicationController
     end
   end
 
+  def export_resource_report
+    email = current_user.email
+    ResourceCategorisationService.new(email).call
+    flash[:success] = 'You will receive resource categorisation report to your mail shortly.'
+    redirect_to export_project_report_time_sheets_path
+  end
+
   def import
     if params[:file].present? && params[:file_name]
       ImportTimesheetWorker.perform_async(params[:file].path, params[:file_name], current_user.email)

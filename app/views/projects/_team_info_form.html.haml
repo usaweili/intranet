@@ -4,9 +4,10 @@
   .row.span12.headers
     .span2.width12 Active?
     .span2.width18 Name
-    .span2.width15 Start Date
-    .span2.width15 End Date
+    .span2.width12 Start Date
+    .span2.width12 End Date
     .span2.width10 Timesheet Required?
+    .span2.width10 Billable?
     .span2.width10 Allocation Percentage
   #team-members
     = f.fields_for :user_projects do |project_user_form|
@@ -17,13 +18,16 @@
               = project_user_form.check_box :active, {class: "active-check-box"}, 'true', 'false'
           .span2.width18
             = project_user_form.input :user_id, collection: users, input_html: {class: "user_select"}, label: false
-          .span2.width15
+          .span2.width12
             = project_user_form.input :start_date, input_html: {class: :datepicker, style: "height: 32px"}, label: false
-          .span2.width15
+          .span2.width12
             = project_user_form.input :end_date, input_html: {class: :datepicker, style: "height: 32px", id: "end-date"},  label: false
           .span2.width10
             .make-switch{"data-on" => "success", "data-off" => "warning", "data-on-label" => "REQ", "data-off-label" => "NREQ"}
               = project_user_form.check_box :time_sheet
+          .span2.width10
+            .make-switch{"data-on" => "success", "data-off" => "warning", "data-on-label" => "True", "data-off-label" => "False"}
+              = project_user_form.check_box :billable
           .span2.width10
             = project_user_form.input :allocation, {min: 0, max: 100, step: 1, style: "height: 32px;", label: false, class: 'allotment'}
           - if project_user_form.object.user.blank?

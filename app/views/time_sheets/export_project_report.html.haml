@@ -1,25 +1,12 @@
-%h2 Export Project Report
-= form_tag export_project_report_time_sheets_path, method: 'GET', class: 'form form-inline' do
-  .form-horizontal
-    .div{class: 'form-position'}
-      .row{class: 'row-padding'}
-        %label{class: "col-md-3"} From Date:
-        = text_field_tag :from_date, params[:from_date],
-          class: "col-md-3 export-report-text-from-date form-control datepicker",
-          placeholder: "From Date", value: @from_date, style: "height: 2em;", readonly: true
-      .row{class: 'row-padding'}
-        %label To Date:
-        = text_field_tag :to_date, params[:to_date],
-          class: "form-control export-report-text-to-date datepicker",
-          placeholder: "To Date", value: @to_date, style: "height: 2em;", readonly: true
-      .row{ class: 'row-padding' }
-        = check_box_tag(:summary)
-        = label_tag :summary, "Get summary report of all projects"
-      .row.row-padding.projects_dropdown
-        = "------------------------------  OR  --------------------------------"
-        %br
-        %br
-        %label Project
-        = select_tag :project_id, options_for_select(Project.get_approved_project_between_range(@from_date, @to_date)), class: 'export-report-text-to-select'
+%ul.nav.nav-tabs
+  %li.active
+    %a{data:{toggle: 'tab'}, href: '#timesheet_export'} Project Report
+  %li
+    = link_to 'Resource Categorisation Report', '#resource_export', data:{toggle: ('tab')}, class: :resource_export
+  
 
-      = submit_tag "Download Report", class: "btn btn-primary btn-padding"
+.export_tab_content.tab-content
+  #timesheet_export.tab-pane.fade{ class: 'in active' }
+    = render 'export_project_report_form'
+  #resource_export.tab-pane.fade
+    = render 'export_resource_report_form'

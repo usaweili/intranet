@@ -1,0 +1,36 @@
+wb = xlsx_package.workbook
+
+wb.add_worksheet(name: 'Billable Resources') do |sheet|
+  sheet.add_row(['Employee Name', 'Total Alocation'])
+  billable_resources.each do | resource |
+    sheet.add_row [ resource[:name], resource[:allocation] ]
+  end
+end
+
+wb.add_worksheet(name: 'Non Billable Resources') do |sheet|
+  sheet.add_row(['Employee Name', 'Total Alocation'])
+  non_billable_resources.each do | resource |
+    sheet.add_row [ resource[:name], resource[:allocation] ]
+  end
+end
+
+wb.add_worksheet(name: 'Investment Resources') do |sheet|
+  sheet.add_row(['Employee Name', 'Total Alocation'])
+  investment_resources.each do | resource |
+    sheet.add_row [ resource[:name], resource[:allocation] ]
+  end
+end
+
+wb.add_worksheet(name: 'Free Resources') do |sheet|
+  sheet.add_row(['Employee Name', 'Total Alocation'])
+  free_resources.each do | resource |
+    sheet.add_row [ resource[:name], resource[:allocation] ]
+  end
+end
+
+wb.add_worksheet(name: 'Bench Resources') do |sheet|
+  sheet.add_row(['Employee Name'])
+  bench_resources.each do | resource |
+    sheet.add_row [ resource[:name] ]
+  end
+end

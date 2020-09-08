@@ -5,8 +5,9 @@ class UserProject
   field :start_date, type: Date
   field :end_date, type: Date, default: nil
   field :time_sheet, type: Boolean, default: false
-  field :active, type:Boolean, default: true
+  field :active, type: Boolean, default: true
   field :allocation, type: Integer, default: 100
+  field :billable, type: Boolean, default: true
 
   belongs_to :user
   belongs_to :project
