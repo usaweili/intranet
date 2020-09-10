@@ -40,7 +40,7 @@ class TimeSheetsController < ApplicationController
     @user = User.find(params[:user_id])
     @individual_timesheet_report, @total_work_and_leaves = {}, {}
     if TimeSheet.from_date_less_than_to_date?(@from_date, @to_date)
-      @individual_timesheet_report, @total_work_and_leaves = TimeSheet.generate_individual_timesheet_report(@user, params) 
+      @individual_timesheet_report, @total_work_and_leaves = TimeSheet.generate_individual_timesheet_report(@user, params)
     else
       flash[:error] = 'Please select appropriate date'
     end
@@ -166,8 +166,8 @@ class TimeSheetsController < ApplicationController
   end
 
   def export_resource_report
-    email = current_user.email
-    ResourceCategorisationService.new(email).call
+    ResourceCategorisationWorker.perform_async(current_user.email)
+
     flash[:success] = 'You will receive resource categorisation report to your mail shortly.'
     redirect_to export_project_report_time_sheets_path
   end
