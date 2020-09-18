@@ -95,8 +95,7 @@ class UsersController < ApplicationController
 
   def update_available_leave
     user = User.find(params[:id])
-    user.employee_detail.available_leaves = params[:value]
-    user.save
+    user.employee_detail.set(available_leaves: params[:value])
     render nothing: true
   end
 
@@ -238,7 +237,7 @@ class UsersController < ApplicationController
     rescue
       @blog_message = "Invalid Blog URL!!"
       UserMailer.delay.invalid_blog_url(@user.id) if @user.is_approved?
-      return nil 
+      return nil
     end
 
     if blog_feed != 0
