@@ -125,7 +125,7 @@ class UsersController < ApplicationController
 
   def resource_list_download
     @users = User.employees.approved
-    send_data @users.to_csv, filename: "ResourceList_#{Time.now.strftime("%d%b%y%k%M")}.csv"
+    send_data @users.to_csv, filename: "ResourceList - #{Time.now.strftime("%d%b%y%k%M")}.csv"
   end
 
   private
@@ -160,9 +160,7 @@ class UsersController < ApplicationController
   end
 
   def load_emails_and_projects
-    @emails = User.management_team.pluck(:email).push('anuja@joshsoftware.com', 'pramod@joshsoftware.com',
-      'swapnil@joshsoftware.com', 'chandrashekhar@joshsoftware.com', 'sahil@joshsoftware.com',
-      'anil@joshsoftware.com').sort
+    @emails = User.approved.pluck(:email)
     @projects = Project.all.collect { |p| [p.name, p.id] }
     notification_emails = @user.employee_detail.try(:notification_emails)
     @notify_users = User.where(:email.in => notification_emails || [])
