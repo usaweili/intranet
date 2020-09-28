@@ -18,17 +18,35 @@ on_time_range_change = ->
       duration_id = str.replace("from_time", "duration")
     $("#" + duration_id)[0].selectedIndex = '0'
 
-update_project_list = ->
-  previous_project = []
-  $('select').each ->
-    if $(this).attr('class').includes('project_id')
-      input = $(this)
-      $.each previous_project, (index, value) ->
-        input.find('option[value=' + String(value) + ']').remove()
-        return
-      previous_project.push input.val()
-    return
-  return
+validate_timesheet = ->
+  $('.custom-error').each ->
+    $(this).closest('.control-group')[0].classList.remove('error')
+    $(this).remove()
+
+  tr_elements = $('tbody tr')
+  length = tr_elements.length - 1
+  value = true
+
+  tr_elements.each (index, element) ->
+    if $(element).find('.custom-error').length == 0 &&
+       $(element).is(':visible')
+      
+      project = $(this).find('.project_id').val()
+      date = $(this).find('.datepicker').datepicker('getDate').valueOf()
+      
+      for x in [index...length]
+        next_row = $(tr_elements[x + 1])
+        if next_row.is(':visible') &&
+           project == next_row.find('.project_id').val() &&
+           date == next_row.find('.datepicker').datepicker('getDate').valueOf()
+          
+          value = false
+          if next_row.find('.custom-error').length == 0 
+            next_project = next_row.find('.project_id')
+            next_row.find('.control-group')[0].classList.add('error')
+            span_text = 'Cannot add multiple timesheets for same project on same date'
+            $("<span class='help-inline custom-error'>" + span_text + "</span>").insertAfter(next_project);
+  return value
 
 $(document).ready ->
   $('.dropdown-submenu a.test').on 'click', (e) ->
@@ -39,10 +57,14 @@ $(document).ready ->
 
   on_duration_change()
   on_time_range_change()
-  update_project_list()
 
+  $('.timesheet').on 'submit', (e) ->
+    if validate_timesheet() 
+    else
+      e.preventDefault()
+      e.stopPropagation()
+      
   $("body").on "nested:fieldAdded", () ->
     on_duration_change()
     on_time_range_change()
-    update_project_list()
   return
