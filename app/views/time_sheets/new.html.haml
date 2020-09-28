@@ -1,10 +1,11 @@
 %h1 Add Timesheet
 = simple_nested_form_for(@user, :url => add_time_sheet_time_sheets_path, :html => { method: 'POST', multipart: true, class: 'timesheet'}) do |f|
   %table.table
-    %th Project
-    %th Date
-    %th No. of hours
-    %th Description
+    %thead
+      %th Project
+      %th Date
+      %th No. of hours
+      %th Description
     %tbody#timesheets
       = f.fields_for :time_sheets, @time_sheets, wrapper: false do |time_sheet|
         %tr.fields

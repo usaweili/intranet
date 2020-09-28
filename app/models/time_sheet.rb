@@ -19,7 +19,7 @@ class TimeSheet
   validates :project_id, :date, :description, presence: true
   validate :is_future_date?
   before_validation :valid_date_for_create?, unless: :is_management?
-  validates_uniqueness_of :project_id, scope: [:date, :user_id], message: 'Cannot add multiple timesheets for same project'
+  validates_uniqueness_of :project_id, scope: [:date, :user_id], message: 'Timesheet already present for same project and date'
   validates :from_time, :to_time, uniqueness: { scope: [:user_id, :date], message: "Record already present" }, if: :is_from_time_and_to_time_present?
   # when both of them are absent thats when we have to check for the duration
   validates :duration, presence: true, unless: :is_from_time_or_to_time_present?
