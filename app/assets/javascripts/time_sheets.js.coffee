@@ -23,20 +23,21 @@ validate_timesheet = ->
     $(this).closest('.control-group')[0].classList.remove('error')
     $(this).remove()
 
-  tr_elements = $('tr')
+  tr_elements = $('tbody tr')
   length = tr_elements.length - 1
   value = true
 
   tr_elements.each (index, element) ->
-    if $(element).find('.project_id').length == 1 &&
-       $(element).find('.custom-error').length == 0
+    if $(element).find('.custom-error').length == 0 &&
+       $(element).is(':visible')
       
       project = $(this).find('.project_id').val()
       date = $(this).find('.datepicker').datepicker('getDate').valueOf()
       
       for x in [index...length]
         next_row = $(tr_elements[x + 1])
-        if project == next_row.find('.project_id').val() &&
+        if next_row.is(':visible') &&
+           project == next_row.find('.project_id').val() &&
            date == next_row.find('.datepicker').datepicker('getDate').valueOf()
           
           value = false
