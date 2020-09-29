@@ -51,6 +51,18 @@
             = link_to "Projects", main_app.projects_report_time_sheets_path, class: 'menu-font', role: 'menuitem'
           %li
             = link_to "Export Reports", main_app.export_project_report_time_sheets_path, class: 'menu-font'
+  
+  %li.dropdown-submenu.pull-left
+    %a.test{:href => "#", :tabindex => "-1"}
+      Manage Website Data
+    %ul.dropdown-menu{class: "timesheet-menu"}
+      - if can? :manage, OpenSourceProject
+        %li
+          = link_to "Open Source Projects", main_app.open_source_projects_path, class: 'menu-font'
+        %li
+          = link_to "Showcase Event", main_app.showcase_events_path, class: 'menu-font'
+        %li
+          = link_to "Trainings", main_app.trainings_path, class: 'menu-font'
   %li
     = link_to "Assessments", ENV['snowflake_url'], role: 'menuitem'
   %li

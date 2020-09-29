@@ -44,6 +44,9 @@ class User
   has_many :user_projects
   has_and_belongs_to_many :schedules
   has_and_belongs_to_many :managed_projects, class_name: 'Project', foreign_key: 'managed_project_ids', inverse_of: :managers
+  has_and_belongs_to_many :open_source_projects
+  has_and_belongs_to_many :showcase_event_teams
+  has_and_belongs_to_many :trainings
 
   after_update :delete_team_cache, if: :website_fields_changed?
   before_create :associate_employee_id
@@ -148,6 +151,10 @@ class User
   def sent_mail_for_approval(leave_application_id)
     notified_users = User.leave_notification_emails(self.id)
     UserMailer.delay.leave_application(self.email, notified_users, leave_application_id)
+  end
+
+  def designation_name
+    designation.name
   end
 
   def role?(role)
