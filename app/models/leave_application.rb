@@ -81,6 +81,25 @@ class LeaveApplication
 
   def process_accept_application
     UserMailer.delay.accept_leave(self.id)
+    send_leave_notification
+  end
+
+  def send_leave_notification
+    if start_at >= Date.today && leave_request?
+      emails = LeaveApplication.get_team_members(self.id)
+      UserMailer.send_accept_leave_notification(id, emails).deliver_now!
+    end
+  end
+
+  def self.get_team_members(leave_id)
+    leave = LeaveApplication.where(id: leave_id).first
+    emails = []
+    project_ids = leave.user.project_details
+    project_ids.each do |project_id|
+      project = Project.where(id: project_id[:id]).first
+      emails << project.users.pluck(:email)
+    end
+    emails = emails.flatten.uniq
   end
 
   def self.process_leave(id, leave_status, call_function, reject_reason = '', processed_by)
