@@ -9,6 +9,14 @@ module ApplicationHelper
     end
   end
 
+  def git_branch
+    if Rails.env.staging?
+      `head -n1 #{Rails.root + 'branch_deployed.txt'}`
+    else
+      `git symbolic-ref --short HEAD`
+    end.chomp
+  end
+  
   def set_label status
     status ? 'label-success' : 'label-warning'
   end

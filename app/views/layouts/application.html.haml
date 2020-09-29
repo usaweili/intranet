@@ -69,3 +69,5 @@
     = yield
   #footer.pull-right
     = link_to "Privacy Policy", '/pdf/Intranet_Privacy_Policy.pdf'
+    - unless Rails.env.production?
+      %span.badge-info.badge-branch= "Current Branch: #{git_branch}"
