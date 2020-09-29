@@ -19,13 +19,17 @@ on_time_range_change = ->
     $("#" + duration_id)[0].selectedIndex = '0'
 
 validate_timesheet = ->
+  $('.custom-error').each ->
+    $(this).closest('.control-group')[0].classList.remove('error')
+    $(this).remove()
+
   tr_elements = $('tr')
   length = tr_elements.length - 1
   value = true
 
   tr_elements.each (index, element) ->
     if $(element).find('.project_id').length == 1 &&
-       $(element).find('.error').length == 0
+       $(element).find('.custom-error').length == 0
       
       project = $(this).find('.project_id').val()
       date = $(this).find('.datepicker').datepicker('getDate').valueOf()
@@ -36,11 +40,11 @@ validate_timesheet = ->
            date == next_row.find('.datepicker').datepicker('getDate').valueOf()
           
           value = false
-          if next_row.find('.error').length == 0 
+          if next_row.find('.custom-error').length == 0 
             next_project = next_row.find('.project_id')
             next_row.find('.control-group')[0].classList.add('error')
-            span_text = 'Cannot add multiple timesheets for <br> same project on same date'
-            $("<br> <span class='help-inline'>" + span_text + "</span>").insertAfter(next_project);
+            span_text = 'Cannot add multiple timesheets for same project on same date'
+            $("<span class='help-inline custom-error'>" + span_text + "</span>").insertAfter(next_project);
   return value
 
 $(document).ready ->

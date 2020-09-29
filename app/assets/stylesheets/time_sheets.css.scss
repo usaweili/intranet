@@ -108,3 +108,9 @@
   margin-top: 20px;
   font-style: italic;
 }
+
+.user_time_sheets_project_id.error {
+  .controls {
+    max-width: 260px;
+  }
+}
