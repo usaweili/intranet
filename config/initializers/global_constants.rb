@@ -6,11 +6,12 @@ LEAVE_STATUS = ['Pending', 'Approved', 'Rejected']
 INVALID_REDIRECTIONS = ["/users/sign_in", "/users/sign_up", "/users/password"]
 TSHIRT_SIZE = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL']
 OTHER = [ 'Delivery Management', 'Design', 'DevOps', 'QA-Automation', 'QA-Manual', 'UI', 'UX']
-LANGUAGE = ['Go', 'Python', 'Ruby', 'Java', 'Javascript', 'PHP', 'Android', 'NodeJs', 'React', 'iOS']
-FRAMEWORK = ['Django', 'Rails', 'Spring Boot', 'Hibernet', 'Laravel', 'Angular', 'Flutter', 'Ionic']
+LANGUAGE = ['Go', 'Python', 'Ruby', 'Java', 'Javascript', 'PHP', 'Android', 'NodeJs', 'React', 'iOS', 'C#']
+FRAMEWORK = ['Django', 'Rails', 'Spring Boot', 'Hibernet', 'Laravel', 'Angular', 'Flutter', 'Ionic', '.Net']
 PENDING = 'Pending'
 APPROVED = 'Approved'
 REJECTED = 'Rejected'
+LOCATIONS = ['Bengaluru', 'Plano', 'Pune']
 
 ORGANIZATION_DOMAIN = 'joshsoftware.com'
 ORGANIZATION_NAME = 'Josh Software'
