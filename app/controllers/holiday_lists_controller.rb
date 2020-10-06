@@ -17,6 +17,7 @@ class HolidayListsController < ApplicationController
       flash[:success] = "Holiday Created Successfully"
       redirect_to new_holiday_list_path
     else
+      flash[:error] = "Can't Create Holiday"
       render 'new'
     end
   end
@@ -29,21 +30,26 @@ class HolidayListsController < ApplicationController
   end
 
   def update
-    if @holiday.update(holiday_params)
+    if @holiday.update_attributes(holiday_params)
       flash[:success] = 'Holiday Updated Successfully'
       redirect_to holiday_lists_path
+    else
+      flash[:error] = "Can't update Holiday"
+      render 'new'
     end
   end
 
   def destroy
     if @holiday.destroy
       flash[:success] = 'Holiday Deleted Successfully'
-      redirect_to holiday_lists_path
+    else
+      flash[:error] = "Can't Delete Holiday"
     end
+    redirect_to holiday_lists_path
   end
 
   def holiday_list
-    date    = Date.today.at_beginning_of_year
+    date = Date.today.at_beginning_of_year
     if params['location'].nil?
       holiday = HolidayList.where(:holiday_date.gte => date)
     else
@@ -52,7 +58,6 @@ class HolidayListsController < ApplicationController
     end
     render json: holiday
   end
-
 
   private
 

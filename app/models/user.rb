@@ -67,8 +67,7 @@ class User
   validates :role, :email, presence: true
   validates_associated :employee_detail
   scope :project_engineers, ->{where(:role.nin => ['HR','Finance'], :status => STATUS[2]).asc("public_profile.first_name")}
-  scope :american, ->{where({"employee_detail.location"=>"Plano"})}
-  scope :indian, ->{where({"employee_detail.location" => "Pune"})}
+  scope :get_employees, -> (country) {where( :'employee_detail.location'.in => User.get_cities(country))}
   scope :employees, ->{all.asc("public_profile.first_name")}
   scope :approved, ->{where(status: 'approved')}
   scope :visible_on_website, -> {where(visible_on_website: true)}
@@ -146,6 +145,10 @@ class User
 
   def call_monitor_service
     CodeMonitoringWorker.perform_async({ event_type: 'User Resigned', user_id: id.to_s })
+  end
+
+  def self.get_cities(country)
+    cities =  CityCountryMapping.map { |i| i[:city] if i[:country] == country }.compact
   end
 
   def get_country

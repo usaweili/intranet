@@ -12,6 +12,7 @@ PENDING = 'Pending'
 APPROVED = 'Approved'
 REJECTED = 'Rejected'
 LOCATIONS = ['Bengaluru', 'Plano', 'Pune']
+COUNTRIES = [ 'India', 'USA']
 
 ORGANIZATION_DOMAIN = 'joshsoftware.com'
 ORGANIZATION_NAME = 'Josh Software'

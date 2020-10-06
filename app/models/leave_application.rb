@@ -101,8 +101,12 @@ class LeaveApplication
     end
   end
 
-  def self.get_leaves_for_sending_reminder(date)
-    LeaveApplication.where(start_at: date, leave_status: APPROVED)
+  def self.get_leaves_for_sending_reminder(date, user_ids)
+    LeaveApplication.where(
+      start_at: date,
+      leave_status: APPROVED,
+      :user_id.in => user_ids
+    )
   end
 
   def self.get_users_past_leaves(user_id)
@@ -121,20 +125,22 @@ class LeaveApplication
     ).order_by(:start_at.asc)
   end
 
-  def self.pending_leaves_reminder(country)
+  def self.pending_leaves_reminder(country, user_ids)
     count = 0
     date  = Date.today
     while count < 2
       date  += 1
-      count += 1 unless HolidayList.is_holiday?(date, country)
+      HolidayList.is_holiday?(date, country) ? next : count += 1
       #checking count for 2 days - sending mail only for 1 and 2 day remaining leaves.
-      if count == 1 || 2
-        leave_applications = LeaveApplication.where(start_at: date, leave_status: PENDING)
-        next if leave_applications.empty?
-        leave_applications.each do |leave_application|
-          managers = leave_application.user.get_managers_emails
-          UserMailer.pending_leave_reminder(leave_application.user, managers, leave_application).deliver_now
-        end
+      leave_applications = LeaveApplication.where(
+        start_at: date,
+        leave_status: PENDING,
+        :user_id.in => user_ids
+      )
+      next if leave_applications.empty?
+      leave_applications.each do |leave_application|
+        managers = leave_application.user.get_managers_emails
+        UserMailer.pending_leave_reminder(leave_application.user, managers, leave_application).deliver_now
       end
     end
   end
