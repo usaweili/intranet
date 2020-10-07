@@ -8,7 +8,7 @@ class Api::V1::ProjectController < ApplicationController
 
   def project_info_fields
     {
-      only: [:_id, :name],
+      only: [:_id, :name, :is_active, :created_at, :updated_at, :manager_ids],
       include: {
         repositories: {
           only: [:url, :host]
