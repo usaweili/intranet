@@ -15,7 +15,7 @@
             'readonly' => true, value: time_sheet.object.date || Date.today}, label: false
           %td= time_sheet.input :duration, collection: TimeSheet::DURATION_HASH.invert.to_a, input_html: {class: "duration_select"}, placeholder: 'Select', label: false
           %td= time_sheet.input :description, as: :text, label: false
-          %td= time_sheet.link_to_remove '', class: 'icon-remove'
+          %td= time_sheet.link_to_remove '', class: 'icon-remove', role: 'button', 'aria-label': 'Click here to remove timesheet'
   = f.hidden_field :user_id, value: @user.id
   = f.hidden_field :from_date, value: @from_date
   = f.hidden_field :to_date, value: @to_date
