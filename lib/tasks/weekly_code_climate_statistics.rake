@@ -1,46 +1,111 @@
-desc "Fetches & loads weekly CodeClimate Statistics for each repo"
+desc 'Fetches & loads weekly CodeClimate Statistics for each repo'
 task :weekly_codeclimate_statistics => :environment do
-  keys = CodeClimateStatistic.fields.keys
-  from = Date.today.beginning_of_week.strftime('%Y-%m-%d')
-  to = Date.today.strftime('%Y-%m-%d')
-  query_string = "filter[from]=#{from}&filter[to]=#{to}"
   Repository.each do |repo|
     if repo.code_climate_id.present?
-      url = "https://api.codeclimate.com/v1/repos/#{repo.code_climate_id}/metrics?#{query_string}"
-      headers = { "Accept" => "application/vnd.api+json", "Authorization" => "Token token=#{ENV['CODE_CLIMATE_TOKEN']}" }
+      headers = {
+        'Accept' => 'application/vnd.api+json',
+        'Authorization' => "Token token=#{ENV['CODE_CLIMATE_TOKEN']}"
+      }
+      repo_url = "https://api.codeclimate.com/v1/repos/#{repo.code_climate_id}"
       begin
-        response = HTTParty.get(url, headers: headers, timeout: 20)
+        repo_response = HTTParty.get(repo_url, headers: headers, timeout: 20)
       rescue Timeout::Error => e
         puts "Error: Request Timeout for #{repo.project.name}"
         next
       end
-      response_body = JSON.parse(response.body)
-      stats = { "repository_id": repo.id }
-      stats["loc"] = {}
-      stats["ratings"] = {}
-      if response_body && response_body["data"]
-        response_body["data"].each do |d|
-          metric = d["attributes"]["name"]
-          metric_split = d["attributes"]["name"].split(".")
-          metric = metric_split.first
-          if keys.include? metric
-            point = d["attributes"]["points"].last
-            if ["loc", "ratings"].include? metric
-              stats[metric][metric_split.last] = point["value"] || 0
-            else
-              stats[metric] = point["value"] || 0
-            end
-            stats[:timestamp] = Time.at(point["timestamp"]) if !stats[:timestamp]
+
+      if repo_response.success?
+        stat = repo.code_climate_statistics.new
+        date_interval = (Date.current - 2.week).beginning_of_week..Date.current
+        repo_details = JSON.parse(repo_response.body)
+        latest_snap_id =
+          repo_details['data']['relationships']['latest_default_branch_snapshot']['data']['id']
+        latest_test_report =
+          repo_details['data']['relationships']['latest_default_branch_test_report']['data']
+        latest_test_coverage_id = latest_test_report && latest_test_report['id']
+        if latest_snap_id.present?
+          snapshot_url = "#{repo_url}/snapshots/#{latest_snap_id}"
+          begin
+            snap_response = HTTParty.get(snapshot_url, headers: headers, timeout: 20)
+          rescue Timeout::Error => e
+            puts "Error: Request Timeout for #{repo.project.name}"
+            next
           end
-        end
-        code_climate_stat = CodeClimateStatistic.create(stats)
-        if code_climate_stat.valid?
-          puts "CodeClimate Statistics created successfully for #{repo.project.name}\'s #{repo.project.name} Repository."
+
+          if snap_response.success?
+            snap_details = JSON.parse(snap_response.body)
+            snap_timestamp = snap_details['data']['attributes']['created_at']
+            snap_date = Date.parse(snap_timestamp)
+            if snap_date.in? date_interval
+              stat.lines_of_code = snap_details['data']['attributes']['lines_of_code']
+              stat.total_issues = snap_details['data']['meta']['issues_count']
+              stat.technical_debt_ratio =
+                snap_details['data']['meta']['measures']['technical_debt_ratio']['value']
+              issues_url = "#{snapshot_url}/issues"
+              complexity_issues_url = "#{issues_url}?filter[categories]=Complexity"
+              duplication_issues_url = "#{issues_url}?filter[categories]=Duplication"
+              begin
+                c_issues_response =
+                  HTTParty.get(complexity_issues_url, headers: headers, timeout: 20)
+                d_issues_response =
+                  HTTParty.get(duplication_issues_url, headers: headers, timeout: 20)
+              rescue Timeout::Error => e
+                puts "Error: Request Timeout for #{repo.project.name}"
+                next
+              end
+
+              c_issues_details = JSON.parse(c_issues_response.body)
+              d_issues_details = JSON.parse(d_issues_response.body)
+              stat.complexity_issues = c_issues_details['meta']['total_count']
+              stat.duplication_issues = d_issues_details['meta']['total_count']
+              ratings = snap_details['data']['attributes']['ratings']
+              ratings.each do |rating|
+                if rating['pillar'] == 'Maintainability'
+                  stat.maintainability = rating['measure']['value']
+                  stat.remediation_time =
+                    rating['measure']['meta']['remediation_time']['value']
+                  stat.implementation_time =
+                    rating['measure']['meta']['implementation_time']['value']
+                end
+              end
+              stat.save!
+              puts "Successfully captured statistics for #{repo.project.name}"
+            else
+              puts "No snapshot captured on default branch of #{repo.project.name}\'s #{repo.name} in this week."
+            end
+          else
+            puts "Failed to retreive latest snapshot details for #{repo.project.name}\'s #{repo.name}."
+          end
         else
-          puts "Error: #{code_climate_stat.errors.full_messages.join(",")} for #{repo.project.name}"
+          puts "Failed to retreive latest snapshot Id for #{repo.project.name}\'s #{repo.name}."
+        end
+
+        if latest_test_coverage_id.present?
+          test_report_url = "#{repo_url}/test_reports/#{latest_test_coverage_id}"
+          begin
+            test_coverage_response =
+              HTTParty.get(test_report_url, headers: headers, timeout: 20)
+          rescue Timeout::Error => e
+            puts "Error: Request Timeout for #{repo.project.name}"
+            next
+          end
+
+          test_coverage_details = JSON.parse(test_coverage_response.body)
+          report_timestamp = test_coverage_details['data']['attributes']['received_at']
+          date_of_report = Date.parse(report_timestamp)
+          if date_of_report.in? date_interval
+            stat.test_coverage =
+              test_coverage_details['data']['attributes']['rating']['measure']['value']
+            stat.save!
+            puts "Successfully captured test coverage for #{repo.project.name}"
+          else
+            puts "No test report captured on default branch of #{repo.project.name}\'s #{repo.name} in this week."
+          end
+        else
+          puts "Failed to retreive latest test coverage Id for #{repo.project.name}\'s #{repo.name}."
         end
       else
-        puts "No Data Found for #{repo.project.name}\'s #{repo.name} Repository."
+        puts "Failed to retreive repository details for #{repo.project.name}\'s #{repo.name}."
       end
     else
       puts "No CodeClimate Repo ID Found for #{repo.project.name}\'s #{repo.name} Repository."

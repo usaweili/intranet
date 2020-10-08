@@ -87,60 +87,35 @@
                                                           %b : #{repo_name}
                                                         %br
                                                         - last_week_data = data.last
-                                                        - keys = ["gpa", "test_coverage", "loc", "maintainability", "remediation_minutes", "technical_debt_ratio", "diff_coverage", "ratings"]
-                                                        
+                                                        - keys = %w(lines_of_code total_issues complexity_issues duplication_issues maintainability quality_gpa remediation_time implementation_time test_coverage technical_debt_ratio)
                                                         %table{border: 1}
                                                           %tr
                                                             %th{style: "padding: 4px 25px;"} Metric
                                                             - data.each do |d|
-                                                              %th{style: "padding: 5px;"} #{d.timestamp.strftime('%d %B %Y')}
+                                                              %th{style: "padding: 5px;"} #{d.created_at.strftime('%d %B %Y')}
                                                             - if data.length > 1
                                                               %th{style: "padding: 5px;"} Difference (In last week)
 
                                                           - keys.each do |metric|
                                                             %tr
-                                                              - if ["loc", "ratings"].include? metric
-                                                                - diff = data.last[metric].merge(data[data.length-2][metric]) { |k, v1, v2| v1 - v2 } if data.length > 1
-                                                                - data.last[metric].each_with_index do |(k, v), i|
-                                                                  - color = 'black'
-                                                                  - if data.length > 1
-                                                                    - color = diff[k] > 0? 'green' : 'red'
-                                                                    - color = 'black' if diff[k].zero?
-                                                                  - if i == 0
-                                                                    %td{style: "padding: 4px 20px;"}
-                                                                      %b #{metric.titleize} - #{k.titleize}
-                                                                    - data.each do |d|
-                                                                      %td{style: "padding: 4px 20px;"}
-                                                                        #{d[metric][k] || 0}
-                                                                    - if data.length > 1
-                                                                      %td{style: "padding: 4px 20px; color:#{color}"} #{diff[k].round(2)}
-                                                                  - else
-                                                                    %tr
-                                                                      %td{style: "padding: 4px 20px;"}
-                                                                        %b #{metric.titleize} - #{k.titleize}
-                                                                      - data.each do |d|
-                                                                        %td{style: "padding: 4px 20px;"} #{d[metric][k] || 0}
-                                                                      - if data.length > 1
-                                                                        %td{style: "padding: 4px 20px; color:#{color}"} #{diff[k].round(2)}
-                                                              - else
-                                                                %td{style: "padding: 4px 20px;"}
-                                                                  %b #{metric.titleize}
-                                                                - data.each do |d|
-                                                                  %td{style: "padding: 4px 20px;"} #{d[metric] && d[metric].round(2) || 0}
-                                                                - if data.length > 1
-                                                                  - if data.last[metric] && data[data.length-2] && data[data.length-2][metric]
-                                                                    - difference = (data.last[metric] - data[data.length-2][metric]).round(2)
-                                                                    - color = "black"
-                                                                    - if difference > 0
-                                                                      - if metric == 'technical_debt_ratio'
-                                                                        - color = 'red'
-                                                                      - else
-                                                                        - color = 'green'
-                                                                    - if difference < 0
+                                                              %td{style: "padding: 4px 20px;"}
+                                                                %b #{metric.titleize}
+                                                              - data.each do |d|
+                                                                %td{style: "padding: 4px 20px;"} #{d[metric] && d[metric].round(2) || 0}
+                                                              - if data.length > 1
+                                                                - if data.last[metric] && data[data.length-2] && data[data.length-2][metric]
+                                                                  - difference = (data.last[metric] - data[data.length-2][metric]).round(2)
+                                                                  - color = "black"
+                                                                  - if difference > 0
+                                                                    - if metric == 'technical_debt_ratio'
                                                                       - color = 'red'
-                                                                    %td{style: "padding: 4px 20px;color:#{color}"} #{difference || 0}
-                                                                  - else
-                                                                    %td{style: "padding: 4px 20px;"} #{data.last[metric] || 0}
+                                                                    - else
+                                                                      - color = 'green'
+                                                                  - if difference < 0
+                                                                    - color = 'red'
+                                                                  %td{style: "padding: 4px 20px;color:#{color}"} #{difference || 0}
+                                                                - else
+                                                                  %td{style: "padding: 4px 20px;"} #{data.last[metric] || 0}
                                                         %br
                                                         %hr
                                                     %br
