@@ -2,13 +2,13 @@ module LeaveAvailable
   extend ActiveSupport::Concern
   
   def assign_leave(event)
-    date_of_joining = self.private_profile.date_of_joining
+    doj = self.private_profile.date_of_joining
     self.employee_detail || self.build_employee_detail
     if (self.employee_detail.available_leaves == 0 || event == 'DOJ Updated') &&
        self.leave_applications.count == 0
-      self.employee_detail.available_leaves = calculate_leave(date_of_joining)
+      self.employee_detail.available_leaves = is_consultant? ? 150 : calculate_leave(doj)
     end
-  end   
+  end
  
   def calculate_leave(date_of_joining)
     leaves = (13 - date_of_joining.month) * PER_MONTH_LEAVE
