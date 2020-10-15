@@ -171,12 +171,14 @@ class TimeSheet
   end
 
   def valid_date_for_create?
+    return true unless new_record?
     return false if errors.full_messages.present?
     if date.blank?
       errors.add(:date, 'Invalid time')
       return false
     end
     if date < Date.today - DAYS_FOR_CREATE
+      return true if user.allow_backdated_timesheet_entry
       text = "Not allowed to fill timesheet for this date. If you want to fill the timesheet, meet your manager."
       errors.add(:date, text)
       return false

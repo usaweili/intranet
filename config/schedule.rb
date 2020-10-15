@@ -89,6 +89,10 @@ every :month, :at => 'start of the month at 09:30am' do
   rake 'light_air:send_opt_out_users_report'
 end
 
+every :month, :at => 'start of the month at 01:00am' do
+  rake 'resource_categorisation_report'
+end
+
 every :day, :at => '10:00am' do
   rake "timesheet_reminder:timesheet_for_different_project"
 end
