@@ -1,6 +1,7 @@
 = link_to "", holiday_lists_path, class: "icon-arrow-left", title: 'Back'
 = simple_form_for @holiday, :html => {class: "form-horizontal"} do |f|
   = f.input :holiday_date, input_html: { class: 'datepicker', 'data-behaviour' => 'datepicker', 'readonly' => 'true'}
+  = f.input :holiday_type, as: :select, collection: HolidayList::HOLIDAY_TYPES.sort, label: 'Holiday Type', prompt: 'Select Holiday Type'
   = f.input :reason, as: :text
   = f.input :country, as: :select, collection: [["India", "India"],["USA", "USA"]], selected: f.object.try(:country), prompt: "Select Country"
   .submit_holiday

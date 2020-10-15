@@ -2,9 +2,13 @@ class HolidayList
   include Mongoid::Document
   field :holiday_date, type: Date
   field :reason, type: String
+  field :holiday_type, type: String
   field :country, type: String
 
-  validates :holiday_date, :reason, :country, presence: true
+  HOLIDAY_TYPES = ['Mandatory', 'Optional']
+
+  validates :holiday_date, :reason, :country, :holiday_type, presence: true
+  validates :holiday_type, inclusion: { in: HOLIDAY_TYPES }
   validate :check_weekend?
   validate :check_duplicate?
 
