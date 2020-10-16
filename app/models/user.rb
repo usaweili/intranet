@@ -148,16 +148,7 @@ class User
   end
 
   def self.get_cities(country)
-    cities =  CityCountryMapping.map { |i| i[:city] if i[:country] == country }.compact
-  end
-
-  def get_country
-    CityCountryMapping.each do |city_country|
-      if city_country[:city] == self.location
-        country = city_country[:country]
-      end
-    end
-    country
+    CityCountryMapping.map { |i| i[:city] if i[:country] == country }.compact
   end
 
   def sent_mail_for_approval(leave_application_id)
@@ -402,7 +393,7 @@ class User
   end
 
   def country
-    user_country = "India"
+    user_country = 'India'
     CityCountryMapping.each do |city_country|
       if self.employee_detail.try(:location) == city_country[:city]
         user_country = city_country[:country]

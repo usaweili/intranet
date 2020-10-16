@@ -101,7 +101,8 @@ class LeaveApplication
     end
   end
 
-  def self.get_leaves_for_sending_reminder(date, user_ids)
+  def self.get_leaves_for_sending_reminder(date, country)
+    user_ids = User.get_employees(country).pluck(:id)
     LeaveApplication.where(
       start_at: date,
       leave_status: APPROVED,
@@ -125,9 +126,10 @@ class LeaveApplication
     ).order_by(:start_at.asc)
   end
 
-  def self.pending_leaves_reminder(country, user_ids)
+  def self.pending_leaves_reminder(country)
     count = 0
     date  = Date.today
+    user_ids = User.get_employees(country).pluck(:id)
     while count < 2
       date  += 1
       HolidayList.is_holiday?(date, country) ? next : count += 1

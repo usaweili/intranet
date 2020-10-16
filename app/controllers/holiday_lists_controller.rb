@@ -8,8 +8,8 @@ class HolidayListsController < ApplicationController
   def index
     @year = params[:year].present? ? params[:year].to_i : Date.today.year
     date  = Date.new(@year)
-    @holidays = HolidayList.where(holiday_date: date..date.at_end_of_year).
-      order(holiday_date: :asc)
+    @holidays = HolidayList.where(holiday_date: date..date.at_end_of_year)
+                           .order(holiday_date: :asc)
   end
 
   def create

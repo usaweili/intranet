@@ -2,7 +2,7 @@ FactoryGirl.define do
   factory :holiday, class: HolidayList do
     reason { Faker::Lorem.sentence(4) }
     country { 'India' }
-
+    holiday_type { 'Mandatory' }
     after(:build) do |obj|
       if(obj.holiday_date == nil)
         obj.holiday_date = Date.tomorrow

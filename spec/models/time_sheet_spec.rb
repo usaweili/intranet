@@ -1361,7 +1361,7 @@ RSpec.describe TimeSheet, type: :model do
       FactoryGirl.create(:holiday, holiday_date: '11/10/2018'.to_date)
       from_date = '05/10/2018'.to_date
       to_date = '15/10/2018'.to_date
-      count = TimeSheet.get_holiday_count(from_date, to_date, "India")
+      count = TimeSheet.get_holiday_count(from_date, to_date, 'India')
       expect(count).to eq(2)
     end
 
@@ -1370,7 +1370,7 @@ RSpec.describe TimeSheet, type: :model do
       FactoryGirl.create(:holiday, holiday_date: '11/10/2018'.to_date)
       from_date = '01/10/2018'.to_date
       to_date = '05/10/2018'.to_date
-      count = TimeSheet.get_holiday_count(from_date, to_date, "India")
+      count = TimeSheet.get_holiday_count(from_date, to_date, 'India')
       expect(count).to eq(0)
     end
   end

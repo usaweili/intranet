@@ -11,6 +11,7 @@ class Ability
       hr_abilities
     elsif user.role? 'Finance'
       can [:public_profile, :private_profile, :edit, :apply_leave], User
+      can :index, HolidayList
     elsif user.role? 'Manager'
       employee_abilities(user.id)
       can :manage, Project
@@ -51,6 +52,7 @@ class Ability
     can :read, [Policy, Attachment, Vendor]
     can [:index, :users_timesheet, :edit_timesheet, :update_timesheet, :new, :add_time_sheet], TimeSheet, user_id: user_id
     can :manage, EntryPass, user_id: user_id
+    can :index, HolidayList
   end
 
   def employee_abilities(user_id)
@@ -67,6 +69,7 @@ class Ability
     cannot [:projects_report, :individual_project_report], TimeSheet
     can :manage, EntryPass, user_id: user_id
     cannot :report, EntryPass
+    can :index, HolidayList
   end
 
   def admin_abilities

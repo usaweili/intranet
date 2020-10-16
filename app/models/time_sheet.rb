@@ -526,8 +526,8 @@ class TimeSheet
       project_ids = TimeSheet.where(date: date).map(&:project_id).uniq
       project_ids.each do |project|
         user_ids = TimeSheet.where(date: date, project_id: project)
-                            .order(:start_time.asc)
-                            .map(&:user_id).uniq
+                            .only(:id, :user_id)
+                            .pluck(:user_id).uniq
         users = User.get_employees(country).where(:id.in => user_ids).pluck(:id)
         users.each do |user|
           timesheets = TimeSheet.where(date: date, project_id: project, user_id: user)
