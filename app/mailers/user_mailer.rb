@@ -19,7 +19,7 @@ class UserMailer < ActionMailer::Base
   def leave_application(sender_email, receivers, leave_application_id)
     @user = User.find_by(email: sender_email)
     @receivers = receivers
-    @notification_emails = @user.employee_detail.present? ? @user.employee_detail.get_notification_names : []
+    @notification_names = @user.employee_detail.present? ? @user.employee_detail.get_notification_names : []
     @older_leaves = LeaveApplication.get_users_past_leaves(@user.id)
     @next_planned_leaves = LeaveApplication.get_users_upcoming_leaves(@user.id).where(
       :id.ne => leave_application_id

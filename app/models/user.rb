@@ -9,7 +9,7 @@ class User
   devise :database_authenticatable, :omniauthable,
          :recoverable, :rememberable, :trackable, :validatable, :omniauth_providers => [:google_oauth2]
   INTERN_ROLE = "Intern"
-  ROLES = ['Super Admin', 'Admin', 'Manager', 'HR', 'Employee', INTERN_ROLE, 'Finance']
+  ROLES = ['Super Admin', 'Admin', 'Manager', 'HR', 'Employee', INTERN_ROLE, 'Finance', 'Consultant']
 
   ## Database authenticatable
   field :email,               :type => String, :default => ""
@@ -126,11 +126,7 @@ class User
       'sameert@joshsoftware.com',
     ].flatten.compact.uniq
 
-    users = if user_ids.kind_of?(Array)
-              User.where(:id.in => user_ids)
-            else
-              User.where(id: user_ids)
-            end
+    users = User.where(:id.in => [user_ids].flatten)
     users.each do |user|
       emails += user.get_managers_emails +
        user.employee_detail.try(:get_notification_emails)
@@ -330,12 +326,15 @@ class User
   def calculate_next_employee_id
     employee_id_array = User.distinct("employee_detail.employee_id")
     employee_id_array.map!(&:to_i)
-    usa_employee_ids = employee_id_array.select{|id| id > 9000}
-    pune_employee_ids = employee_id_array.select {|id| id <= 9000}
 
-    if self.employee_detail.try(:location) == "Plano"
+    if role?('Consultant')
+      employee_ids = employee_id_array.select{|id| id > 10000}
+      emp_id = employee_ids.empty? ? 10000 : employee_ids.max
+    elsif self.employee_detail.try(:location) == 'Plano'
+      usa_employee_ids = employee_id_array.select{|id| id > 9000}
       emp_id = usa_employee_ids.empty? ? 9000 : usa_employee_ids.max
     else
+      pune_employee_ids = employee_id_array.select {|id| id <= 9000}
       emp_id = pune_employee_ids.empty? ? 0 : pune_employee_ids.max
     end
     emp_id = emp_id + 1
