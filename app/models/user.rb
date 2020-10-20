@@ -79,7 +79,7 @@ class User
   delegate :location, to: :employee_detail, :allow_nil => true
 
   scope :leaders, ->{ visible_on_website.asc(:website_sequence_number).in(role: ROLE[:admin]) }
-  scope :members, ->{ visible_on_website.nin(role: ROLE[:admin]).asc(['public_profile.first_name']) }
+  scope :members, ->{ visible_on_website.nin(:role.in => [ ROLE[:admin], 'Consultant' ]).asc(['public_profile.first_name']) }
 
   before_create do
     self.website_sequence_number = (User.max(:website_sequence_number) || 0) + 1
@@ -315,13 +315,16 @@ class User
     employee_id_array.map!(&:to_i)
 
     if role?('Consultant')
-      employee_ids = employee_id_array.select{|id| id > 10000}
+      employee_ids = employee_id_array.select{ |id| id > 10000 }
       emp_id = employee_ids.empty? ? 10000 : employee_ids.max
+    elsif self.employee_detail.try(:location) == 'Bengaluru'
+      employee_ids = employee_id_array.select{ |id| id > 8000 && id < 9000 }
+      emp_id = employee_ids.empty? ? 8000 : employee_ids.max
     elsif self.employee_detail.try(:location) == 'Plano'
-      usa_employee_ids = employee_id_array.select{|id| id > 9000}
+      usa_employee_ids = employee_id_array.select{ |id| id > 9000 && id < 10000}
       emp_id = usa_employee_ids.empty? ? 9000 : usa_employee_ids.max
     else
-      pune_employee_ids = employee_id_array.select {|id| id <= 9000}
+      pune_employee_ids = employee_id_array.select { |id| id <= 9000}
       emp_id = pune_employee_ids.empty? ? 0 : pune_employee_ids.max
     end
     emp_id = emp_id + 1
