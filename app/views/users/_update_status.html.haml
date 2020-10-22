@@ -13,7 +13,7 @@
   %br
   %br
   = f.label 'Allow Timesheet Backdated Entry'
-  .make-switch{"data-on" => "success", "data-off" => "warning", "data-on-label"=>"Yes", "data-off-label"=> "NO"}
+  .make-switch{ tabindex: 0, "data-on" => "success", "data-off" => "warning", "data-on-label"=>"Yes", "data-off-label"=> "NO"}
     = f.check_box :allow_backdated_timesheet_entry, {}, 'true', 'false'
   %br
   %br
