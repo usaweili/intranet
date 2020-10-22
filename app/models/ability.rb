@@ -78,6 +78,9 @@ class Ability
 
   def consultant_abilities(user_id)
     can [:public_profile, :private_profile, :apply_leave], User, id: user_id
+    can [:index, :download_document], Attachment do |attachment|
+      attachment.user_id == user_id || attachment.is_visible_to_all
+    end
     can :read, Policy
     cannot :manage, LeaveApplication
     can [:new, :create], LeaveApplication, user_id: user_id
