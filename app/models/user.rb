@@ -89,6 +89,8 @@ class User
     assign_leave('Role Updated') if self.role_changed? &&
                                     self.role_was == INTERN_ROLE &&
                                     self.role == 'Employee'
+  end
+
   after_update do
     reject_future_leaves if (status_changed? && status == 'resigned')
   end
