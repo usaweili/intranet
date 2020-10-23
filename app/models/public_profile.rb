@@ -33,6 +33,7 @@ class PublicProfile
   #validates_presence_of :first_name, :last_name, :gender, :mobile_number, :date_of_birth, :blood_group, :on => :update
   validates :gender, inclusion: { in: GENDER }, allow_blank: true, :on => :update
   validates :blood_group, inclusion: { in: BLOOD_GROUPS }, allow_blank: true, :on => :update
+  validates :github_handle, format: { with: /\A[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}\z/, message: "Invalid Github Handle" }
   validates_format_of [:github_handle, :twitter_handle], without: URI.regexp(['http', 'https']), allow_blank: true
   validates_format_of [:facebook_url, :linkedin_url], with: URI.regexp(['http', 'https']), allow_blank: true
 
