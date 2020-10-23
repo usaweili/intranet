@@ -49,7 +49,7 @@ class TimeSheet
   ALLOCATED_HOURS = 8
   DAYS_FOR_UPDATE = 7
   # change it back after running rake task to calculate duration
-  DAYS_FOR_CREATE = Date.today - TimeSheet.first.date
+  DAYS_FOR_CREATE = 7
   # threshold pending days after which mail will be sent to all receivers
   PENDING_THRESHOLD = 3
   # Working hours threshold for a day
