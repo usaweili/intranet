@@ -29,6 +29,8 @@ describe PublicProfile do
   it { should validate_inclusion_of(:blood_group).
         to_allow(BLOOD_GROUPS).on(:update)
      }
+  it { should allow_value('validhandle').for(:github_handle)}
+  it { should_not allow_value('invalid  handle').for(:github_handle)}
 
   context 'Trigger - should call code monitor service' do
     it 'when Public Profile(github, gitlab, bitbucket handles) is updated' do
