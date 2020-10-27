@@ -6,7 +6,7 @@ class UserProject
   field :end_date, type: Date, default: nil
   field :time_sheet, type: Boolean, default: false
   field :active, type: Boolean, default: true
-  field :allocation, type: Integer, default: 100
+  field :allocation, type: Integer, default: 160
   field :billable, type: Boolean, default: true
 
   belongs_to :user
