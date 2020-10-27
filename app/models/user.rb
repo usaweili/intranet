@@ -88,7 +88,7 @@ class User
   before_save do
     assign_leave('Role Updated') if self.role_changed? &&
                                     self.role_was == INTERN_ROLE &&
-                                    self.role == 'Employee'
+                                    [ ROLE[:employee], ROLE[:consultant] ].include?(self.role)
   end
 
   slug :name
