@@ -47,12 +47,19 @@ RSpec.describe UserProject, type: :model do
         to eq("Allocation can't be blank")
     end
 
-    it 'Should fail because allocation is greater than 100' do
+    it 'Should fail because allocation is greater than 160' do
       user_project = FactoryGirl.build(:user_project)
-      user_project.allocation = 101
+      user_project.allocation = 161
       user_project.save
       expect(user_project.errors.full_messages).
         to eq(["Allocation not less than 0 & not more than 160"])
+    end
+
+    it 'Should pass if allocation has default value 160' do
+      user_project = FactoryGirl.build(:user_project)
+      user_project.save
+      expect(user_project.allocation).
+        to eq(160)
     end
 
     context 'end_date compulsory if user is inactive' do
