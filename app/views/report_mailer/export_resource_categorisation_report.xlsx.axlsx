@@ -1,9 +1,17 @@
 wb = xlsx_package.workbook
 
 wb.add_worksheet(name: 'Billable Resources') do |sheet|
-  sheet.add_row(['Employee Name', 'Allocation (hrs/month)', 'Billable', 'Non Billable', 'Investment', 'Bench', 'Projects' ])
-  resources.each do | resource |
-    sheet.add_row [ resource[:name], resource[:total_allocation], resource[:billable],
-                    resource[:non_billable], resource[:investment], resource[:bench], resource[:projects] ]
+  sheet.add_row(['Employee Name', 'Employee Location', 'Allocation (hrs/month)', 'Billable', 'Non Billable', 'Investment', 'Bench', 'Technical Skills', 'Projects' ])
+  resource_report.each do | resource |
+    sheet.add_row [ resource[:name], resource[:location], resource[:total_allocation], resource[:billable],
+                    resource[:non_billable], resource[:investment], resource[:bench], resource[:technical_skills], resource[:projects] ]
+  end
+end
+
+wb.add_worksheet(name: 'Project Wise Billable Resources') do |sheet|
+  sheet.add_row([ 'Project Name', 'Employee Name', 'Employee Location', 'Employee Designation', 'Billable', 'Non Billable', 'Investment' ])
+  project_wise_resource_report.each do | resource |
+    sheet.add_row [ resource[:project], resource[:name], resource[:location], resource[:designation],
+                    resource[:billable], resource[:non_billable], resource[:investment] ]
   end
 end
