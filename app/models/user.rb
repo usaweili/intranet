@@ -83,7 +83,7 @@ class User
   delegate :location, to: :employee_detail, :allow_nil => true
 
   scope :leaders, ->{ visible_on_website.asc(:website_sequence_number).in(role: ROLE[:admin]) }
-  scope :members, ->{ visible_on_website.nin(:role.in => [ ROLE[:admin], 'Consultant' ]).asc(['public_profile.first_name']) }
+  scope :members, ->{ visible_on_website.nin(:role.in => [ ROLE[:admin], ROLE[:consultant] ]).asc(['public_profile.first_name']) }
 
   before_create do
     self.website_sequence_number = (User.max(:website_sequence_number) || 0) + 1
@@ -92,7 +92,7 @@ class User
   before_save do
     assign_leave('Role Updated') if self.role_changed? &&
                                     self.role_was == INTERN_ROLE &&
-                                    self.role == 'Employee'
+                                    [ ROLE[:employee], ROLE[:consultant] ].include?(self.role)
   end
 
   slug :name
@@ -327,7 +327,7 @@ class User
     employee_id_array = User.distinct("employee_detail.employee_id")
     employee_id_array.map!(&:to_i)
 
-    if role?('Consultant')
+    if role?(ROLE[:consultant])
       employee_ids = employee_id_array.select{ |id| id > 10000 }
       emp_id = employee_ids.empty? ? 10000 : employee_ids.max
     elsif self.employee_detail.try(:location) == 'Bengaluru'
