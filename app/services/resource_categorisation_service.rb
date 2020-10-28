@@ -16,7 +16,7 @@ class ResourceCategorisationService
       'Business Development Executive',
       'Office Assistant'
     ]
-    User.approved.where(:role.in => ['Employee', 'Intern']).each do |user|
+    User.approved.where(:role.in => ['Employee', 'Intern'], :'employee_detail.location'.ne => 'Bengaluru').each do |user|
       unless exclude_designations.include?(user.designation.try(:name))
         billable_allocation = billable_projects_allocation(user.id)
         billable_allocation = billable_allocation > 160 ? 160 : billable_allocation
@@ -26,6 +26,7 @@ class ResourceCategorisationService
         bench_allocation =  (160 - total_allocation) < 0 ? 0 : (160 - total_allocation)
         project_names = user.project_details.map { |i| i.values[1] }
         resource_report << { name: user.name,
+                             location: user.location,
                              total_allocation: total_allocation,
                              billable: billable_allocation,
                              non_billable: non_billable_allocation,
