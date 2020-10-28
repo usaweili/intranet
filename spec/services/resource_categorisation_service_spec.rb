@@ -26,6 +26,13 @@ RSpec.describe ResourceCategorisationService do
       @service = ResourceCategorisationService.new(@employee_one.email)
     end
   
+    it 'should pass if report contains the location of employee' do
+      location = @employee_one.location
+      response = @service.generate_resource_report
+
+      expect(response[0][:location]).to eq(location)
+    end
+
     it 'Billable Allocation - should return total allocation of billable projects' do
       total_allocation = @employee_one.user_projects.map(&:allocation).sum
       response = @service.billable_projects_allocation(@employee_one)
@@ -76,8 +83,8 @@ RSpec.describe ResourceCategorisationService do
       project_name_one = @employee_one.project_details.map { |i| i.values[1] }.join(', ')
       project_name_two = @employee_two.project_details.map { |i| i.values[1] }.join(', ')
       report = [
-        { name: @employee_one.name, total_allocation: 80, billable: @user_project_one.allocation, non_billable: 0, investment: 0, bench: 80, projects: project_name_one },
-        { name: @employee_two.name, total_allocation: 100, billable: 0, non_billable: @user_project_two.allocation, investment:0, bench: 60, projects: project_name_two }
+        { name: @employee_one.name, location: @employee_one.location, total_allocation: 80, billable: @user_project_one.allocation, non_billable: 0, investment: 0, bench: 80, projects: project_name_one },
+        { name: @employee_two.name, location: @employee_two.location, total_allocation: 100, billable: 0, non_billable: @user_project_two.allocation, investment:0, bench: 60, projects: project_name_two }
       ]
       report = report.sort_by { |k| k[:name] }
       response = @service.generate_resource_report
