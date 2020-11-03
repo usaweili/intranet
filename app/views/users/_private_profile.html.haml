@@ -34,7 +34,7 @@
         %td
           = r.input :relation, placeholder: 'e.g Father, Mother, Brother etc'
           = r.input :name
-          = r.input :phone_no
+          = r.input :phone_no, input_html: { required: true, type: 'text', maxlength: 10}
   %table{style: "width:100%;"}
     %tr
       = pri.simple_fields_for :addresses do |a|
@@ -52,7 +52,7 @@
             = a.input :city, disabled: disable                  
             = a.input :pin_code, disabled: disable
             = a.input :state, disabled: disable                
-            = a.input :landline_no, disabled: disable, label: 'Landline/Mobile No' 
+            = a.input :landline_no, disabled: disable, label: 'Landline/Mobile No', input_html: { required: true, type: 'text', maxlength: 10 }
   %br
   %center
     = pri.submit "Update Profile", class: 'btn'
