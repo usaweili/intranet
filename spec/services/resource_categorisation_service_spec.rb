@@ -17,7 +17,6 @@ RSpec.describe ResourceCategorisationService do
         :user_project,
         active: true,
         billable: false,
-        end_date: Date.today,
         allocation: 100,
         user: @employee_two,
         project: @active_project
@@ -26,11 +25,18 @@ RSpec.describe ResourceCategorisationService do
       @service = ResourceCategorisationService.new(@employee_one.email)
     end
   
+    it 'should pass if response contains two reports' do
+      location = @employee_one.location
+      response = @service.generate_resource_report
+
+      expect(response.count).to eq(2)
+    end
+
     it 'should pass if report contains the location of employee' do
       location = @employee_one.location
       response = @service.generate_resource_report
 
-      expect(response[0][:location]).to eq(location)
+      expect(response[:resource_report][0][:location]).to eq(location)
     end
 
     it 'Billable Allocation - should return total allocation of billable projects' do
@@ -79,16 +85,40 @@ RSpec.describe ResourceCategorisationService do
       expect(response).to eq(90)
     end
 
-    it 'should generate resource reports' do
+    it 'should generate resource report as expected' do
       project_name_one = @employee_one.project_details.map { |i| i.values[1] }.join(', ')
       project_name_two = @employee_two.project_details.map { |i| i.values[1] }.join(', ')
       report = [
         { name: @employee_one.name, location: @employee_one.location, total_allocation: 80, billable: @user_project_one.allocation, non_billable: 0, investment: 0, bench: 80, projects: project_name_one },
-        { name: @employee_two.name, location: @employee_two.location, total_allocation: 100, billable: 0, non_billable: @user_project_two.allocation, investment:0, bench: 60, projects: project_name_two }
+        { name: @employee_two.name, location: @employee_two.location, total_allocation: 100, billable: 0, non_billable: @user_project_two.allocation, investment: 0, bench: 60, projects: project_name_two }
       ]
       report = report.sort_by { |k| k[:name] }
       response = @service.generate_resource_report
-      expect(response).to eq(report)
+      expect(response[:resource_report]).to eq(report)
+    end    
+
+    it 'should generate project wise resource report as expected' do
+      project_name_one = @employee_one.project_details.map { |i| i.values[1] }.join(', ')
+      project_name_two = @employee_two.project_details.map { |i| i.values[1] }.join(', ')
+      report = [
+        { name: @employee_one.name, location: @employee_one.location, billable: @user_project_one.allocation, non_billable: 0, investment: 0, project: project_name_one },
+        { name: @employee_two.name, location: @employee_two.location, billable: 0, non_billable: @user_project_two.allocation, investment: 0, project: project_name_two }
+      ]
+      report = report.sort_by { |k| k[:name] }
+      response = @service.generate_resource_report
+      expect(response[:project_wise_resource_report]).to eq(report)
+    end    
+
+    it 'should generate project wise resource report without total allocation column' do
+      response = @service.generate_resource_report
+
+      expect(response[:project_wise_resource_report][0].has_key?(:total_allocation)).to eq(false)
+    end    
+
+    it 'should generate project wise resource report without bench column' do
+      response = @service.generate_resource_report
+
+      expect(response[:project_wise_resource_report][0].has_key?(:bench)).to eq(false)
     end    
 
     it 'should send mail' do
