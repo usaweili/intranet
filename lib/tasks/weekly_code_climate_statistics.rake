@@ -69,8 +69,6 @@ def set_snapshot_details(id)
             @stat.implementation_time =
               rating['measure']['meta']['implementation_time']['value']
           end
-        else
-          puts "Failed to retreive latest snapshot Id for #{repo.project.name}\'s #{repo.name}."
         end
         set_filtered_issue_details(url)
         @stat.remarks << "Successfully captured snapshot details for #{@project_name}'s #{@repo_name}."
