@@ -19,7 +19,7 @@
           %td.fields
             = c.input :name
             = c.input :role
-            = c.input :phone_no, input_html: { required: true, type: 'text', maxlength: 10 }
+            = c.input :phone_no, input_html: { maxlength: 10 }
             = c.input :email
             = c.link_to_remove 'Remove Contact', class: 'btn controls'
             %hr
@@ -34,5 +34,5 @@
       = a.input :city
       = a.input :pin_code
       = a.input :state
-      = a.input :landline_no, label: 'Landline/Mobile No' 
+      = a.input :landline_no, label: 'Landline/Mobile No', input_html: { maxlength: 10 }
     = f.submit 'Save', class: "btn controls"
