@@ -11,7 +11,6 @@ class ResourceCategorisationService
   end
 
   def generate_resource_report
-    resource_report = []
     exclude_designations = [
       'Assistant Vice President - Sales',
       'Business Development Executive',
@@ -20,22 +19,23 @@ class ResourceCategorisationService
 
     User.approved.where(:role.in => ['Employee', 'Intern'], :'employee_detail.location'.ne => 'Bengaluru').each do |user|
       unless exclude_designations.include?(user.designation.try(:name))
-        billable_allocation = billable_projects_allocation(user)
+        @user = user
+        billable_allocation = billable_projects_allocation()
         billable_allocation = billable_allocation > 160 ? 160 : billable_allocation
-        non_billable_allocation = non_billable_projects_allocation(user)
-        investment_allocation = investment_projects_allocation(user)
+        non_billable_allocation = non_billable_projects_allocation()
+        investment_allocation = investment_projects_allocation()
         total_allocation = billable_allocation + non_billable_allocation + investment_allocation
         bench_allocation =  (160 - total_allocation) < 0 ? 0 : (160 - total_allocation)
         project_names = user.project_details.map { |i| i.values[1] }
 
         if total_allocation == 0
-          @report[:project_wise_resource_report] << { name: user.name,
-                                                      location: user.location,
-                                                      billable: 0,
-                                                      non_billable: 0,
-                                                      investment: 0,
-                                                      project: project_names.join(', ')
-                                                    }
+          unless project_names.empty?
+            project_names.each do |project_name|
+              @report[:project_wise_resource_report] << add_record.merge(project: project_name)
+            end
+          else
+            @report[:project_wise_resource_report] << add_record
+          end
         end
 
         @report[:resource_report] << { name: user.name,
@@ -54,80 +54,76 @@ class ResourceCategorisationService
     @report
   end
 
-  def billable_projects_allocation(user)
+  def billable_projects_allocation()
     user_projects = UserProject.where(
-      :project_id.in => @billable_projects.pluck(:id),
+      :project_id.in => @billable_projects,
       active: true,
       billable: true,
-      user_id: user.id
+      user_id: @user.id
     )
     unless user_projects.nil?
       user_projects.each do |user_project|
-        billable_allocation = user_project.allocation > 160 ? 160 : user_project.allocation
-        @report[:project_wise_resource_report] << { name: user.name,
-                                                    location: user.location,
-                                                    billable: billable_allocation,
-                                                    non_billable: 0,
-                                                    investment: 0,
-                                                    project: user_project.project.name
-                                                  }
+        @report[:project_wise_resource_report] << add_record.merge(
+          billable: user_project.allocation,
+          project: user_project.project.name
+        )
       end
       user_projects.pluck(:allocation).sum
     end
 
   end
 
-  def non_billable_projects_allocation(user)
+  def non_billable_projects_allocation()
     user_projects = UserProject.where(
-      :project_id.in => @non_billable_projects.pluck(:id),
+      :project_id.in => @non_billable_projects,
       active: true,
       billable: false,
-      user_id: user.id
+      user_id: @user.id
     )
 
     unless user_projects.nil?
       user_projects.each do |user_project|
-        nonbillable_allocation = user_project.allocation > 160 ? 160 : user_project.allocation
-        @report[:project_wise_resource_report] << { name: user.name,
-                                                    location: user.location,
-                                                    billable: 0,
-                                                    non_billable: nonbillable_allocation,
-                                                    investment: 0,
-                                                    project: user_project.project.name
-                                                  }
-
+        @report[:project_wise_resource_report] << add_record.merge(
+          non_billable: user_project.allocation,
+          project: user_project.project.name
+        )
       end
       user_projects.pluck(:allocation).sum
     end
   end
 
-  def investment_projects_allocation(user)
+  def investment_projects_allocation()
     user_projects = UserProject.where(
-      :project_id.in => @investment_projects.pluck(:id),
+      :project_id.in => @investment_projects,
       active: true,
-      user_id: user.id
+      user_id: @user.id
     )
 
     unless user_projects.nil?
       user_projects.each do |user_project|
-        investment_allocation = user_project.allocation > 160 ? 160 : user_project.allocation
-        @report[:project_wise_resource_report] << { name: user.name,
-                                                    location: user.location,
-                                                    billable: 0,
-                                                    non_billable: 0,
-                                                    investment: investment_allocation,
-                                                    project: user_project.project.name
-                                                  }
-
+        @report[:project_wise_resource_report] << add_record.merge(
+          investment: user_project.allocation,
+          project: user_project.project.name
+        )
       end
       user_projects.pluck(:allocation).sum
     end
+  end
+
+  def add_record
+    { name: @user.name,
+      location: @user.location,
+      billable: 0,
+      non_billable: 0,
+      investment: 0,
+      project: ""
+    }
   end
 
   def load_projects
-    @report = {:resource_report => [], :project_wise_resource_report => []}
-    @billable_projects = Project.where(:type_of_project.in => ['T&M', 'Fixbid'], is_active: true)
-    @non_billable_projects = Project.where(:type_of_project.in => ['T&M', 'Free', 'Fixbid'], is_active: true)
-    @investment_projects = Project.where(type_of_project: 'Investment', is_active: true, is_activity: false)
+    @report = {resource_report: [], project_wise_resource_report: []}
+    @billable_projects = Project.where(:type_of_project.in => ['T&M', 'Fixbid'], is_active: true).pluck(:id)
+    @non_billable_projects = Project.where(:type_of_project.in => ['T&M', 'Free', 'Fixbid'], is_active: true).pluck(:id)
+    @investment_projects = Project.where(type_of_project: 'Investment', is_active: true, is_activity: false).pluck(:id)
   end
 end
