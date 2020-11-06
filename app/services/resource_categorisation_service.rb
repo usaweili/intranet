@@ -6,8 +6,8 @@ class ResourceCategorisationService
   end
 
   def call
-    reports = generate_resource_report
-    ReportMailer.send_resource_categorisation_report(reports, @emails).deliver_now
+    generate_resource_report
+    ReportMailer.send_resource_categorisation_report(@report, @emails).deliver_now
   end
 
   def generate_resource_report
@@ -51,7 +51,6 @@ class ResourceCategorisationService
     end
     @report[:resource_report] = @report[:resource_report].sort_by { |k,v| k[:name] }
     @report[:project_wise_resource_report] = @report[:project_wise_resource_report].sort_by { |k,v| k[:name] }
-    @report
   end
 
   def billable_projects_allocation()
@@ -61,15 +60,13 @@ class ResourceCategorisationService
       billable: true,
       user_id: @user.id
     )
-    unless user_projects.nil?
-      user_projects.each do |user_project|
-        @report[:project_wise_resource_report] << add_record.merge(
-          billable: user_project.allocation,
-          project: user_project.project.name
-        )
-      end
-      user_projects.pluck(:allocation).sum
+    user_projects.each do |user_project|
+      @report[:project_wise_resource_report] << add_record.merge(
+        billable: user_project.allocation,
+        project: user_project.project.name
+      )
     end
+    user_projects.pluck(:allocation).sum
 
   end
 
@@ -81,15 +78,13 @@ class ResourceCategorisationService
       user_id: @user.id
     )
 
-    unless user_projects.nil?
-      user_projects.each do |user_project|
-        @report[:project_wise_resource_report] << add_record.merge(
-          non_billable: user_project.allocation,
-          project: user_project.project.name
-        )
-      end
-      user_projects.pluck(:allocation).sum
+    user_projects.each do |user_project|
+      @report[:project_wise_resource_report] << add_record.merge(
+        non_billable: user_project.allocation,
+        project: user_project.project.name
+      )
     end
+    user_projects.pluck(:allocation).sum
   end
 
   def investment_projects_allocation()
@@ -99,15 +94,13 @@ class ResourceCategorisationService
       user_id: @user.id
     )
 
-    unless user_projects.nil?
-      user_projects.each do |user_project|
-        @report[:project_wise_resource_report] << add_record.merge(
-          investment: user_project.allocation,
-          project: user_project.project.name
-        )
-      end
-      user_projects.pluck(:allocation).sum
+    user_projects.each do |user_project|
+      @report[:project_wise_resource_report] << add_record.merge(
+        investment: user_project.allocation,
+        project: user_project.project.name
+      )
     end
+    user_projects.pluck(:allocation).sum
   end
 
   def add_record
