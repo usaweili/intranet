@@ -105,6 +105,10 @@ every :day, :at => '10:00am' do
   rake "probation_notification:probation_end"
 end
 
+every :sunday, :at => '10:00pm' do
+  rake 'resource_categorisation_report'
+end
+
 every :sunday, :at => '11:00pm' do
   rake "weekly_codeclimate_statistics"
 end
