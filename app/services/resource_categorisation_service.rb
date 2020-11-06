@@ -28,14 +28,8 @@ class ResourceCategorisationService
         bench_allocation =  (160 - total_allocation) < 0 ? 0 : (160 - total_allocation)
         project_names = user.project_details.map { |i| i.values[1] }
 
-        if total_allocation == 0
-          unless project_names.empty?
-            project_names.each do |project_name|
-              @report[:project_wise_resource_report] << add_record.merge(project: project_name)
-            end
-          else
-            @report[:project_wise_resource_report] << add_record
-          end
+        if total_allocation == 0 && project_names.blank?
+          @report[:project_wise_resource_report] << add_record
         end
 
         @report[:resource_report] << { name: user.name,
