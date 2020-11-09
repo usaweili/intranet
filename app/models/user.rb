@@ -191,6 +191,10 @@ class User
     end
   end
 
+  def is_management?
+    [ROLE[:HR], ROLE[:admin], ROLE[:manager]].include?(role)
+  end
+
   def is_approved?
     self.status == 'approved'
   end
