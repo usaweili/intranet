@@ -15,6 +15,7 @@ class Ability
       employee_abilities(user.id)
       can :manage, Project
       can :edit, User
+      can :index, User
       can :manage, Company
       can [:public_profile, :private_profile, :apply_leave], User
       can :manage, TimeSheet
@@ -40,6 +41,7 @@ class Ability
     can :manage, [Project]
     can :manage, [Attachment, Policy]
     can :manage, Vendor
+    can :manage, User
     can :manage, LeaveApplication
     can :manage, Schedule
     can :manage, Company
@@ -48,9 +50,7 @@ class Ability
     can :manage, Designation
     can :resource_list, User
     can :manage, EntryPass
-    can :manage, OpenSourceProject
-    can :manage, ShowcaseEvent
-    can :manage, Training
+    can :read, :dashboard
   end
 
   def intern_abilities(user_id)
@@ -58,6 +58,7 @@ class Ability
     can :read, [Policy, Attachment, Vendor]
     can [:index, :users_timesheet, :edit_timesheet, :update_timesheet, :new, :add_time_sheet], TimeSheet, user_id: user_id
     can :manage, EntryPass, user_id: user_id
+    can :read, :dashboard
   end
 
   def employee_abilities(user_id)
@@ -74,6 +75,22 @@ class Ability
     cannot [:projects_report, :individual_project_report], TimeSheet
     can :manage, EntryPass, user_id: user_id
     cannot :report, EntryPass
+    can :read, :dashboard
+    can :index, User
+  end
+
+  def consultant_abilities(user_id)
+    can [:public_profile, :private_profile, :apply_leave], User, id: user_id
+    can :read, Policy
+    cannot :manage, LeaveApplication
+    can [:new, :create], LeaveApplication, user_id: user_id
+    can [:edit, :update], LeaveApplication, leave_status: 'Pending', user_id: user_id
+    can [:index, :users_timesheet, :edit_timesheet, :update_timesheet, :new, :add_time_sheet], TimeSheet, user_id: user_id
+    cannot [:projects_report, :individual_project_report], TimeSheet
+    cannot :manage, EntryPass, user_id: user_id
+    cannot :report, EntryPass
+    cannot :index, User
+    cannot :read, :dashboard
   end
 
   def consultant_abilities(user_id)

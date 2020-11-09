@@ -20,11 +20,16 @@
     %li
       = link_to "Invite Employee", main_app.invite_user_path, role: 'menuitem'
   %li
-    = link_to "Profile", main_app.public_profile_user_path(current_user), data: {'no-turbolink' =>  true}, role: 'menuitem'
-  %li
-    = link_to "Documents", main_app.attachments_path, data: {'no-turbolink' =>  true}
+    = link_to "Profile", main_app.public_profile_user_path(current_user), data: {'no-turbolink' =>  true}
+  
+  - if can? :manage, Attachment
+    %li
+      = link_to "Documents", main_app.attachments_path, data: {'no-turbolink' =>  true}
   
   - unless can_access?('Events')
+    %li
+      = link_to "Events", "https://intranet.joshsoftware.com/functions", 'target' => '_blank'
+  - if can_access?('Newsletter')
     %li
       = link_to "Events", "https://intranet.joshsoftware.com/functions", 'target' => '_blank'
   - if can_access?('Newsletter')
@@ -68,8 +73,10 @@
   - unless can_access?('Assessments')
     %li
       = link_to "Assessments", ENV['snowflake_url']
-  %li
-    = link_to "Office Entry Pass", '/entry_passes'
+  
+  - if can? :manage, EntryPass
+    %li
+      = link_to "Office Entry Pass", '/entry_passes'
 
   - if can_access?('Repositories') 
     %li

@@ -177,6 +177,10 @@ class User
     [ROLE[:intern], ROLE[:employee]].include?(role)
   end
 
+  def is_consultant?
+    self.role == ROLE[:consultant]
+  end
+
   def is_admin_or_hr?
     [ROLE[:HR], ROLE[:admin]].include?(role)
   end
