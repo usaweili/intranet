@@ -6,7 +6,7 @@ task :approved_leave_notification => :environment do
                                     start_at: Date.tomorrow)
     leaves.each do |leave|
       emails = leave.get_team_members
-      UserMailer.delay.send_approved_leave_notification(leave.id, emails)
+      UserMailer.delay.send_approved_leave_notification(leave.id, emails) unless emails.empty?
     end
   end
 end
