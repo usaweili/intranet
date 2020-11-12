@@ -1,5 +1,5 @@
 desc 'Notify team members about the leave status'
-task :approved_leave_notification => :environment do
+task approved_leave_notification: :environment do
   unless HolidayList.is_holiday?(Date.today)
     leaves = LeaveApplication.where(leave_type: 'LEAVE',
                                     leave_status: 'Approved',
