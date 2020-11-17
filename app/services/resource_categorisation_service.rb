@@ -30,13 +30,14 @@ class ResourceCategorisationService
         @report[:resource_report] << {
           name: user.name,
           location: user.location,
+          designation: user.designation.try(:name),
           total_allocation: total_allocation,
           billable: billable_allocation,
           non_billable: non_billable_allocation,
           investment: investment_allocation,
           bench: bench_allocation,
           technical_skills: [user.public_profile.try('technical_skills')].join(', '),
-          projects: project_names.join(', ')
+          projects: project_names
         }
       end
     end
