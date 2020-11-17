@@ -6,13 +6,16 @@ class ReportMailer < ActionMailer::Base
     data_file  = render_to_string(
       layout: false, handlers: [:axlsx], formats: [:xlsx],
       template: 'report_mailer/export_resource_categorisation_report',
-      locals: { resource_report: options[:resource_report],
-                project_wise_resource_report: options[:project_wise_resource_report]
-              }
+      locals: {
+        resource_report: options[:resource_report],
+        project_wise_resource_report: options[:project_wise_resource_report]
+      }
     )
 
-    attachment = { mime_type: Mime[:xlsx],
-                   content: data_file }
+    attachment = {
+      mime_type: Mime[:xlsx],
+      content: data_file
+    }
 
     attachments["ResourceCategorisationReport - #{Date.today}.xlsx"] = attachment
     mail(
