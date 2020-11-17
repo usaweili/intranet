@@ -2,10 +2,10 @@
 = simple_nested_form_for @project, :html => {class: "form-horizontal teamForm"} do |f|
   %h3 Current Team Members of #{@project.name}
   .row.span12.headers
-    .span2.width12 Active?
+    .span2.width10 Active?
     .span2.width18 Name
-    .span2.width12 Start Date
-    .span2.width12 End Date
+    .span2.width18 Start Date
+    .span2.width18 End Date
     .span2.width10 Timesheet Required?
     .span2.width10 Billable?
     .span2.width10 Allocation (hrs/month)
@@ -13,15 +13,17 @@
     = f.fields_for :user_projects do |project_user_form|
       - if project_user_form.object.user.blank? || (project_user_form.object.user && project_user_form.object.user.is_approved? && (project_user_form.object.active || project_user_form.object.end_date.nil?))
         .row.span12
-          .span2.width12
+          .span2.width10
             .make-switch{ tabindex: 0, "data-on": "success", "data-off": "danger", "data-on-label": "Yes", "data-off-label": "No"}
               = project_user_form.check_box :active, {class: "active-check-box"}, 'true', 'false'
           .span2.width18
             = project_user_form.input :user_id, collection: users, input_html: {class: "user_select"}, label: false
-          .span2.width12
-            = project_user_form.input :start_date, input_html: {class: :datepicker, style: "height: 32px"}, label: false
-          .span2.width12
-            = project_user_form.input :end_date, input_html: {class: :datepicker, style: "height: 32px", id: "end-date"},  label: false
+          .span2.width18
+            = project_user_form.input :start_date, label: false,
+              input_html: {type: :date, class: 'date-picker', style: 'height: 32px', value: project_user_form.object.start_date.try(:strftime, '%Y-%m-%d')}
+          .span2.width18
+            = project_user_form.input :end_date, label: false,
+              input_html: {type: :date, class: 'date-picker', style: 'height: 32px', id: 'end-date', value: project_user_form.object.end_date.try(:strftime, '%Y-%m-%d')}
           .span2.width10
             .make-switch{ tabindex: 0, "data-on": "success", "data-off": "warning", "data-on-label": "REQ", "data-off-label": "NREQ"}
               = project_user_form.check_box :time_sheet
@@ -32,7 +34,7 @@
             = project_user_form.input :allocation, {min: 0, max: 160, step: 1, style: "height: 32px;", label: false, class: 'allotment'}
           - if project_user_form.object.user.blank?
             = project_user_form.link_to_remove "Cancel", class: "btn btn-danger"
-  .offset3
+  .offset4
     = f.link_to_add "Add team member", :user_projects, data: {target: '#team-members'}, class: "btn btn-success", id: "add-team-members-button"
     = f.submit :Save, class: 'btn controls btn-info'
 

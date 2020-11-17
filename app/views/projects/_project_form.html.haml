@@ -24,8 +24,8 @@
           =f.label 'Timesheet Mandatory'
           .make-switch{ tabindex: 0, "data-on": "success", "data-off": "warning", "data-on-label": "True", "data-off-label": "False"}
             = f.check_box :timesheet_mandatory, {}, 'true', 'false'
-        = f.input :start_date, required: true, 'aria-required': true, input_html: {class: :datepicker}, value: f.object.start_date.try(:strftime, '%d-%m-%Y')
-        = f.input :end_date, input_html: {class: :datepicker}, value: f.object.end_date.try(:strftime, '%d-%m-%Y')
+        = f.input :start_date, required: true, 'aria-required': true, input_html: {type: :date, class: 'date-picker', value: f.object.start_date.try(:strftime, '%Y-%m-%d')}
+        = f.input :end_date, input_html: {type: :date, class: 'date-picker', value: f.object.end_date.try(:strftime, '%d-%m-%Y')}
         = label_tag "Case Study", nil, class: 'control-label'
         = f.file_field :case_study, required: true, 'aria-required': true, class: 'case_study_upload', accept: "application/pdf"
         = f.input :code_climate_id, label: "Code climate id"
@@ -42,8 +42,8 @@
           = label_tag 'Client Logo', nil, class: 'control-label'
           = f.file_field :logo, required: true, 'aria-required': true, id: 'logo-upload', class: 'case_study_upload'
           = image_tag f.object.logo, size: "50x50", id: 'project-logo'
-          = f.input :invoice_date, input_html: {class: :datepicker}, value: f.object.start_date.try(:strftime, '%d-%m-%Y')
-          = f.input :code, label: "Project Code", required: true, 'aria-required': true, id: "projectcode" do
+          = f.input :invoice_date, input_html: {type: :date, class: 'date-picker', value: f.object.start_date.try(:strftime, '%Y-%m-%d')}
+          = f.input :code, label: 'Project Code', required: true, 'aria-required': true, id: 'projectcode' do
             = f.text_field :code, readonly: f.object.code
             - unless f.object.code.present?
               = link_to "javascript:void(0)", onclick: "generate_code();" do

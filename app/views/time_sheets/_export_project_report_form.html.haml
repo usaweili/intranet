@@ -3,14 +3,10 @@
     .div.form-position
       .row.row-padding
         %label.col-md-3 From Date:
-        = text_field_tag :from_date, params[:from_date],
-          class: "col-md-3 export-report-text-from-date form-control datepicker",
-          placeholder: "From Date", value: @from_date, style: "height: 2em;", readonly: true
+        %input{ name: 'from_date', class: 'col-md-3 export-report-text-from-date form-control date-picker', type: 'date', placeholder: 'From Date', value: @from_date}
       .row.row-padding
         %label To Date:
-        = text_field_tag :to_date, params[:to_date],
-          class: "form-control export-report-text-to-date datepicker",
-          placeholder: "To Date", value: @to_date, style: "height: 2em;", readonly: true
+        %input{ name: 'to_date', class: 'form-control export-report-text-to-date date-picker', type: 'date', placeholder: 'From Date', value: @from_date}
       .row.row-padding
         = check_box_tag(:summary)
         = label_tag :summary, "Get summary report of all projects"
