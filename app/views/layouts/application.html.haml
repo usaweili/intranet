@@ -33,8 +33,6 @@
                     .media-body
                       Cras sit amet nibh libero, in gravida nulla. Nulla metus scelerisque ante sollicitudin commodo
             %li
-              = link_to 'Dashboard', main_app.root_path, data: {'no-turbolink' =>  true}, role: 'menuitem'
-            %li
               = link_to 'Employees', main_app.users_path, role: 'menuitem'
             %li
               = link_to 'Screamout', screamout.contents_path, data: {'no-turbolink' =>  true}, role: 'menuitem'
