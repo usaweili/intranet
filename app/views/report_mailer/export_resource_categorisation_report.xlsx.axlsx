@@ -3,9 +3,10 @@ wb = xlsx_package.workbook
 wb.add_worksheet(name: 'Billable Resources') do |sheet|
   sheet.add_row(['Employee Name', 'Employee Location', 'Employee Designation', 'Allocation (hrs/month)', 'Billable', 'Non Billable', 'Investment', 'Bench', 'Technical Skills', 'Projects' ])
   resource_report.each do | resource |
-    row = [ resource[:name], resource[:location], resource[:designation], resource[:total_allocation], resource[:billable],
-            resource[:non_billable], resource[:investment], resource[:bench], resource[:technical_skills] ]
-    sheet.add_row row + resource[:projects]
+    sheet.add_row [ resource[:name], resource[:location], resource[:designation],resource[:total_allocation],
+                    resource[:billable],resource[:non_billable], resource[:investment], resource[:bench],
+                    resource[:technical_skills] ] + resource[:projects]
+
   end
 end
 
