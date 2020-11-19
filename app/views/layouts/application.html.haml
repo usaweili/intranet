@@ -60,7 +60,7 @@
     #spinner-wrapper
       #spinnerDiv
     - flash.each do |key, msg|
-      %div{class: "#{flash_class(key)} alert-dismissible text-center", style: "margin-top: 15px;"}
+      %div{class: "#{flash_class(key)} alert-dismissible", style: "margin-top: 15px;"}
         = msg
         .close{'data-dismiss' => 'alert'} ×
     - flash.clear
