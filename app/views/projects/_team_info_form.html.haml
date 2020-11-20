@@ -4,8 +4,8 @@
   .row.span12.headers
     .span2.width10 Active?
     .span2.width18 Name
-    .span2.width18 Start Date
-    .span2.width18 End Date
+    .span2.width15 Start Date
+    .span2.width15 End Date
     .span2.width10 Timesheet Required?
     .span2.width10 Billable?
     .span2.width10 Allocation (hrs/month)
@@ -18,10 +18,10 @@
               = project_user_form.check_box :active, {class: "active-check-box"}, 'true', 'false'
           .span2.width18
             = project_user_form.input :user_id, collection: users, input_html: {class: "user_select"}, label: false
-          .span2.width18
+          .span2.width15
             = project_user_form.input :start_date, label: false,
               input_html: {type: :date, class: 'date-picker', style: 'height: 32px', value: project_user_form.object.start_date.try(:strftime, '%Y-%m-%d')}
-          .span2.width18
+          .span2.width15
             = project_user_form.input :end_date, label: false,
               input_html: {type: :date, class: 'date-picker', style: 'height: 32px', id: 'end-date', value: project_user_form.object.end_date.try(:strftime, '%Y-%m-%d')}
           .span2.width10
@@ -33,7 +33,7 @@
           .span2.width10
             = project_user_form.input :allocation, {min: 0, max: 160, step: 1, style: "height: 32px;", label: false, class: 'allotment'}
           - if project_user_form.object.user.blank?
-            = project_user_form.link_to_remove "Cancel", class: "btn btn-danger"
+            = project_user_form.link_to_remove '', class: 'icon-remove'
   .offset4
     = f.link_to_add "Add team member", :user_projects, data: {target: '#team-members'}, class: "btn btn-success", id: "add-team-members-button"
     = f.submit :Save, class: 'btn controls btn-info'
