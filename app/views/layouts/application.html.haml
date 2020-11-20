@@ -15,8 +15,11 @@
   #header
     .wrap
       .logo
-        =link_to(image_tag("Josh-Software-Logo.svg"), "#", data: {'no-turbolink' =>  true})
-
+        - if (params[:controller].eql?('light/users') and (params[:action].eql?('subscribe') or params[:action].eql?('unsubscribe'))) or (params[:controller].eql?('light/newsletters') and (params[:action].eql?('web_version')))
+          = link_to(image_tag("Josh-Software-Logo.svg"), "#", data: {'no-turbolink' =>  true})
+        - else
+          = link_to(image_tag("Josh-Software-Logo.svg"), main_app.root_path, data: {'no-turbolink' =>  true})
+      
       .main-menu
         %ul.nav.nav-pills{ role: 'menubar'}
           - if user_signed_in?
