@@ -6,11 +6,12 @@ class EmployeeDetail
   embedded_in :user
 
   field :employee_id, type: String
-  field :date_of_relieving, :type => Date
+  field :date_of_relieving, type: Date
   field :notification_emails, type: Array
   field :available_leaves, type: Integer, default: 0
   field :description
   field :is_billable, type: Boolean, default: false
+  field :unassigned_project, type: Boolean, default: true
   field :designation_track, type: String, default: DESIGNATION_TRACKS.first
   field :location
 
@@ -49,6 +50,6 @@ class EmployeeDetail
   def assign_new_usa_id?
     # For Sachin's record we are keeping his employee ID as it is
     # For all other USA employees ID must be above 9000
-    employee_id.nil? and location == "Plano" ? true : false
+    employee_id.nil? and location == 'Plano' ? true : false
   end
 end

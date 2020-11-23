@@ -1118,7 +1118,7 @@ class TimeSheet
         }
         user_timesheet << time_sheet_data
       end
-      if user_timesheet.present?
+      if user_timesheet.present? && user.employee_detail.unassigned_project
         TimesheetRemainderMailer.user_timesheet_for_different_project(user, user_timesheet).deliver_now
       end
     end
