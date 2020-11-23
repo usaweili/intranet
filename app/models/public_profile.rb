@@ -6,6 +6,8 @@ class PublicProfile
 
   mount_uploader :image, FileUploader
 
+  MAX_CORE_SKILL_COUNT = 3
+
   field :first_name, default: ''
   field :last_name, default: ''
   field :gender

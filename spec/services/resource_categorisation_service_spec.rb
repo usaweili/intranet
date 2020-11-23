@@ -8,6 +8,7 @@ RSpec.describe ResourceCategorisationService do
 
       @active_project = FactoryGirl.create(:project, name: 'Brand Scope')
       @active_project_two = FactoryGirl.create(:project, name: 'Quick Insure')
+      @devops_project = FactoryGirl.create(:project, name: 'DevOps Work')
       @free_project = FactoryGirl.create(
         :project,
         name: 'Intranet',
@@ -78,11 +79,26 @@ RSpec.describe ResourceCategorisationService do
       expect(response).to eq(90)
     end
 
+    it 'Get Technical Skills - should return atmost three techinal skills' do
+      response = @service.get_technical_skills(@emp_one)
+      expect(response.count).to eq(3)
+    end
+
     it 'should generate resource report as expected' do
+      @emp_three = FactoryGirl.create(:user, status: STATUS[2])
+      @user_project_three = FactoryGirl.create(
+        :user_project,
+        active: true,
+        allocation: 160,
+        user: @emp_three,
+        project: @devops_project
+      )
       project_name_one = @emp_one.project_details.map { |i| i.values[1] }
       project_name_two = @emp_two.project_details.map { |i| i.values[1] }
-      technical_skills_one = @emp_one.public_profile.technical_skills.join(', ') if @emp_one.public_profile.technical_skills.present?
-      technical_skills_two = @emp_two.public_profile.technical_skills.join(', ') if @emp_two.public_profile.technical_skills.present?
+      project_name_three = @emp_three.project_details.map { |i| i.values[1] }
+      technical_skills_one = @service.get_technical_skills(@emp_one)
+      technical_skills_two = @service.get_technical_skills(@emp_two)
+      technical_skills_three = @service.get_technical_skills(@emp_three)
       report = [
         {
           name: @emp_one.name,
@@ -110,6 +126,19 @@ RSpec.describe ResourceCategorisationService do
         }
       ]
       report = report.sort_by { |k| k[:name] }
+      report << {
+        name: @emp_three.name,
+        location: @emp_three.location,
+        designation: @emp_three.designation.try(:name),
+        total_allocation: 160,
+        billable: 0,
+        non_billable: @user_project_three.allocation,
+        investment: 0,
+        bench: 0,
+        technical_skills: technical_skills_three,
+        projects: project_name_three
+      }
+
       response = @service.generate_resource_report
       expect(response[:resource_report]).to eq(report)
     end
