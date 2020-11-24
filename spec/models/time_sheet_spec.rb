@@ -2082,21 +2082,29 @@ RSpec.describe TimeSheet, type: :model do
     end
     let!(:user) { FactoryGirl.create(:user, status: STATUS[2]) }
     let!(:project) { FactoryGirl.create(:project, start_date: Date.today - 5) }
-    it 'should send mail if user is not assinged on project and filled timesheet' do
-      time_sheet = FactoryGirl.create(:time_sheet, user: user, project: project, created_at: Date.today - 1)
+    it 'should send mail if user is not assigned on project and filled timesheet' do
+      FactoryGirl.create(:time_sheet, user: user, project: project, created_at: Date.today - 1)
       TimeSheet.get_users_and_timesheet_who_have_filled_timesheet_for_different_project
       expect(ActionMailer::Base.deliveries.count).to eq(1)
     end
 
-    it 'should not send mail if project is assigned to this user' do
-      user_project = FactoryGirl.create(:user_project, user: user, project: project)
-      timesheet    = FactoryGirl.create(:time_sheet, user: user, project: project)
+    it 'should send mail if user is not assigned on project and filled timesheet and '+
+       'if unassigned_project flag in employee details is true for respective employee' do
+      FactoryGirl.create(:time_sheet, user: user, project: project, created_at: Date.today - 1)
+      user.employee_detail.set(unassigned_project: true)
+      TimeSheet.get_users_and_timesheet_who_have_filled_timesheet_for_different_project
+      expect(ActionMailer::Base.deliveries.count).to eq(1)
+    end
+
+    it 'should not send mail if project is assigned to respective employee' do
+      FactoryGirl.create(:user_project, user: user, project: project)
+      FactoryGirl.create(:time_sheet, user: user, project: project, created_at: Date.today - 1)
       TimeSheet.get_users_and_timesheet_who_have_filled_timesheet_for_different_project
       expect(ActionMailer::Base.deliveries.count).to eq(0)
     end
 
-    it 'should not send mail if unassigned_project flag in employee details is false for this user' do
-      timesheet    = FactoryGirl.create(:time_sheet, user: user, project: project)
+    it 'should not send mail if unassigned_project flag in employee details is false for respective employee' do
+      FactoryGirl.create(:time_sheet, user: user, project: project, created_at: Date.today - 1)
       user.employee_detail.set(unassigned_project: false)
       TimeSheet.get_users_and_timesheet_who_have_filled_timesheet_for_different_project
       user.employee_detail.set(unassigned_project: true)

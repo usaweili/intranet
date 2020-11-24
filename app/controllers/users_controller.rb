@@ -133,9 +133,24 @@ class UsersController < ApplicationController
   end
 
   def user_params
-    params.require(:user).permit(:status, :role, :visible_on_website, :website_sequence_number,
-      :allow_backdated_timesheet_entry, employee_detail_attributes: [:id, :employee_id, :location,
-      :date_of_relieving, :designation, :description, :is_billable, :designation_track, :notification_emails => [] ],
+    params.require(:user).permit(
+      :status,
+      :role,
+      :visible_on_website,
+      :website_sequence_number,
+      :allow_backdated_timesheet_entry,
+      employee_detail_attributes: [
+        :id,
+        :employee_id,
+        :location,
+        :date_of_relieving,
+        :designation,
+        :description,
+        :is_billable,
+        :unassigned_project,
+        :designation_track,
+        notification_emails: []
+      ],
       attachments_attributes: [:id, :name, :document, :_destroy]
     )
   end
@@ -179,9 +194,11 @@ class UsersController < ApplicationController
 
   def get_bonusly_messages
     bonusly = Api::Bonusly.new(BONUSLY_TOKEN)
-    bonusly.bonusly_messages(start_time: Date.today.strftime('%B+1st'),
-                             end_time:   Date.today.end_of_month.strftime('%B+%dst'),
-                             user_email: @user.email)
+    bonusly.bonusly_messages(
+      start_time: Date.today.strftime('%B+1st'),
+      end_time:   Date.today.end_of_month.strftime('%B+%dst'),
+      user_email: @user.email
+    )
   end
 
   def get_github_feed
