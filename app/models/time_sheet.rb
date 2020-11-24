@@ -1096,7 +1096,7 @@ class TimeSheet
 
   def self.get_users_and_timesheet_who_have_filled_timesheet_for_different_project
     activity_ids = Project.where(is_activity: true).pluck(:id)
-    User.where('employee_detail.unassigned_project': true).approved.each do | user |
+    User.approved.where('employee_detail.unassigned_project': true).each do | user |
       user_timesheet = []
       date           = Date.yesterday
       time_sheets    = user.time_sheets.where(
