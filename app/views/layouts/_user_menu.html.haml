@@ -31,6 +31,13 @@
       = link_to "Events", "https://intranet.joshsoftware.com/functions", 'target' => '_blank'
   - if can_access?('Newsletter')
     %li
+      = link_to "Documents", main_app.attachments_path, data: {'no-turbolink' =>  true}
+  
+  - unless can_access?('Events')
+    %li
+      = link_to "Events", "https://intranet.joshsoftware.com/functions", 'target' => '_blank'
+  - if can_access?('Newsletter')
+    %li
       = link_to "Newsletter", main_app.light_path, role: 'menuitem'
   - if can? :manage, Designation
     %li= link_to 'Manage Designations', main_app.designations_path, role: 'menuitem'

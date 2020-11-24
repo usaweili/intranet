@@ -10,7 +10,7 @@ class LeaveApplicationsController < ApplicationController
   end
 
   def index
-    @users = User.approved.not_in(role: ['Admin'])
+    @users = User.employees.not_in(role: ['Admin'])
   end
 
   def create

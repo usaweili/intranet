@@ -91,7 +91,7 @@ class LeaveApplication
   def send_leave_notification
     if start_at >= Date.today && leave_request?
       emails = get_team_members
-      UserMailer.send_accept_leave_notification(id, emails).deliver_now! unless emails.empty?
+      UserMailer.send_accept_leave_notification(id, emails).deliver_now! if emails.present?
     end
   end
 
