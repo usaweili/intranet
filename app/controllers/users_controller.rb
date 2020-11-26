@@ -1,5 +1,4 @@
 class UsersController < ApplicationController
-  load_and_authorize_resource
   before_action :authenticate_user!
   before_action :load_user, only: [:edit, :update, :show, :public_profile, :private_profile, :get_feed]
   before_action :load_profiles, only: [:public_profile, :private_profile, :update, :edit]
