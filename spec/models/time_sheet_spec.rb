@@ -19,8 +19,8 @@ RSpec.describe TimeSheet, type: :model do
 
     # it 'Should success' do
     #   params = {
-    #     'user_id' => USER_ID, 
-    #     'channel_id' => CHANNEL_ID, 
+    #     'user_id' => USER_ID,
+    #     'channel_id' => CHANNEL_ID,
     #     'text' => "The_pediatric_network #{Date.yesterday}  6 7 abcd efghigk lmnop"
     #   }
 
@@ -67,8 +67,8 @@ RSpec.describe TimeSheet, type: :model do
     #Slack related specs
     # it 'Should return false because invalid timesheet command format' do
     #   params = {
-    #     'user_id' => USER_ID, 
-    #     'channel_id' => CHANNEL_ID, 
+    #     'user_id' => USER_ID,
+    #     'channel_id' => CHANNEL_ID,
     #     'text' => 'England_Hockey 22-07-2018  6'
     #   }
 
@@ -77,7 +77,7 @@ RSpec.describe TimeSheet, type: :model do
 
     # it 'Should return false because user does not assign to this project' do
     #   params = {
-    #     'user_id' => USER_ID, 
+    #     'user_id' => USER_ID,
     #     'channel_id' => CHANNEL_ID,
     #     'text' => 'England 14-07-2018  6 7 abcd efgh'
     #   }
@@ -156,7 +156,7 @@ RSpec.describe TimeSheet, type: :model do
       it 'pass and update timesheet' do
         time_sheet = FactoryGirl.create(:time_sheet,
           user: user,
-          project: project,    
+          project: project,
           date: Date.today - 2,
           from_time: "#{Date.today - 2} 6:00",
           to_time: "#{Date.today - 2} 7:00"
@@ -673,7 +673,7 @@ RSpec.describe TimeSheet, type: :model do
         project: project,
         start_date: DateTime.now - 2
       )
-    end 
+    end
 
     it 'Should give the project name' do
       expect(TimeSheet.get_project_name(project.id)).to eq(project.name)
@@ -1530,7 +1530,7 @@ RSpec.describe TimeSheet, type: :model do
   context 'Update timesheet' do
     let!(:user) { FactoryGirl.create(:admin) }
     let!(:project) { FactoryGirl.create(:project) }
-  
+
     #'check_validation_while_updating_time_sheet' is undefined method
     # it 'Should give return value true' do
     #   FactoryGirl.create(:user_project,
@@ -1547,7 +1547,7 @@ RSpec.describe TimeSheet, type: :model do
     #                 )
     #   params = {
     #               time_sheets_attributes: {
-    #                 "0" => { 
+    #                 "0" => {
     #                          project_id: "#{project.id}",
     #                          date: "#{Date.today - 1}",
     #                          from_time: "#{Date.today - 1} - 09:00 AM",
@@ -1562,7 +1562,7 @@ RSpec.describe TimeSheet, type: :model do
     #     TimeSheet.check_validation_while_updating_time_sheet(params)
     #   expect(return_value).to eq(true)
     # end
-  
+
     # it 'Should give error from time less than to time' do
     #   FactoryGirl.create(:user_project,
     #     user: user,
@@ -1593,7 +1593,7 @@ RSpec.describe TimeSheet, type: :model do
     #     TimeSheet.check_validation_while_updating_time_sheet(params)
     #   expect(return_value).to eq("Error :: From time must be less than to time")
     # end
-  
+
     # it 'Should give error not allowed to fill timesheet for this date. If you want to fill the timesheet, meet your manager' do
     #   FactoryGirl.create(:user_project,
     #     user: user,
@@ -1625,7 +1625,7 @@ RSpec.describe TimeSheet, type: :model do
     #     'Error :: Not allowed to fill timesheet for this date. If you want to fill the timesheet, meet your manager.'
     #   )
     # end
-  
+
     # it "Should give error can't fill the timesheet for future time" do
     #   FactoryGirl.create(:user_project,
     #     user: user,
@@ -1658,7 +1658,7 @@ RSpec.describe TimeSheet, type: :model do
     #     "Error :: Can't fill the timesheet for future time."
     #   )
     # end
-  
+
     # it 'Should give error not allowed to fill timesheet for this date. If you want to fill the timesheet, meet your manager.' do
     #   FactoryGirl.create(:user_project,
     #     user: user,
@@ -1697,7 +1697,7 @@ RSpec.describe TimeSheet, type: :model do
   #   let!(:user_one) { FactoryGirl.create(:user) }
   #   let!(:user_two) { FactoryGirl.create(:user) }
   #   let!(:project) { FactoryGirl.create(:project) }
-    
+
     # it 'Should give the project report' do
     #   user_one.public_profile.first_name = 'Aaaaa'
     #   user_one.save
@@ -2082,15 +2082,33 @@ RSpec.describe TimeSheet, type: :model do
     end
     let!(:user) { FactoryGirl.create(:user, status: STATUS[2]) }
     let!(:project) { FactoryGirl.create(:project, start_date: Date.today - 5) }
-    it 'should send mail if user is not assinged on project and filled timesheet' do
-      time_sheet = FactoryGirl.create(:time_sheet, user: user, project: project, created_at: Date.today - 1)
+    it 'should send mail if user is not assigned on project and filled timesheet' do
+      FactoryGirl.create(:time_sheet, user: user, project: project, created_at: Date.today - 1)
       TimeSheet.get_users_and_timesheet_who_have_filled_timesheet_for_different_project
       expect(ActionMailer::Base.deliveries.count).to eq(1)
     end
 
-    it 'should not send mail if project is assigned to this user' do
-      user_project = FactoryGirl.create(:user_project, user: user, project: project)
-      timesheet    = FactoryGirl.create(:time_sheet, user: user, project: project)
+    it 'should send mail if user is not assigned on project and filled timesheet and '+
+       'if unassigned_project flag in employee details is true for respective employee' do
+      FactoryGirl.create(:time_sheet, user: user, project: project, created_at: Date.today - 1)
+      user.employee_detail.set(unassigned_project: true)
+      TimeSheet.get_users_and_timesheet_who_have_filled_timesheet_for_different_project
+      expect(ActionMailer::Base.deliveries.count).to eq(1)
+    end
+
+    it 'should not send mail if project is assigned to respective employee' do
+      FactoryGirl.create(:user_project, user: user, project: project)
+      FactoryGirl.create(:time_sheet, user: user, project: project, created_at: Date.today - 1)
+      TimeSheet.get_users_and_timesheet_who_have_filled_timesheet_for_different_project
+      expect(ActionMailer::Base.deliveries.count).to eq(0)
+    end
+
+    it 'should not send mail if unassigned_project flag in employee details is false for respective employee' do
+      FactoryGirl.create(:time_sheet, user: user, project: project, created_at: Date.today - 1)
+      user.employee_detail.set(unassigned_project: false)
+      TimeSheet.get_users_and_timesheet_who_have_filled_timesheet_for_different_project
+      user.employee_detail.set(unassigned_project: true)
+      expect(ActionMailer::Base.deliveries.count).to eq(0)
     end
   end
 
@@ -2098,7 +2116,7 @@ RSpec.describe TimeSheet, type: :model do
     let!(:user) { FactoryGirl.create(:user, status: STATUS[2]) }
     let!(:user_hr) { FactoryGirl.create(:user, role: 'HR', status: STATUS[2]) }
     let!(:project) { FactoryGirl.create(:project, timesheet_mandatory: true) }
-    
+
     before do
       ActionMailer::Base.deliveries = []
       @start_date = Date.today - 14
@@ -2133,12 +2151,12 @@ RSpec.describe TimeSheet, type: :model do
       )
     end
   end
-  
+
   context "Employees Working Hour Report" do
     let!(:user) { FactoryGirl.create(:user, status: STATUS[2]) }
     let!(:user_hr) { FactoryGirl.create(:user, role: 'HR', status: STATUS[2]) }
     let!(:project) { FactoryGirl.create(:project, timesheet_mandatory: true) }
-    
+
     before do
       ActionMailer::Base.deliveries = []
       @dates = 7.days.ago.to_date..(Date.today - 1)
@@ -2198,9 +2216,9 @@ RSpec.describe TimeSheet, type: :model do
 
       expect(ActionMailer::Base.deliveries.count).to eq(0)
     end
-    
+
   end
-  
+
   context "User without time_sheet" do
     let!(:user) { FactoryGirl.create(:user, status: STATUS[2]) }
     let!(:userhr) { FactoryGirl.create(:user, role:"HR", status: STATUS[2]) }
