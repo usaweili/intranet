@@ -30,6 +30,15 @@
               = project_user_form.check_box :billable
           .span2.width10
             = project_user_form.input :allocation, {min: 0, max: 160, step: 1, style: "height: 32px;", label: false, class: 'allotment'}
+          .span2.width10
+            - if project_user_form.object.user
+              - title = "#{project_user_form.object.user.name}'s Details"
+              - content = "#{render 'user_details', user: project_user_form.object.user}"
+            - else
+              - title = ''
+              - content = 'Kindly select an employee to see details.'
+            %button{class: 'btn btn-circle icon-info', 'data-html': 'true', 'data-placement': 'left', 'data-toggle': 'popover', 'data-trigger': 'hover',
+                    'data-title': title, 'data-content': content, type: :button}
           - if project_user_form.object.user.blank?
             = project_user_form.link_to_remove "Cancel", class: "btn btn-danger"
   .offset3
@@ -67,7 +76,16 @@
           %td= project_user_form.time_sheet ? 'Yes' : 'No'
           %td= project_user_form.allocation
 
+:css
+  .popover {max-width: 600px;}
+  .btn-circle {border-radius: 50%;}
+
 :javascript
+  $(function () {
+    $('[data-toggle="popover"]').popover();
+    $('[data-toggle="tooltip"]').tooltip();
+  });
+
   $(".active-check-box").each(function(key2,checkBox){
     var endDate = $(checkBox).parent().parent().parent().find("#end-date").val()
     if(!checkBox.checked &&  endDate != ""){

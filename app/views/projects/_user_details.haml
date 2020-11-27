@@ -1,0 +1,28 @@
+%table.table.table-borderless
+  %tbody
+    %tr
+      %td Total Experience:
+      %td
+        = convert_months_to_years_and_months(user.experience_as_of_today)
+    %tr
+      %td Technical Skills:
+      %td
+        = user.public_profile.technical_skills.join(", ") if user.public_profile.technical_skills.present?
+    - if user.user_projects.where(active: 'true').present? && user.user_projects.where(active: 'true').count > 1
+      %tr
+        %td Other Projects:
+        %td
+          %table.table.table-borderless
+            %tbody
+              %tr
+                %th Project Name
+                %th Is Billable
+                %th Allocation(hr/month)
+                - user.user_projects.where(active: 'true').nin(project: @project).each do |user_project|
+                  %tr
+                    %td
+                      = user_project.project.name
+                    %td
+                      = user_project.billable
+                    %td
+                      = user_project.allocation
